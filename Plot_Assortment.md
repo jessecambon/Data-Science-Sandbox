@@ -1,18 +1,29 @@
----
-title: "Plot Assortment"
-output:
-  github_document
----
+Plot Assortment
+================
 
-This notebook will demonstrate an assortment of basic ggplots 
-such as bar charts, line charts, and scatter plots.
+This notebook will demonstrate an assortment of basic ggplots such as bar charts, line charts, and scatter plots.
 
 We will use the inbuilt starwars dataset in tidyverse just for fun.
 
+Libraries and Global Variables
+------------------------------
 
-## Libraries and Global Variables
-```{r}
+``` r
 library(tidyverse)
+```
+
+    ## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+
+    ## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
+    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.4
+    ## ✔ tidyr   0.8.0     ✔ stringr 1.3.0
+    ## ✔ readr   1.1.1     ✔ forcats 0.3.0
+
+    ## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+
+``` r
 library(ggrepel) # loads ggplot2 as well
 library(DT)
 
@@ -20,9 +31,10 @@ library(DT)
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
-## Data Prep
+Data Prep
+---------
 
-```{r}
+``` r
 # Average height and weight by species
 species_summ <- starwars %>% group_by(species) %>%
   drop_na(c(height,mass)) %>%
@@ -37,15 +49,14 @@ species_summ <- starwars %>% group_by(species) %>%
 starwars_ht_wt <- starwars %>% drop_na(c(height,mass,gender)) %>%
   filter(!str_detect(name,'Jabba|Yoda')) %>% 
   slice(1:15) # grab only top 15 characters listed
-
 ```
 
-## Create plots
+Create plots
+------------
 
-To save any plot as an SVG use this command:
-ggsave('filename.svg',plot=plotname, device = "svg")
+To save any plot as an SVG use this command: ggsave('filename.svg',plot=plotname, device = "svg")
 
-```{r}
+``` r
 # A simple bar chart - average heights of the species
 bar1 <- ggplot(data=species_summ,
           aes(x = species, y=average_height, fill = species)) +
@@ -60,10 +71,11 @@ theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('Species') +
 ylab('')
 bar1
+```
 
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
-
-
+``` r
 # Scatter plot of heights and weights 
 ht_wt <- ggplot(data=starwars_ht_wt,
           aes(x = mass, y = height, color = gender)) +
@@ -87,9 +99,12 @@ theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('Mass') +
 ylab('Height')
 ht_wt
+```
 
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-2.png)
+
+``` r
 # Create interactive data table of raw data
 # This only works in HTML format so comment it out if knitting to github format 
 #datatable(starwars %>% select(-hair_color,skin_color,-birth_year), options = list(pageLength = 10))
 ```
-
