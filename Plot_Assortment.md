@@ -36,7 +36,13 @@ Data Prep
 
 ``` r
 # Average height and weight by species
-species_summ <- starwars %>% group_by(species) %>%
+
+starwars_jac <- starwars %>% group_by(name) %>%
+  mutate(num_films=length(unlist(films)),
+         height_to_mass_ratio = height / mass) %>%
+  ungroup()
+
+species_summ <- starwars_jac %>% group_by(species) %>%
   drop_na(c(height,mass)) %>%
   summarise(average_height=mean(height),
             average_mass=mean(mass),
@@ -44,11 +50,16 @@ species_summ <- starwars %>% group_by(species) %>%
   mutate(height_to_mass_ratio = average_height / average_mass) %>%
   filter(count!=1) # don't look at species that only have one member
 
+homeworld_summ <- starwars_jac %>%
+  count(homeworld,species) %>% drop_na() %>%
+  arrange(desc(n)) %>%
+  filter(n >= 3)
+
 ## Drop missing height and weight values for scatter plot
 # Also drop Jabba and Yoda because they are outliers
-starwars_ht_wt <- starwars %>% drop_na(c(height,mass,gender)) %>%
+starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
   filter(!str_detect(name,'Jabba|Yoda')) %>% 
-  slice(1:15) # grab only top 15 characters listed
+  filter(num_films >= 3)
 ```
 
 Create plots
@@ -76,6 +87,26 @@ bar1
 ![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 ``` r
+# Take a look at number of each species from each homeworld
+bar2 <- ggplot(data=homeworld_summ,
+          aes(x = species, y=n,fill = species)) +
+facet_grid(~homeworld) +
+geom_bar(stat='identity',position='dodge') +
+theme_bw() +
+#scale_y_continuous(limits=c(0,XXXX),labels = scales::comma) +
+#scale_x_continuous(breaks=min(f2$year):max(f2$year)) + 
+scale_fill_manual(values=rep(cbPalette,1)) +
+theme(legend.position="none") +
+labs(title='Number of Species from Selected Homeworlds') +
+theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
+xlab('') +
+ylab('')
+bar2
+```
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-2.png)
+
+``` r
 # Scatter plot of heights and weights 
 ht_wt <- ggplot(data=starwars_ht_wt,
           aes(x = mass, y = height, color = gender)) +
@@ -93,7 +124,7 @@ geom_text_repel(
   theme(legend.position = "top")  +
 #scale_y_continuous(labels = scales::percent) +
 #scale_x_continuous(breaks=min(combi_filt$fiscal_year):max(combi_filt$fiscal_year)) + 
-scale_color_manual(values=rep(cbPalette,1)) +
+scale_color_manual(values=c(cbPalette[2:3])) +
 labs(title='Heights and Weights of Selected Star Wars Characters') +
 theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('Mass') +
@@ -101,7 +132,7 @@ ylab('Height')
 ht_wt
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-2.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-3.png)
 
 ``` r
 # Create interactive data table of raw data
