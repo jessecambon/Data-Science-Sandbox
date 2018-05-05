@@ -42,12 +42,7 @@ tm_credits(c("", "Robinson projection"), position = c("RIGHT", "BOTTOM"))
 
 ``` r
 
-qtm(World, fill = c("HPI", "gdp_cap_est"), style = "natural")
-```
 
-![](Thematic_Maps_files/figure-markdown_github/unnamed-chunk-2-2.png)
-
-``` r
 
 GDPTable <- World %>% as_tibble() %>% select(name,gdp_cap_est) %>%
   mutate(gdp_cap_est=as.numeric(gdp_cap_est)) %>% arrange(desc(gdp_cap_est)) %>% slice(1:20)
