@@ -1,5 +1,7 @@
 Plot Assortment
 ================
+Jesse Cambon
+13 May, 2018
 
 This notebook will demonstrate an assortment of basic ggplots such as bar charts, line charts, and scatter plots.
 
@@ -10,20 +12,6 @@ Libraries and Global Variables
 
 ``` r
 library(tidyverse)
-```
-
-    ## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
-
-    ## ✔ ggplot2 2.2.1     ✔ purrr   0.2.4
-    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.4
-    ## ✔ tidyr   0.8.0     ✔ stringr 1.3.0
-    ## ✔ readr   1.1.1     ✔ forcats 0.3.0
-
-    ## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-
-``` r
 library(ggrepel) # loads ggplot2 as well
 library(treemapify)
 library(knitr)
@@ -34,6 +22,9 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 
 film_chron_order = c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith","A New Hope", 
                      "The Empire Strikes Back", "Return of the Jedi","The Force Awakens")  
+
+# Set default ggplot theme
+theme_set(theme_bw()+theme(legend.position = "top",plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
 Data Prep
@@ -125,99 +116,87 @@ To save any plot as an SVG use this command: ggsave('filename.svg',plot=plotname
 
 ``` r
 # Treemap of star wars character mass
-tree1 <- ggplot(data=starwars %>% drop_na(mass),
+ggplot(data=starwars %>% drop_na(mass),
                 aes(area=mass,fill=species,label=name)) + 
-  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
-      legend.title = element_blank(),
+  theme(legend.title = element_blank(),
       legend.position="none") +
   labs(title='Relative Weights of Star Wars Characters') +
   scale_fill_manual(values=rep(cbPalette,5)) +
   geom_treemap() +
   geom_treemap_text(fontface = "italic", colour = "white", place = "centre",
                     grow = TRUE)
-tree1
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 ``` r
 # A simple bar chart - average heights of the species
-bar1 <- ggplot(data=species_summ,
+ggplot(data=species_summ,
           aes(x = species, y=average_height, fill = species)) +
 geom_bar(stat='identity',position='dodge') +
-theme_bw() +
 scale_fill_manual(values=rep(cbPalette,5)) +
+geom_text(aes(label=round(average_height)), vjust=-0.25) +
 theme(legend.position="none") +
 labs(title='Average Height of Selected Star Wars Species') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('Species') +
 ylab('')
-bar1
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-2.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-2.png)
 
 ``` r
 # Take a look at number of each species from each homeworld
-bar2 <- ggplot(data=homeworld_summ,
+ggplot(data=homeworld_summ,
           aes(x = species, y=n,fill = species)) +
 facet_grid(~homeworld) +
 geom_bar(stat='identity',position='dodge') +
-theme_bw() +
 scale_fill_manual(values=rep(cbPalette,1)) +
 theme(legend.position="none") +
 labs(title='Number of Characters of each species from selected homeworlds') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('') +
 ylab('')
-bar2
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-3.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-3.png)
 
 ``` r
 # Number of characters from each species 
-stackedline1 <- ggplot(data=starwars_species_film,
+ggplot(data=starwars_species_film,
           aes(x = episode, y=n,fill = species_collapsed)) +
 geom_area(aes(group=species_collapsed)) +
-theme_bw() + 
 scale_x_continuous(breaks=c(1:7)) +
 scale_fill_manual(values=rep(cbPalette,1)) +
-theme(legend.position="top") +
 labs(title='Number of Characters Appearing from Each Species by Film') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
-      legend.title = element_blank()) +
+theme(legend.title = element_blank()) +
 xlab('Episode #') +
 ylab('')
-stackedline1
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-4.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-4.png)
 
 ``` r
 # Number of characters from each species 
-line1 <- ggplot(data=starwars_gender_film,
+ggplot(data=starwars_gender_film,
           aes(x = episode, y=prop,color = gender)) +
 geom_line() + geom_point() +
-theme_bw() + 
+  
 scale_x_continuous(breaks=c(1:7)) +
 scale_y_continuous(labels=scales::percent) + 
 scale_fill_manual(values=rep(cbPalette,1)) +
-theme(legend.position="top") +
 labs(title='Percentage of Characters in Each Film by Gender') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
-      legend.title = element_blank()) +
+theme(legend.title = element_blank()) +
 xlab('Episode #') +
 ylab('')
-line1
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-5.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-5.png)
 
 ``` r
 # Scatter plot of heights and weights 
-ht_wt <- ggplot(data=starwars_ht_wt,
-          aes(x = mass, y = height, color = gender)) +
+# Note - group=1 is set in ggplot aes to force geom_smooth to fit
+# both groups
+ggplot(data=starwars_ht_wt,
+          aes(x = mass, y = height, color = gender,group=1)) +
 geom_point() +
 geom_text_repel(
     data = starwars_ht_wt,
@@ -227,17 +206,14 @@ geom_text_repel(
     nudge_y = 0,
     segment.color = NA
   ) +
-   theme_bw() +
-  theme(legend.position = "top")  +
+geom_smooth(method="lm") +
 scale_color_manual(values=c(cbPalette[2:3])) +
 labs(title='Heights and Weights of Selected Star Wars Characters') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('Mass') +
 ylab('Height')
-ht_wt
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-6.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-6.png)
 
 ``` r
 # Create interactive data table of raw data
