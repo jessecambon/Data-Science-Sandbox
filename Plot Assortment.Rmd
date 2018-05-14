@@ -1,5 +1,7 @@
 ---
 title: "Plot Assortment"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   github_document
 ---
@@ -11,7 +13,7 @@ We will use the inbuilt starwars dataset in tidyverse just for fun.
 
 
 ## Libraries and Global Variables
-```{r}
+```{r setup, message=FALSE}
 library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify)
@@ -23,6 +25,9 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 
 film_chron_order = c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith","A New Hope", 
                      "The Empire Strikes Back", "Return of the Jedi","The Force Awakens")  
+
+# Set default ggplot theme
+theme_set(theme_bw()+theme(legend.position = "top",plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
 ## Data Prep
@@ -91,79 +96,69 @@ ggsave('filename.svg',plot=plotname, device = "svg")
 ```{r}
 
 # Treemap of star wars character mass
-tree1 <- ggplot(data=starwars %>% drop_na(mass),
+ggplot(data=starwars %>% drop_na(mass),
                 aes(area=mass,fill=species,label=name)) + 
-  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
-      legend.title = element_blank(),
+  theme(legend.title = element_blank(),
       legend.position="none") +
   labs(title='Relative Weights of Star Wars Characters') +
   scale_fill_manual(values=rep(cbPalette,5)) +
   geom_treemap() +
   geom_treemap_text(fontface = "italic", colour = "white", place = "centre",
                     grow = TRUE)
-tree1
+
 
 # A simple bar chart - average heights of the species
-bar1 <- ggplot(data=species_summ,
+ggplot(data=species_summ,
           aes(x = species, y=average_height, fill = species)) +
 geom_bar(stat='identity',position='dodge') +
-theme_bw() +
 scale_fill_manual(values=rep(cbPalette,5)) +
+geom_text(aes(label=round(average_height)), vjust=-0.25) +
 theme(legend.position="none") +
 labs(title='Average Height of Selected Star Wars Species') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('Species') +
 ylab('')
-bar1
 
 # Take a look at number of each species from each homeworld
-bar2 <- ggplot(data=homeworld_summ,
+ggplot(data=homeworld_summ,
           aes(x = species, y=n,fill = species)) +
 facet_grid(~homeworld) +
 geom_bar(stat='identity',position='dodge') +
-theme_bw() +
 scale_fill_manual(values=rep(cbPalette,1)) +
 theme(legend.position="none") +
 labs(title='Number of Characters of each species from selected homeworlds') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('') +
 ylab('')
-bar2
+
 
 # Number of characters from each species 
-stackedline1 <- ggplot(data=starwars_species_film,
+ggplot(data=starwars_species_film,
           aes(x = episode, y=n,fill = species_collapsed)) +
 geom_area(aes(group=species_collapsed)) +
-theme_bw() + 
 scale_x_continuous(breaks=c(1:7)) +
 scale_fill_manual(values=rep(cbPalette,1)) +
-theme(legend.position="top") +
 labs(title='Number of Characters Appearing from Each Species by Film') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
-      legend.title = element_blank()) +
+theme(legend.title = element_blank()) +
 xlab('Episode #') +
 ylab('')
-stackedline1
 
 # Number of characters from each species 
-line1 <- ggplot(data=starwars_gender_film,
+ggplot(data=starwars_gender_film,
           aes(x = episode, y=prop,color = gender)) +
 geom_line() + geom_point() +
-theme_bw() + 
+  
 scale_x_continuous(breaks=c(1:7)) +
 scale_y_continuous(labels=scales::percent) + 
 scale_fill_manual(values=rep(cbPalette,1)) +
-theme(legend.position="top") +
 labs(title='Percentage of Characters in Each Film by Gender') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
-      legend.title = element_blank()) +
+theme(legend.title = element_blank()) +
 xlab('Episode #') +
 ylab('')
-line1
 
 # Scatter plot of heights and weights 
-ht_wt <- ggplot(data=starwars_ht_wt,
-          aes(x = mass, y = height, color = gender)) +
+# Note - group=1 is set in ggplot aes to force geom_smooth to fit
+# both groups
+ggplot(data=starwars_ht_wt,
+          aes(x = mass, y = height, color = gender,group=1)) +
 geom_point() +
 geom_text_repel(
     data = starwars_ht_wt,
@@ -173,14 +168,11 @@ geom_text_repel(
     nudge_y = 0,
     segment.color = NA
   ) +
-   theme_bw() +
-  theme(legend.position = "top")  +
+geom_smooth(method="lm") +
 scale_color_manual(values=c(cbPalette[2:3])) +
 labs(title='Heights and Weights of Selected Star Wars Characters') +
-theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
 xlab('Mass') +
 ylab('Height')
-ht_wt
 
 # Create interactive data table of raw data
 # This only works in HTML format so comment it out if knitting to github format 
