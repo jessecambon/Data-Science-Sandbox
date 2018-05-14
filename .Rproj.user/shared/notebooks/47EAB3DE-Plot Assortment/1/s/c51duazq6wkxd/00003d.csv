@@ -1,0 +1,3 @@
+"0","# Create interactive data table of raw data"
+"0","# This only works in HTML format so comment it out if knitting to github format "
+"0","#datatable(starwars %>% select(-hair_color,skin_color,-birth_year), options = list(pageLength = 10))"

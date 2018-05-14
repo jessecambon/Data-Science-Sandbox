@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1526261832238.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3919909751",
+    "id" : "BCB34880",
+    "lastKnownWriteTime" : 1526230866,
+    "last_content_update" : 1526262187627,
+    "path" : "~/Programming/Data Viz Cookbook/Plot Assortment.Rmd",
+    "project_path" : "Plot Assortment.Rmd",
+    "properties" : {
+        "cursorPosition" : "105,30",
+        "last_setup_crc32" : "F3DD3458d0782a7",
+        "scrollLine" : "92"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
