@@ -1,7 +1,7 @@
 Plot Assortment
 ================
 Jesse Cambon
-13 May, 2018
+14 May, 2018
 
 This notebook will demonstrate an assortment of basic ggplots such as bar charts, line charts, and scatter plots.
 
@@ -18,13 +18,16 @@ library(knitr)
 #library(DT)
 
 # Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
-cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
+               "#D55E00", "#CC79A7")
 
-film_chron_order = c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith","A New Hope", 
-                     "The Empire Strikes Back", "Return of the Jedi","The Force Awakens")  
+film_chron_order = c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith",
+  "A New Hope","The Empire Strikes Back", "Return of the Jedi","The Force Awakens")  
 
 # Set default ggplot theme
-theme_set(theme_bw()+theme(legend.position = "top",plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
+theme_set(theme_bw()+
+  theme(legend.position = "top",
+            plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
 Data Prep
@@ -35,20 +38,20 @@ Data Prep
 
 starwars_jac <- starwars %>% group_by(name) %>%
   mutate(num_films=length(unlist(films)),
-         height_to_mass_ratio = height / mass) %>%
+         height_to_mass_ratio = height / mass,
+           # bucket species
+  species_collapsed=case_when(
+    !(species %in% c('Human','Droid')) ~ 'Other',
+    TRUE ~ species
+  )) %>%
   ungroup() 
 
 # put each film on a different row
 # ie. character-film level dataset
-starwars_unnest <- starwars %>%
+starwars_unnest <- starwars_jac %>%
   unnest(films) %>%
   mutate(films= factor(films,levels=film_chron_order)) %>%
   mutate(episode=as.integer(films)) %>%
-  # bucket species
-  mutate(species_collapsed=case_when(
-    !(species %in% c('Human','Droid')) ~ 'Other',
-    TRUE ~ species
-  )) %>%
   rename(film=films)
 
 # Number of characters of each species by film
@@ -62,33 +65,6 @@ starwars_gender_film <- starwars_unnest %>%
   mutate(prop=n/sum(n)) %>%
   ungroup() 
 
-# Display in table
-kable(starwars_gender_film,digits=2)
-```
-
-|  episode| gender        |    n|  prop|
-|--------:|:--------------|----:|-----:|
-|        1| female        |    4|  0.12|
-|        1| hermaphrodite |    1|  0.03|
-|        1| male          |   27|  0.84|
-|        2| female        |   14|  0.37|
-|        2| male          |   24|  0.63|
-|        3| female        |    9|  0.28|
-|        3| male          |   23|  0.72|
-|        4| female        |    2|  0.13|
-|        4| hermaphrodite |    1|  0.07|
-|        4| male          |   12|  0.80|
-|        5| female        |    1|  0.07|
-|        5| male          |   12|  0.86|
-|        5| none          |    1|  0.07|
-|        6| female        |    2|  0.11|
-|        6| hermaphrodite |    1|  0.06|
-|        6| male          |   15|  0.83|
-|        7| female        |    3|  0.30|
-|        7| male          |    6|  0.60|
-|        7| none          |    1|  0.10|
-
-``` r
 species_summ <- starwars_jac %>% group_by(species) %>%
   drop_na(c(height,mass)) %>%
   summarise(average_height=mean(height),
@@ -97,10 +73,28 @@ species_summ <- starwars_jac %>% group_by(species) %>%
   mutate(height_to_mass_ratio = average_height / average_mass) %>%
   filter(count!=1) # don't look at species that only have one member
 
+# Display in table
+kable(species_summ)
+```
+
+| species  |  average\_height|  average\_mass|  count|  height\_to\_mass\_ratio|
+|:---------|----------------:|--------------:|------:|------------------------:|
+| Droid    |         140.0000|       69.75000|      4|                 2.007169|
+| Gungan   |         210.0000|       74.00000|      2|                 2.837838|
+| Human    |         179.5455|       82.78182|     22|                 2.168900|
+| Mirialan |         168.0000|       53.10000|      2|                 3.163842|
+| Wookiee  |         231.0000|      124.00000|      2|                 1.862903|
+
+``` r
 homeworld_summ <- starwars_jac %>%
-  count(homeworld,species) %>% drop_na() %>%
+  count(homeworld,species_collapsed) %>%
+  group_by(homeworld) %>%
+  mutate(homeworld_pop=sum(n)) %>%
+  ungroup() %>%
+  # If homeworld is missing, label it unknown
+  replace_na(list(homeworld='Unknown')) %>%
   arrange(desc(n)) %>%
-  filter(n >= 3)
+  filter(homeworld_pop > 3)
 
 ## Drop missing height and weight values for scatter plot
 # Also drop Jabba and Yoda because they are outliers
@@ -123,8 +117,7 @@ ggplot(data=starwars %>% drop_na(mass),
   labs(title='Relative Weights of Star Wars Characters') +
   scale_fill_manual(values=rep(cbPalette,5)) +
   geom_treemap() +
-  geom_treemap_text(fontface = "italic", colour = "white", place = "centre",
-                    grow = TRUE)
+  geom_treemap_text(fontface = "italic", colour = "white", place = "centre", grow = TRUE)
 ```
 
 ![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-1.png)
@@ -137,7 +130,7 @@ geom_bar(stat='identity',position='dodge') +
 scale_fill_manual(values=rep(cbPalette,5)) +
 geom_text(aes(label=round(average_height)), vjust=-0.25) +
 theme(legend.position="none") +
-labs(title='Average Height of Selected Star Wars Species') +
+labs(title='Average Height of Selected Star Wars Species (cm)') +
 xlab('Species') +
 ylab('')
 ```
@@ -147,12 +140,14 @@ ylab('')
 ``` r
 # Take a look at number of each species from each homeworld
 ggplot(data=homeworld_summ,
-          aes(x = species, y=n,fill = species)) +
-facet_grid(~homeworld) +
-geom_bar(stat='identity',position='dodge') +
+          aes(x = species_collapsed, y=n,fill = species_collapsed)) +
+# The scales argument suppress the presense of an empty "Other" species
+# slot on Tatooine
+facet_grid(~homeworld,scales = "free_x") +
+geom_bar(stat='identity') +
 scale_fill_manual(values=rep(cbPalette,1)) +
-theme(legend.position="none") +
-labs(title='Number of Characters of each species from selected homeworlds') +
+theme(legend.position="none",legend.title=element_blank()) +
+labs(title='Number of Characters of Each Species from Selected Homeworlds') +
 xlab('') +
 ylab('')
 ```
@@ -165,7 +160,7 @@ ggplot(data=starwars_species_film,
           aes(x = episode, y=n,fill = species_collapsed)) +
 geom_area(aes(group=species_collapsed)) +
 scale_x_continuous(breaks=c(1:7)) +
-scale_fill_manual(values=rep(cbPalette,1)) +
+scale_fill_manual(values=c(cbPalette[1],cbPalette[3],cbPalette[4])) +
 labs(title='Number of Characters Appearing from Each Species by Film') +
 theme(legend.title = element_blank()) +
 xlab('Episode #') +
@@ -179,7 +174,6 @@ ylab('')
 ggplot(data=starwars_gender_film,
           aes(x = episode, y=prop,color = gender)) +
 geom_line() + geom_point() +
-  
 scale_x_continuous(breaks=c(1:7)) +
 scale_y_continuous(labels=scales::percent) + 
 scale_fill_manual(values=rep(cbPalette,1)) +
@@ -209,8 +203,8 @@ geom_text_repel(
 geom_smooth(method="lm") +
 scale_color_manual(values=c(cbPalette[2:3])) +
 labs(title='Heights and Weights of Selected Star Wars Characters') +
-xlab('Mass') +
-ylab('Height')
+xlab('Mass (kg)') +
+ylab('Height (cm)')
 ```
 
 ![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-6.png)
