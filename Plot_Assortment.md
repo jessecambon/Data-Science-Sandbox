@@ -1,7 +1,7 @@
 Plot Assortment
 ================
 Jesse Cambon
-14 May, 2018
+18 May, 2018
 
 This notebook will demonstrate an assortment of basic ggplots such as bar charts, line charts, and scatter plots.
 
@@ -27,6 +27,7 @@ film_chron_order = c("The Phantom Menace", "Attack of the Clones", "Revenge of t
 # Set default ggplot theme
 theme_set(theme_bw()+
   theme(legend.position = "top",
+            plot.subtitle= element_text(face="bold",hjust=0.5),
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
@@ -163,7 +164,7 @@ scale_x_continuous(breaks=c(1:7)) +
 scale_fill_manual(values=c(cbPalette[1],cbPalette[3],cbPalette[4])) +
 labs(title='Number of Characters Appearing from Each Species by Film') +
 theme(legend.title = element_blank()) +
-xlab('Episode #') +
+xlab('Episode') +
 ylab('')
 ```
 
@@ -179,30 +180,40 @@ scale_y_continuous(labels=scales::percent) +
 scale_fill_manual(values=rep(cbPalette,1)) +
 labs(title='Percentage of Characters in Each Film by Gender') +
 theme(legend.title = element_blank()) +
-xlab('Episode #') +
+xlab('Episode') +
 ylab('')
 ```
 
 ![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-5.png)
 
 ``` r
+# Linear model
+fit <- lm(height ~ mass, data=starwars_ht_wt)
+coeff <- as.numeric(fit$coefficients[2])
+r_square <- summary(fit)$r.squared
+
 # Scatter plot of heights and weights 
 # Note - group=1 is set in ggplot aes to force geom_smooth to fit
 # both groups
 ggplot(data=starwars_ht_wt,
           aes(x = mass, y = height, color = gender,group=1)) +
 geom_point() +
-geom_text_repel(
+geom_label_repel(
     data = starwars_ht_wt,
     aes(label = name),
     size = 3,
-    nudge_x = 0,
-    nudge_y = 0,
-    segment.color = NA
+    force = 5,
+    box.padding = 0.2, # use this to control label spacing
+    segment.color = 'grey',
+    show.legend = F # need this to fix legend
   ) +
-geom_smooth(method="lm") +
+geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_color_manual(values=c(cbPalette[2:3])) +
-labs(title='Heights and Weights of Selected Star Wars Characters') +
+labs(title='Heights and Weights of Selected Star Wars Characters',
+     subtitle = bquote(Slope == .(round(coeff,2)) ~ ' | ' ~ R^2  ==  .(round(r_square,2)) )) +
+       
+      # str_c('Slope: ',as.character(round(coeff,2)),'  |  ',
+      #                expression(paste("R"^"2")),as.character(round(r_square,2)))) +
 xlab('Mass (kg)') +
 ylab('Height (cm)')
 ```
