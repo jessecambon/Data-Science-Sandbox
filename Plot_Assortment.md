@@ -139,6 +139,20 @@ ggplot(data=starwars %>% drop_na(mass),
 ![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 ``` r
+# Treemap of the same starwars dataset but with hierarchy
+treemap(starwars, #Your data frame object
+        index=c("species","name"),  #A list of your categorical variables
+        vSize = "mass",  #This is your quantitative variable
+        type="index", #Type sets the organization and color scheme of your treemap
+        palette = "Reds",  #Select your color palette from the RColorBrewer presets or make your own.
+        title="Relative Weights of Star Wars Characters", #Customize your title
+        fontsize.title = 14 #Change the font size of the title
+        )
+```
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-2.png)
+
+``` r
 # Treemap of titanic
 treemap(titanic, #Your data frame object
         index=c("Sex","Class"),  #A list of your categorical variables
@@ -150,7 +164,7 @@ treemap(titanic, #Your data frame object
         )
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-2.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-3.png)
 
 ``` r
 # A simple bar chart - average heights of the species
@@ -165,7 +179,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-3.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-4.png)
 
 ``` r
 # Take a look at number of each species from each homeworld
@@ -182,7 +196,7 @@ xlab('') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-4.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-5.png)
 
 ``` r
 # Stacked bar of Titanic dataset
@@ -203,7 +217,7 @@ ylab('')
 
     ## Warning: Removed 5 rows containing missing values (geom_text).
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-5.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-6.png)
 
 ``` r
 # Number of characters from each species 
@@ -218,7 +232,7 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-6.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-7.png)
 
 ``` r
 # Number of characters from each species 
@@ -234,7 +248,7 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-7.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-8.png)
 
 ``` r
 # Linear model
@@ -268,7 +282,7 @@ xlab('Mass (kg)') +
 ylab('Height (cm)')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-8.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-9.png)
 
 ``` r
 # Create interactive data table of raw data
