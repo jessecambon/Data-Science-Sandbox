@@ -1,7 +1,7 @@
 Plot Assortment
 ================
 Jesse Cambon
-18 May, 2018
+07 August, 2018
 
 This notebook will demonstrate an assortment of basic ggplots such as bar charts, line charts, and scatter plots.
 
@@ -15,6 +15,21 @@ library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify)
 library(knitr)
+library(treemap)
+library(formattable) # percent format
+
+data(Titanic)
+titanic <- Titanic %>% as_tibble() 
+
+
+titanic_bar <- titanic %>%
+  # add a percent for Class 
+  group_by(Sex,Survived,Class) %>%
+  summarize(n=sum(n)) %>%
+  group_by(Sex,Survived) %>%
+  mutate(bar_total=sum(n)) %>%
+  ungroup() %>%
+  mutate(percent=percent(n/bar_total,0))
 #library(DT)
 
 # Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
@@ -124,6 +139,20 @@ ggplot(data=starwars %>% drop_na(mass),
 ![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 ``` r
+# Treemap of titanic
+treemap(titanic, #Your data frame object
+        index=c("Sex","Class"),  #A list of your categorical variables
+        vSize = "n",  #This is your quantitative variable
+        type="index", #Type sets the organization and color scheme of your treemap
+        palette = "Reds",  #Select your color palette from the RColorBrewer presets or make your own.
+        title="Titanic Passengers", #Customize your title
+        fontsize.title = 14 #Change the font size of the title
+        )
+```
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-2.png)
+
+``` r
 # A simple bar chart - average heights of the species
 ggplot(data=species_summ,
           aes(x = species, y=average_height, fill = species)) +
@@ -136,7 +165,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-2.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-3.png)
 
 ``` r
 # Take a look at number of each species from each homeworld
@@ -153,7 +182,28 @@ xlab('') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-3.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-4.png)
+
+``` r
+# Stacked bar of Titanic dataset
+
+ggplot(data=titanic_bar,
+          aes(x = Sex, y=n,fill = Class)) +
+facet_grid(~Survived,scales = "free_x") +
+geom_bar(stat='identity') +
+coord_flip() +
+  geom_text(data=titanic_bar,aes(label = ifelse(n > 30 ,n,NA)),
+    size = 3,position = position_stack(vjust = 0.5)) +
+scale_fill_manual(values=rep(cbPalette,1)) +
+theme(legend.position="top") +
+labs(title='Titanic Passengers by Survival Status') +
+xlab('') +
+ylab('')
+```
+
+    ## Warning: Removed 5 rows containing missing values (geom_text).
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-5.png)
 
 ``` r
 # Number of characters from each species 
@@ -168,7 +218,7 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-4.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-6.png)
 
 ``` r
 # Number of characters from each species 
@@ -184,7 +234,7 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-5.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-7.png)
 
 ``` r
 # Linear model
@@ -218,7 +268,7 @@ xlab('Mass (kg)') +
 ylab('Height (cm)')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-6.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-8.png)
 
 ``` r
 # Create interactive data table of raw data

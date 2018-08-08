@@ -18,6 +18,21 @@ library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify)
 library(knitr)
+library(treemap)
+library(formattable) # percent format
+
+data(Titanic)
+titanic <- Titanic %>% as_tibble() 
+
+
+titanic_bar <- titanic %>%
+  # add a percent for Class 
+  group_by(Sex,Survived,Class) %>%
+  summarize(n=sum(n)) %>%
+  group_by(Sex,Survived) %>%
+  mutate(bar_total=sum(n)) %>%
+  ungroup() %>%
+  mutate(percent=percent(n/bar_total,0))
 #library(DT)
 
 # Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
@@ -114,6 +129,15 @@ ggplot(data=starwars %>% drop_na(mass),
   geom_treemap() +
   geom_treemap_text(fontface = "italic", colour = "white", place = "centre", grow = TRUE)
 
+# Treemap of titanic
+treemap(titanic, #Your data frame object
+        index=c("Sex","Class"),  #A list of your categorical variables
+        vSize = "n",  #This is your quantitative variable
+        type="index", #Type sets the organization and color scheme of your treemap
+        palette = "Reds",  #Select your color palette from the RColorBrewer presets or make your own.
+        title="Titanic Passengers", #Customize your title
+        fontsize.title = 14 #Change the font size of the title
+        )
 
 # A simple bar chart - average heights of the species
 ggplot(data=species_summ,
@@ -139,6 +163,20 @@ labs(title='Number of Characters of Each Species from Selected Homeworlds') +
 xlab('') +
 ylab('')
 
+# Stacked bar of Titanic dataset
+
+ggplot(data=titanic_bar,
+          aes(x = Sex, y=n,fill = Class)) +
+facet_grid(~Survived,scales = "free_x") +
+geom_bar(stat='identity') +
+coord_flip() +
+  geom_text(data=titanic_bar,aes(label = ifelse(n > 30 ,n,NA)),
+    size = 3,position = position_stack(vjust = 0.5)) +
+scale_fill_manual(values=rep(cbPalette,1)) +
+theme(legend.position="top") +
+labs(title='Titanic Passengers by Survival Status') +
+xlab('') +
+ylab('')
 
 # Number of characters from each species 
 ggplot(data=starwars_species_film,
