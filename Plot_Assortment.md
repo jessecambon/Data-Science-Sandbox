@@ -1,36 +1,30 @@
 Plot Assortment
 ================
 Jesse Cambon
-07 August, 2018
+10 August, 2018
 
-This notebook will demonstrate an assortment of basic ggplots such as bar charts, line charts, and scatter plots.
+-   [Bar Charts](#bar-charts)
+-   [Scatterplots](#scatterplots)
+-   [Line Charts](#line-charts)
+-   [Treemaps](#treemaps)
+-   [Stacked Area Charts](#stacked-area-charts)
 
-We will use the inbuilt starwars dataset in tidyverse just for fun.
+This notebook will demonstrate an assortment of traditional charts such as bar charts, scatterplots, and treemaps.
 
-Libraries and Global Variables
-------------------------------
+These charts are provided as reference code to save time in constructing similar data visualizations and are not necessarily meant to represent best practice.
+
+Notes: Use 'fill' commands for areas and 'color' for lines. To save any plot use ggsave()
 
 ``` r
 library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
-library(treemapify)
+library(treemapify) # ggplot treemap
 library(knitr)
 library(treemap)
 library(formattable) # percent format
-
-data(Titanic)
-titanic <- Titanic %>% as_tibble() 
+library(wesanderson) # Color Palettes from Wes Anderson Movies
 
 
-titanic_bar <- titanic %>%
-  # add a percent for Class 
-  group_by(Sex,Survived,Class) %>%
-  summarize(n=sum(n)) %>%
-  group_by(Sex,Survived) %>%
-  mutate(bar_total=sum(n)) %>%
-  ungroup() %>%
-  mutate(percent=percent(n/bar_total,0))
-#library(DT)
 
 # Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
@@ -44,14 +38,20 @@ theme_set(theme_bw()+
   theme(legend.position = "top",
             plot.subtitle= element_text(face="bold",hjust=0.5),
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
-```
 
-Data Prep
----------
+data(Titanic)
+titanic <- Titanic %>% as_tibble() 
 
-``` r
+
+titanic_bar <- titanic %>%
+  # add a percent for Class 
+  group_by(Sex,Survived,Class) %>%
+  summarize(n=sum(n)) %>%
+  group_by(Sex,Survived) %>%
+  mutate(percent_num=n/sum(n),percent_char=as.character(percent(n/sum(n),0)))
+
+
 # Average height and weight by species
-
 starwars_jac <- starwars %>% group_by(name) %>%
   mutate(num_films=length(unlist(films)),
          height_to_mass_ratio = height / mass,
@@ -119,59 +119,15 @@ starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
   filter(num_films >= 3)
 ```
 
-Create plots
-------------
-
-To save any plot as an SVG use this command: ggsave('filename.svg',plot=plotname, device = "svg")
-
-``` r
-# Treemap of star wars character mass
-ggplot(data=starwars %>% drop_na(mass),
-                aes(area=mass,fill=species,label=name)) + 
-  theme(legend.title = element_blank(),
-      legend.position="none") +
-  labs(title='Relative Weights of Star Wars Characters') +
-  scale_fill_manual(values=rep(cbPalette,5)) +
-  geom_treemap() +
-  geom_treemap_text(fontface = "italic", colour = "white", place = "centre", grow = TRUE)
-```
-
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-1.png)
-
-``` r
-# Treemap of the same starwars dataset but with hierarchy
-treemap(starwars, #Your data frame object
-        index=c("species","name"),  #A list of your categorical variables
-        vSize = "mass",  #This is your quantitative variable
-        type="index", #Type sets the organization and color scheme of your treemap
-        palette = "Reds",  #Select your color palette from the RColorBrewer presets or make your own.
-        title="Relative Weights of Star Wars Characters", #Customize your title
-        fontsize.title = 14 #Change the font size of the title
-        )
-```
-
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-2.png)
-
-``` r
-# Treemap of titanic
-treemap(titanic, #Your data frame object
-        index=c("Sex","Class"),  #A list of your categorical variables
-        vSize = "n",  #This is your quantitative variable
-        type="index", #Type sets the organization and color scheme of your treemap
-        palette = "Reds",  #Select your color palette from the RColorBrewer presets or make your own.
-        title="Titanic Passengers", #Customize your title
-        fontsize.title = 14 #Change the font size of the title
-        )
-```
-
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-3.png)
+Bar Charts
+----------
 
 ``` r
 # A simple bar chart - average heights of the species
 ggplot(data=species_summ,
           aes(x = species, y=average_height, fill = species)) +
 geom_bar(stat='identity',position='dodge') +
-scale_fill_manual(values=rep(cbPalette,5)) +
+scale_fill_manual(values=wes_palette('Moonrise3')) +
 geom_text(aes(label=round(average_height)), vjust=-0.25) +
 theme(legend.position="none") +
 labs(title='Average Height of Selected Star Wars Species (cm)') +
@@ -179,7 +135,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-4.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
 ``` r
 # Take a look at number of each species from each homeworld
@@ -189,66 +145,40 @@ ggplot(data=homeworld_summ,
 # slot on Tatooine
 facet_grid(~homeworld,scales = "free_x") +
 geom_bar(stat='identity') +
-scale_fill_manual(values=rep(cbPalette,1)) +
+scale_fill_manual(values=wes_palette('Moonrise2')) +
 theme(legend.position="none",legend.title=element_blank()) +
 labs(title='Number of Characters of Each Species from Selected Homeworlds') +
 xlab('') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-5.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-1-2.png)
 
 ``` r
 # Stacked bar of Titanic dataset
 
 ggplot(data=titanic_bar,
-          aes(x = Sex, y=n,fill = Class)) +
-facet_grid(~Survived,scales = "free_x") +
+          aes(x = Sex, y=percent_num,fill = Class)) +
+facet_grid(~Survived) +
 geom_bar(stat='identity') +
 coord_flip() +
-  geom_text(data=titanic_bar,aes(label = ifelse(n > 30 ,n,NA)),
+  geom_text(data=titanic_bar,aes(label = ifelse(percent_num > 0.05 ,percent_char,NA)),
     size = 3,position = position_stack(vjust = 0.5)) +
-scale_fill_manual(values=rep(cbPalette,1)) +
-theme(legend.position="top") +
+scale_fill_manual(values=wes_palette('Royal2')) +
+theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
 labs(title='Titanic Passengers by Survival Status') +
 xlab('') +
-ylab('')
+ylab('') + 
+guides(fill = guide_legend(reverse=T))
 ```
 
-    ## Warning: Removed 5 rows containing missing values (geom_text).
+    ## Warning: Removed 2 rows containing missing values (geom_text).
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-6.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-1-3.png)
 
-``` r
-# Number of characters from each species 
-ggplot(data=starwars_species_film,
-          aes(x = episode, y=n,fill = species_collapsed)) +
-geom_area(aes(group=species_collapsed)) +
-scale_x_continuous(breaks=c(1:7)) +
-scale_fill_manual(values=c(cbPalette[1],cbPalette[3],cbPalette[4])) +
-labs(title='Number of Characters Appearing from Each Species by Film') +
-theme(legend.title = element_blank()) +
-xlab('Episode') +
-ylab('')
-```
-
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-7.png)
-
-``` r
-# Number of characters from each species 
-ggplot(data=starwars_gender_film,
-          aes(x = episode, y=prop,color = gender)) +
-geom_line() + geom_point() +
-scale_x_continuous(breaks=c(1:7)) +
-scale_y_continuous(labels=scales::percent) + 
-scale_fill_manual(values=rep(cbPalette,1)) +
-labs(title='Percentage of Characters in Each Film by Gender') +
-theme(legend.title = element_blank()) +
-xlab('Episode') +
-ylab('')
-```
-
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-8.png)
+Scatterplots
+------------
 
 ``` r
 # Linear model
@@ -262,6 +192,8 @@ r_square <- summary(fit)$r.squared
 ggplot(data=starwars_ht_wt,
           aes(x = mass, y = height, color = gender,group=1)) +
 geom_point() +
+theme(legend.title=element_blank(),
+      legend.margin=margin(0,0,0,0)) +
 geom_label_repel(
     data = starwars_ht_wt,
     aes(label = name),
@@ -282,10 +214,77 @@ xlab('Mass (kg)') +
 ylab('Height (cm)')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-9.png)
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 ``` r
 # Create interactive data table of raw data
 # This only works in HTML format so comment it out if knitting to github format 
 #datatable(starwars %>% select(-hair_color,skin_color,-birth_year), options = list(pageLength = 10))
 ```
+
+Line Charts
+-----------
+
+``` r
+# Number of characters from each species 
+ggplot(data=starwars_gender_film,
+          aes(x = episode, y=prop,color = gender)) +
+geom_line() + geom_point() +
+scale_x_continuous(breaks=c(1:7)) +
+scale_y_continuous(labels=scales::percent) + 
+scale_color_manual(values=wes_palette('Darjeeling1')) +
+labs(title='Percentage of Characters in Each Film by Gender') +
+theme(legend.title = element_blank()) +
+xlab('Episode') +
+ylab('')
+```
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+Treemaps
+--------
+
+``` r
+# Treemap of titanic
+treemap(titanic, #Your data frame object
+        index=c("Sex","Class"),  #A list of your categorical variables
+        vSize = "n",  #This is your quantitative variable
+        type="index", #Type sets the organization and color scheme of your treemap
+        palette = wes_palette('IsleofDogs2',type='discrete'),  #Select your color palette from the RColorBrewer presets or make your own.
+        title="Titanic Passengers", #Customize your title
+        fontsize.title = 14 #Change the font size of the title
+        )
+```
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+``` r
+# Treemap of star wars character mass
+ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
+                aes(area=mass,fill=gender,label=name)) + 
+  labs(title='Relative Weights of Star Wars Characters') +
+  scale_fill_manual(values=wes_palette('FantasticFox1')) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", place = "centre", grow = TRUE) +
+  guides(fill=guide_legend(title="Gender"))
+```
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-4-2.png)
+
+Stacked Area Charts
+-------------------
+
+``` r
+# Number of characters from each species 
+ggplot(data=starwars_species_film,
+          aes(x = episode, y=n,fill = species_collapsed)) +
+geom_area(aes(group=species_collapsed)) +
+scale_x_continuous(breaks=c(1:7)) +
+scale_fill_manual(values=wes_palette('GrandBudapest1')) +
+labs(title='Number of Characters Appearing from Each Species by Film') +
+theme(legend.title = element_blank()) +
+xlab('Episode') +
+ylab('')
+```
+
+![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-5-1.png)
