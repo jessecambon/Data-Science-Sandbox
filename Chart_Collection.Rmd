@@ -1,5 +1,5 @@
 ---
-title: "Plot Assortment"
+title: "Chart Collection"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -7,7 +7,7 @@ output:
     toc: true
 ---
 
-This notebook contains code for producing a variety of charts.
+This notebook contains code for producing a variety of charts with ggplot.
 The charts are for demonstration purposes and are not necessarily meant to 
 represent best practices.
 

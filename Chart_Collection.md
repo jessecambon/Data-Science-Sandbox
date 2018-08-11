@@ -1,4 +1,4 @@
-Plot Assortment
+Chart Collection
 ================
 Jesse Cambon
 11 August, 2018
@@ -14,7 +14,7 @@ Jesse Cambon
     -   [Stacked Area](#stacked-area)
     -   [Treemap](#treemap)
 
-This notebook contains code for producing a variety of charts. The charts are for demonstration purposes and are not necessarily meant to represent best practices.
+This notebook contains code for producing a variety of charts with ggplot. The charts are for demonstration purposes and are not necessarily meant to represent best practices.
 
 Notes: Use 'fill' commands for areas and 'color' for lines. To save any plot use ggsave()
 
