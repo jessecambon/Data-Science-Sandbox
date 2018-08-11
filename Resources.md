@@ -9,7 +9,9 @@ A categorized list of data science resources.
 * https://www.r-bloggers.com/may-2018-top-40-new-packages/ 
 * Thou shalt learn thy Tidyverse  https://www.tidyverse.org/index.html  
 
-## Statistical Analysis
+## Statistics
+* [Cross Validated (StackExchange for Statistics)](https://stats.stackexchange.com/)
+* [Elements of Statistical Learning](https://web.stanford.edu/~hastie/ElemStatLearn/) - A classic statistics textbook that is a good reference for a wide variety of methods that are relevant to data science.
 * Survival analysis
 * Best article on regression ever
 * Tidyverse style survey package
@@ -21,8 +23,8 @@ A categorized list of data science resources.
 * Interactive Migration Map with IPUMs Data
 * Thematic Maps (tmap)
 
-## Graph Examples
-* Top 50 Ggplot Visualizations 
+## Chart Examples
+* [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html) 
 * https://www.r-graph-gallery.com/ 
 * Alluvial (streamgraphs and Sankey diagrams)
 * Infographics in R
