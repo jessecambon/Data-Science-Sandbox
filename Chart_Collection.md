@@ -1,11 +1,12 @@
 Plot Assortment
 ================
 Jesse Cambon
-10 August, 2018
+11 August, 2018
 
 -   [Bar Charts](#bar-charts)
 -   [Scatterplots](#scatterplots)
 -   [Line Charts](#line-charts)
+-   [Histograms](#histograms)
 -   [Treemaps](#treemaps)
 -   [Stacked Area Charts](#stacked-area-charts)
 
@@ -133,7 +134,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-1-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
 ``` r
 # Take a look at number of each species from each homeworld
@@ -150,7 +151,7 @@ xlab('') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-1-2.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-2.png)
 
 ``` r
 # Stacked bar of Titanic dataset
@@ -173,7 +174,7 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
     ## Warning: Removed 4 rows containing missing values (geom_text).
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-1-3.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-3.png)
 
 Scatterplots
 ------------
@@ -212,7 +213,7 @@ xlab('Mass (kg)') +
 ylab('Height (cm)')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
 ``` r
 # Create interactive data table of raw data
@@ -237,7 +238,27 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+Histograms
+----------
+
+``` r
+# Histogram with autobinning based on gender
+ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
+  geom_histogram(aes(fill=gender), 
+                   binwidth = 10, 
+                   col="black") +
+            #       size=.1) +  # change binwidth
+  labs(title="Height Distribution of Star Wars Characters", 
+       caption="Han Shot First") +
+xlab('Height (cm)') +
+ylab('Count')
+```
+
+    ## Warning: Removed 6 rows containing non-finite values (stat_bin).
+
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 Treemaps
 --------
@@ -254,7 +275,7 @@ treemap(titanic, #Your data frame object
         )
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 ``` r
 # Treemap of star wars character mass
@@ -267,7 +288,7 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
   guides(fill=guide_legend(title="Gender"))
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-4-2.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-5-2.png)
 
 Stacked Area Charts
 -------------------
@@ -285,4 +306,4 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-6-1.png)
