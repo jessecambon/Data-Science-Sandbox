@@ -62,13 +62,11 @@ library(colormap)
 us <- usa_composite()
 us_map <- fortify(us, region="fips_state")
 
-gg_usa <- ggplot(us@data, aes(map_id=fips_state,fill=pop_2014)) +
+ggplot(us@data, aes(map_id=fips_state,fill=pop_2014)) +
   geom_map(map=us_map, color='#ffffff', size=0.1) + 
   expand_limits(x=us_map$long,y=us_map$lat) +
   theme_map() +  
-  theme(legend.position="right") 
-
-gg_usa +
+  theme(legend.position="right") +
   coord_map("albers", lat0=30, lat1=40) +
   scale_fill_colormap("State Population\n(2014 Estimates)", labels=comma,
                       colormap = colormaps$copper, reverse = T, discrete = F)

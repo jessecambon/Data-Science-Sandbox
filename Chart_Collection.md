@@ -4,29 +4,34 @@ Jesse Cambon
 11 August, 2018
 
 -   [Data Preparation](#data-preparation)
--   [Bar Charts](#bar-charts)
--   [Scatterplots](#scatterplots)
--   [Line Charts](#line-charts)
--   [Histograms](#histograms)
--   [Treemaps](#treemaps)
--   [Stacked Area Charts](#stacked-area-charts)
+-   [Chart Types](#chart-types)
+    -   [Lollipop](#lollipop)
+    -   [Waffle](#waffle)
+    -   [Histogram](#histogram)
+    -   [Bar](#bar)
+    -   [Scatter](#scatter)
+    -   [Line](#line)
+    -   [Stacked Area](#stacked-area)
+    -   [Treemap](#treemap)
 
 This notebook contains code for producing a variety of charts. The charts are for demonstration purposes and are not necessarily meant to represent best practices.
 
 Notes: Use 'fill' commands for areas and 'color' for lines. To save any plot use ggsave()
 
 Data Preparation
-----------------
+================
 
 ``` r
+# Load libraries
 library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify) # ggplot treemap
-library(knitr)
+#library(knitr)
 library(treemap)
 library(formattable) # percent format
 library(wesanderson) # Color Palettes from Wes Anderson Movies
-
+library(waffle) # waffle charts, make sure to install the github version with devtools::install_github("hrbrmstr/waffle")
+library(lubridate) # time/date related functions
 
 
 # Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
@@ -53,6 +58,11 @@ titanic_bar <- titanic %>%
   group_by(Sex,Survived) %>%
   mutate(percent_num=n/sum(n),percent_char=as.character(percent(n/sum(n),0)))
 
+# Titanic passenger composition (for waffle chart)
+titanic_class <- titanic %>%
+  group_by(Class) %>%
+  summarize(n=sum(n)) %>%
+  ungroup()
 
 # Average height and weight by species
 starwars_jac <- starwars %>% group_by(name) %>%
@@ -93,18 +103,8 @@ species_summ <- starwars_jac %>% group_by(species) %>%
   filter(count!=1) # don't look at species that only have one member
 
 # Display in table
-kable(species_summ)
-```
+#kable(species_summ)
 
-| species  |  average\_height|  average\_mass|  count|  height\_to\_mass\_ratio|
-|:---------|----------------:|--------------:|------:|------------------------:|
-| Droid    |         140.0000|       69.75000|      4|                 2.007169|
-| Gungan   |         210.0000|       74.00000|      2|                 2.837838|
-| Human    |         179.5455|       82.78182|     22|                 2.168900|
-| Mirialan |         168.0000|       53.10000|      2|                 3.163842|
-| Wookiee  |         231.0000|      124.00000|      2|                 1.862903|
-
-``` r
 homeworld_summ <- starwars_jac %>%
   count(homeworld,species_collapsed) %>%
   group_by(homeworld) %>%
@@ -120,10 +120,85 @@ homeworld_summ <- starwars_jac %>%
 starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
   filter(!str_detect(name,'Jabba|Yoda')) %>% 
   filter(num_films >= 3)
+
+murder_rates <- USArrests %>% 
+  rownames_to_column('State') %>%
+  as_tibble() %>%
+  arrange(desc(UrbanPop)) %>%
+  head(15) %>%
+  arrange(desc(Murder)) %>% 
+  mutate(State=factor(State,levels=rev(State)))
+
+eu_stock <- EuStockMarkets %>% 
+  as_tibble() %>%
+  gather(Index,Price) %>%
+  mutate(Year=rep(time(EuStockMarkets),4)) 
 ```
 
-Bar Charts
-----------
+Chart Types
+===========
+
+Lollipop
+--------
+
+``` r
+  ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
+    geom_segment( aes(x=State ,xend=State, y=0, yend=Murder), color="grey") +
+    geom_point(size=3, color="#69b3a2") +
+    coord_flip() +
+      theme(
+      panel.grid.minor.y = element_blank(),
+      panel.grid.major.y = element_blank(),
+      legend.position="none"
+    ) +
+    labs(title='Murder Rates of Selected States - 1975',
+        caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
+    xlab("") +
+    ylab('Murders Per 100,000 Residents')
+```
+
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-1.png)
+
+Waffle
+------
+
+``` r
+waffle_palette <- wes_palette('Darjeeling2')
+waffle_palette[5] <- 'white' # 
+
+waffle( titanic_class %>% 
+    rename(names=Class,vals=n),  # rename data to match waffle chart syntax
+  rows = 30, size = 0.5, 
+  colors = waffle_palette, legend_pos = "bottom") +
+  labs(title='Titanic Pasengers') +
+  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14)) +
+  guides(fill = guide_legend(title='Class'))
+```
+
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-2-1.png)
+
+Histogram
+---------
+
+``` r
+# Histogram with autobinning based on gender
+ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
+  geom_histogram(aes(fill=gender), 
+                   binwidth = 10, 
+                   col="black") +
+            #       size=.1) +  # change binwidth
+  labs(title="Height Distribution of Star Wars Characters", 
+       caption="Han Shot First") +
+xlab('Height (cm)') +
+ylab('Count')
+```
+
+    ## Warning: Removed 6 rows containing non-finite values (stat_bin).
+
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+Bar
+---
 
 ``` r
 # A simple bar chart - average heights of the species
@@ -138,7 +213,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 ``` r
 # Take a look at number of each species from each homeworld
@@ -155,7 +230,7 @@ xlab('') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-2.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-2.png)
 
 ``` r
 # Stacked bar of Titanic dataset
@@ -178,10 +253,10 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
     ## Warning: Removed 4 rows containing missing values (geom_text).
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-3.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-3.png)
 
-Scatterplots
-------------
+Scatter
+-------
 
 ``` r
 # Linear model
@@ -217,7 +292,7 @@ xlab('Mass (kg)') +
 ylab('Height (cm)')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 ``` r
 # Create interactive data table of raw data
@@ -225,8 +300,32 @@ ylab('Height (cm)')
 #datatable(starwars %>% select(-hair_color,skin_color,-birth_year), options = list(pageLength = 10))
 ```
 
-Line Charts
------------
+Line
+----
+
+``` r
+# Horizontal axis limits (Year)
+eu_plot_lims <- c(round(min(eu_stock$Year)),round(max(eu_stock$Year)))
+
+# Performance of EU Stock Indexes
+ggplot(eu_stock,
+          aes(x=Year,y=Price,color = fct_rev(Index))) +
+geom_line() +
+scale_x_continuous(limits=eu_plot_lims,breaks=eu_plot_lims[1]:eu_plot_lims[2]) +
+scale_y_continuous(labels=scales::comma) + 
+scale_color_manual(values=wes_palette('GrandBudapest2')) +
+labs(title='EU Stock Indexes',
+     caption='Data provided by Erste Bank AG, Vienna, Austria') +
+theme(legend.title = element_blank(),
+      legend.text=element_text(size=10),
+      legend.position='right') +
+xlab('Year') +
+ylab('Price') +
+# make legend lines bigger
+guides(colour = guide_legend(override.aes = list(size=2.5))) 
+```
+
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ``` r
 # Number of characters from each species 
@@ -242,60 +341,10 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-6-2.png)
 
-Histograms
-----------
-
-``` r
-# Histogram with autobinning based on gender
-ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
-  geom_histogram(aes(fill=gender), 
-                   binwidth = 10, 
-                   col="black") +
-            #       size=.1) +  # change binwidth
-  labs(title="Height Distribution of Star Wars Characters", 
-       caption="Han Shot First") +
-xlab('Height (cm)') +
-ylab('Count')
-```
-
-    ## Warning: Removed 6 rows containing non-finite values (stat_bin).
-
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-1.png)
-
-Treemaps
---------
-
-``` r
-# Treemap of titanic
-treemap(titanic, #Your data frame object
-        index=c("Sex","Class"),  #A list of your categorical variables
-        vSize = "n",  #This is your quantitative variable
-        type="index", #Type sets the organization and color scheme of your treemap
-        palette = wes_palette('IsleofDogs2',type='discrete'),  #Select your color palette from the RColorBrewer presets or make your own.
-        title="Titanic Passengers", #Customize your title
-        fontsize.title = 14 #Change the font size of the title
-        )
-```
-
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-5-1.png)
-
-``` r
-# Treemap of star wars character mass
-ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
-                aes(area=mass,fill=gender,label=name)) + 
-  labs(title='Relative Weights of Star Wars Characters') +
-  scale_fill_manual(values=wes_palette('FantasticFox1')) +
-  geom_treemap() +
-  geom_treemap_text(colour = "white", place = "centre", grow = TRUE) +
-  guides(fill=guide_legend(title="Gender"))
-```
-
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-5-2.png)
-
-Stacked Area Charts
--------------------
+Stacked Area
+------------
 
 ``` r
 # Number of characters from each species 
@@ -310,4 +359,34 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-7-1.png)
+
+Treemap
+-------
+
+``` r
+# Treemap of titanic
+treemap(titanic, #Your data frame object
+        index=c("Sex","Class"),  #A list of your categorical variables
+        vSize = "n",  #This is your quantitative variable
+        type="index", #Type sets the organization and color scheme of your treemap
+        palette = wes_palette('IsleofDogs2',type='discrete'),  #Select your color palette from the RColorBrewer presets or make your own.
+        title="Titanic Passengers", #Customize your title
+        fontsize.title = 14 #Change the font size of the title
+        )
+```
+
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-8-1.png)
+
+``` r
+# Treemap of star wars character mass
+ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
+                aes(area=mass,fill=gender,label=name)) + 
+  labs(title='Relative Weights of Star Wars Characters') +
+  scale_fill_manual(values=wes_palette('FantasticFox1')) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", place = "centre", grow = TRUE) +
+  guides(fill=guide_legend(title="Gender"))
+```
+
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-8-2.png)

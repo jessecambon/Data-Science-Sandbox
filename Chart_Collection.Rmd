@@ -15,17 +15,20 @@ Notes:
 Use 'fill' commands for areas and 'color' for lines.
 To save any plot use ggsave()
 
-## Data Preparation
+# Data Preparation
 
 ```{r setup, message=FALSE}
+
+# Load libraries
 library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify) # ggplot treemap
-library(knitr)
+#library(knitr)
 library(treemap)
 library(formattable) # percent format
 library(wesanderson) # Color Palettes from Wes Anderson Movies
-
+library(waffle) # waffle charts, make sure to install the github version with devtools::install_github("hrbrmstr/waffle")
+library(lubridate) # time/date related functions
 
 
 # Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
@@ -52,6 +55,11 @@ titanic_bar <- titanic %>%
   group_by(Sex,Survived) %>%
   mutate(percent_num=n/sum(n),percent_char=as.character(percent(n/sum(n),0)))
 
+# Titanic passenger composition (for waffle chart)
+titanic_class <- titanic %>%
+  group_by(Class) %>%
+  summarize(n=sum(n)) %>%
+  ungroup()
 
 # Average height and weight by species
 starwars_jac <- starwars %>% group_by(name) %>%
@@ -92,7 +100,7 @@ species_summ <- starwars_jac %>% group_by(species) %>%
   filter(count!=1) # don't look at species that only have one member
 
 # Display in table
-kable(species_summ)
+#kable(species_summ)
 
 homeworld_summ <- starwars_jac %>%
   count(homeworld,species_collapsed) %>%
@@ -110,10 +118,78 @@ starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
   filter(!str_detect(name,'Jabba|Yoda')) %>% 
   filter(num_films >= 3)
 
+murder_rates <- USArrests %>% 
+  rownames_to_column('State') %>%
+  as_tibble() %>%
+  arrange(desc(UrbanPop)) %>%
+  head(15) %>%
+  arrange(desc(Murder)) %>% 
+  mutate(State=factor(State,levels=rev(State)))
+
+eu_stock <- EuStockMarkets %>% 
+  as_tibble() %>%
+  gather(Index,Price) %>%
+  mutate(Year=rep(time(EuStockMarkets),4)) 
+
+```
+
+# Chart Types
+
+## Lollipop
+
+```{r}
+  
+  ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
+    geom_segment( aes(x=State ,xend=State, y=0, yend=Murder), color="grey") +
+    geom_point(size=3, color="#69b3a2") +
+    coord_flip() +
+      theme(
+      panel.grid.minor.y = element_blank(),
+      panel.grid.major.y = element_blank(),
+      legend.position="none"
+    ) +
+    labs(title='Murder Rates of Selected States - 1975',
+        caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
+    xlab("") +
+    ylab('Murders Per 100,000 Residents')
+```
+
+## Waffle
+
+```{r}
+waffle_palette <- wes_palette('Darjeeling2')
+waffle_palette[5] <- 'white' # 
+
+waffle( titanic_class %>% 
+    rename(names=Class,vals=n),  # rename data to match waffle chart syntax
+  rows = 30, size = 0.5, 
+  colors = waffle_palette, legend_pos = "bottom") +
+  labs(title='Titanic Pasengers') +
+  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14)) +
+  guides(fill = guide_legend(title='Class'))
+  
+  
 ```
 
 
-## Bar Charts 
+
+## Histogram
+
+```{r}
+# Histogram with autobinning based on gender
+ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
+  geom_histogram(aes(fill=gender), 
+                   binwidth = 10, 
+                   col="black") +
+            #       size=.1) +  # change binwidth
+  labs(title="Height Distribution of Star Wars Characters", 
+       caption="Han Shot First") +
+xlab('Height (cm)') +
+ylab('Count')
+```
+
+
+## Bar 
 
 ```{r}
 # A simple bar chart - average heights of the species
@@ -159,7 +235,7 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
 ```
 
-## Scatterplots
+## Scatter
 
 ```{r}
 
@@ -200,9 +276,29 @@ ylab('Height (cm)')
 #datatable(starwars %>% select(-hair_color,skin_color,-birth_year), options = list(pageLength = 10))
 ```
 
-## Line Charts
+## Line
 
 ```{r}
+
+# Horizontal axis limits (Year)
+eu_plot_lims <- c(round(min(eu_stock$Year)),round(max(eu_stock$Year)))
+
+# Performance of EU Stock Indexes
+ggplot(eu_stock,
+          aes(x=Year,y=Price,color = fct_rev(Index))) +
+geom_line() +
+scale_x_continuous(limits=eu_plot_lims,breaks=eu_plot_lims[1]:eu_plot_lims[2]) +
+scale_y_continuous(labels=scales::comma) + 
+scale_color_manual(values=wes_palette('GrandBudapest2')) +
+labs(title='EU Stock Indexes',
+     caption='Data provided by Erste Bank AG, Vienna, Austria') +
+theme(legend.title = element_blank(),
+      legend.text=element_text(size=10),
+      legend.position='right') +
+xlab('Year') +
+ylab('Price') +
+# make legend lines bigger
+guides(colour = guide_legend(override.aes = list(size=2.5))) 
 
 # Number of characters from each species 
 ggplot(data=starwars_gender_film,
@@ -218,23 +314,27 @@ ylab('')
 
 ```
 
-## Histograms
+
+## Stacked Area
 
 ```{r}
-# Histogram with autobinning based on gender
-ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
-  geom_histogram(aes(fill=gender), 
-                   binwidth = 10, 
-                   col="black") +
-            #       size=.1) +  # change binwidth
-  labs(title="Height Distribution of Star Wars Characters", 
-       caption="Han Shot First") +
-xlab('Height (cm)') +
-ylab('Count')
+
+# Number of characters from each species 
+ggplot(data=starwars_species_film,
+          aes(x = episode, y=n,fill = species_collapsed)) +
+geom_area(aes(group=species_collapsed)) +
+scale_x_continuous(breaks=c(1:7)) +
+scale_fill_manual(values=wes_palette('IsleofDogs1')) +
+labs(title='Number of Characters Appearing from Each Species by Film') +
+theme(legend.title = element_blank()) +
+xlab('Episode') +
+ylab('')
+
 ```
 
 
-## Treemaps
+
+## Treemap
 
 ```{r}
 
@@ -259,19 +359,3 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
 
 ```
 
-## Stacked Area Charts
-
-```{r}
-
-# Number of characters from each species 
-ggplot(data=starwars_species_film,
-          aes(x = episode, y=n,fill = species_collapsed)) +
-geom_area(aes(group=species_collapsed)) +
-scale_x_continuous(breaks=c(1:7)) +
-scale_fill_manual(values=wes_palette('IsleofDogs1')) +
-labs(title='Number of Characters Appearing from Each Species by Film') +
-theme(legend.title = element_blank()) +
-xlab('Episode') +
-ylab('')
-
-```
