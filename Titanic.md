@@ -16,7 +16,7 @@ library(tidyverse)
 library(PASWR) #titanic3 dataset
 library(wesanderson) # color palettes
 library(formattable) # percent format
-#library(caret)
+library(caret) # regression package
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -66,8 +66,39 @@ fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=tit
 
 predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived) %>%
-  mutate(prediction=predict(fit,newdata=titanic,type='response'))
+  mutate(prediction=predict(fit,newdata=titanic,type='response')) %>%
+  mutate(prediction_binary=case_when(prediction >0.5 ~ 1, TRUE ~ 0))
+
+# Confusion Matrix analysis with assumed cutoff
+confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
 ```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##           Reference
+    ## Prediction   0   1
+    ##          0 710 199
+    ##          1  99 301
+    ##                                           
+    ##                Accuracy : 0.7723          
+    ##                  95% CI : (0.7487, 0.7948)
+    ##     No Information Rate : 0.618           
+    ##     P-Value [Acc > NIR] : < 2.2e-16       
+    ##                                           
+    ##                   Kappa : 0.4987          
+    ##  Mcnemar's Test P-Value : 9.756e-09       
+    ##                                           
+    ##             Sensitivity : 0.8776          
+    ##             Specificity : 0.6020          
+    ##          Pos Pred Value : 0.7811          
+    ##          Neg Pred Value : 0.7525          
+    ##              Prevalence : 0.6180          
+    ##          Detection Rate : 0.5424          
+    ##    Detection Prevalence : 0.6944          
+    ##       Balanced Accuracy : 0.7398          
+    ##                                           
+    ##        'Positive' Class : 0               
+    ## 
 
 Model Graphs
 ------------
