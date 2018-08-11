@@ -12,6 +12,8 @@ A categorized list of data science resources.
 ## Statistics
 * [Cross Validated (StackExchange for Statistics)](https://stats.stackexchange.com/)
 * [Elements of Statistical Learning](https://web.stanford.edu/~hastie/ElemStatLearn/) - A freely available and well-vetted statistics textbook that is a good reference for a wide variety of methods that are relevant to data science.
+* [Biostat Handbook](http://www.biostathandbook.com/) - A great concise and and accessible reference for statistical methods which have relevance in a wide variety of fields (not just Biostatistics).
+* [Frank Harrell](http://www.fharrell.com/) - Head of the Biostats department @ Vanderbilt and author of several R packages (Hmsic and rms). He has good materials on regression modeling.
 * Survival analysis
 * Best article on regression ever
 * Tidyverse style survey package
