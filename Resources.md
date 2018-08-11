@@ -11,7 +11,7 @@ A categorized list of data science resources.
 
 ## Statistics
 * [Cross Validated (StackExchange for Statistics)](https://stats.stackexchange.com/)
-* [Elements of Statistical Learning](https://web.stanford.edu/~hastie/ElemStatLearn/) - A classic statistics textbook that is a good reference for a wide variety of methods that are relevant to data science.
+* [Elements of Statistical Learning](https://web.stanford.edu/~hastie/ElemStatLearn/) - A freely available and well-vetted statistics textbook that is a good reference for a wide variety of methods that are relevant to data science.
 * Survival analysis
 * Best article on regression ever
 * Tidyverse style survey package
