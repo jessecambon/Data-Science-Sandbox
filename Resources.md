@@ -1,6 +1,6 @@
 ## General
-[Data-To-Viz - Comprehensive Data Viz Reference](https://www.data-to-viz.com)
-RStudio Cheatsheets 
+* [Data-To-Viz - Comprehensive Data Viz Reference](https://www.data-to-viz.com)
+* RStudio Cheatsheets 
 Memory Usage – Hadley Wickham 
 Incredibly Comprehensive List of APIs for R
 http://flowingdata.com/ - Data viz ideas
