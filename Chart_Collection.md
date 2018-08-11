@@ -3,6 +3,7 @@ Plot Assortment
 Jesse Cambon
 11 August, 2018
 
+-   [Data Preparation](#data-preparation)
 -   [Bar Charts](#bar-charts)
 -   [Scatterplots](#scatterplots)
 -   [Line Charts](#line-charts)
@@ -10,9 +11,12 @@ Jesse Cambon
 -   [Treemaps](#treemaps)
 -   [Stacked Area Charts](#stacked-area-charts)
 
-This notebook contains code for producing a variety of charts. The charts are for demonstration purposes and are not necessarily meant to represent best practice.
+This notebook contains code for producing a variety of charts. The charts are for demonstration purposes and are not necessarily meant to represent best practices.
 
 Notes: Use 'fill' commands for areas and 'color' for lines. To save any plot use ggsave()
+
+Data Preparation
+----------------
 
 ``` r
 library(tidyverse)
