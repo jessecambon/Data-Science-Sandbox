@@ -3,8 +3,8 @@ A categorized list of data science resources.
 
 ## General
 * [Data-To-Viz - Comprehensive Data Viz Reference](https://www.data-to-viz.com)
-* RStudio Cheatsheets 
-* Incredibly Comprehensive List of APIs for R
+* [RStudio Cheatsheets](https://www.rstudio.com/resources/cheatsheets/) 
+* [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
 * http://flowingdata.com/ - Data viz ideas
 * https://www.r-bloggers.com/may-2018-top-40-new-packages/ 
 * Thou shalt learn thy Tidyverse  https://www.tidyverse.org/index.html  
