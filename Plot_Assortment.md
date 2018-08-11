@@ -9,9 +9,7 @@ Jesse Cambon
 -   [Treemaps](#treemaps)
 -   [Stacked Area Charts](#stacked-area-charts)
 
-This notebook will demonstrate an assortment of traditional charts such as bar charts, scatterplots, and treemaps.
-
-These charts are provided as reference code to save time in constructing similar data visualizations and are not necessarily meant to represent best practice.
+This notebook contains code for producing a variety of charts. The charts are for demonstration purposes and are not necessarily meant to represent best practice.
 
 Notes: Use 'fill' commands for areas and 'color' for lines. To save any plot use ggsave()
 
@@ -143,7 +141,7 @@ ggplot(data=homeworld_summ,
           aes(x = species_collapsed, y=n,fill = species_collapsed)) +
 # The scales argument suppress the presense of an empty "Other" species
 # slot on Tatooine
-facet_grid(~homeworld,scales = "free_x") +
+facet_grid(~homeworld,scales = 'free',space='free') +
 geom_bar(stat='identity') +
 scale_fill_manual(values=wes_palette('Moonrise2')) +
 theme(legend.position="none",legend.title=element_blank()) +
@@ -158,22 +156,22 @@ ylab('')
 # Stacked bar of Titanic dataset
 
 ggplot(data=titanic_bar,
-          aes(x = Sex, y=percent_num,fill = Class)) +
+          aes(x = Sex, y=percent_num,fill = fct_rev(Class))) +
 facet_grid(~Survived) +
 geom_bar(stat='identity') +
 coord_flip() +
-  geom_text(data=titanic_bar,aes(label = ifelse(percent_num > 0.05 ,percent_char,NA)),
+  geom_text(data=titanic_bar,aes(label = ifelse(percent_num > 0.07 ,percent_char,NA)),
     size = 3,position = position_stack(vjust = 0.5)) +
 scale_fill_manual(values=wes_palette('Royal2')) +
 theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
+        axis.ticks.x=element_blank())+
 labs(title='Titanic Passengers by Survival Status') +
 xlab('') +
-ylab('') + 
-guides(fill = guide_legend(reverse=T))
+ylab('') +
+guides(fill = guide_legend(title='Class',reverse=T))
 ```
 
-    ## Warning: Removed 2 rows containing missing values (geom_text).
+    ## Warning: Removed 4 rows containing missing values (geom_text).
 
 ![](Plot_Assortment_files/figure-markdown_github/unnamed-chunk-1-3.png)
 
@@ -280,7 +278,7 @@ ggplot(data=starwars_species_film,
           aes(x = episode, y=n,fill = species_collapsed)) +
 geom_area(aes(group=species_collapsed)) +
 scale_x_continuous(breaks=c(1:7)) +
-scale_fill_manual(values=wes_palette('GrandBudapest1')) +
+scale_fill_manual(values=wes_palette('IsleofDogs1')) +
 labs(title='Number of Characters Appearing from Each Species by Film') +
 theme(legend.title = element_blank()) +
 xlab('Episode') +
