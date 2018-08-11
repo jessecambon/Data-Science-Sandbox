@@ -5,3 +5,4 @@
 *.Rmd
 Old
 Old/*
+.gitignore
