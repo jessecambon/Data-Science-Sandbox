@@ -1,3 +1,6 @@
+A categorized list of data science resources.
+
+
 ## General
 * [Data-To-Viz - Comprehensive Data Viz Reference](https://www.data-to-viz.com)
 * RStudio Cheatsheets 
