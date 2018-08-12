@@ -162,7 +162,7 @@ Lollipop
     ylab('Murders Per 100,000 Residents')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-1.png)
+![](Chart_Collection_files/figure-markdown_github/lollipop-1.png)
 
 Waffle
 ------
@@ -180,7 +180,7 @@ waffle( titanic_class %>%
   guides(fill = guide_legend(title='Class'))
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](Chart_Collection_files/figure-markdown_github/waffle-1.png)
 
 Histogram
 ---------
@@ -200,7 +200,7 @@ ylab('Count')
 
     ## Warning: Removed 6 rows containing non-finite values (stat_bin).
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](Chart_Collection_files/figure-markdown_github/histogram-1.png)
 
 Bar
 ---
@@ -218,7 +218,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](Chart_Collection_files/figure-markdown_github/bar-1.png)
 
 ``` r
 # Take a look at number of each species from each homeworld
@@ -235,7 +235,7 @@ xlab('') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-2.png)
+![](Chart_Collection_files/figure-markdown_github/bar-2.png)
 
 ``` r
 # Stacked bar of Titanic dataset
@@ -258,7 +258,7 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
     ## Warning: Removed 4 rows containing missing values (geom_text).
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-4-3.png)
+![](Chart_Collection_files/figure-markdown_github/bar-3.png)
 
 Scatter
 -------
@@ -297,7 +297,7 @@ xlab('Mass (kg)') +
 ylab('Height (cm)')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](Chart_Collection_files/figure-markdown_github/scatter-1.png)
 
 ``` r
 # Create interactive data table of raw data
@@ -330,7 +330,7 @@ ylab('Price') +
 guides(colour = guide_legend(override.aes = list(size=2.5))) 
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](Chart_Collection_files/figure-markdown_github/line-1.png)
 
 ``` r
 # Number of characters from each species 
@@ -346,7 +346,7 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-6-2.png)
+![](Chart_Collection_files/figure-markdown_github/line-2.png)
 
 Stacked Area
 ------------
@@ -364,7 +364,7 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](Chart_Collection_files/figure-markdown_github/stackedarea-1.png)
 
 Treemap
 -------
@@ -385,7 +385,7 @@ treemap(titanic, #Your data frame object
     ## Warning in `[.data.table`(dtfDT, , `:=`("c", fact), with = FALSE):
     ## with=FALSE ignored, it isn't needed when using :=. See ?':=' for examples.
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
 ``` r
 # Treemap of star wars character mass
@@ -398,4 +398,4 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
   guides(fill=guide_legend(title="Gender"))
 ```
 
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-8-2.png)
+![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-2.png)

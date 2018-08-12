@@ -138,7 +138,7 @@ eu_stock <- EuStockMarkets %>%
 
 ## Lollipop
 
-```{r}
+```{r lollipop}
   ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
     geom_segment( aes(x=State ,xend=State, y=0, yend=Murder), color="grey") +
     geom_point(size=3, color=cbPalette[6]) +
@@ -161,7 +161,7 @@ eu_stock <- EuStockMarkets %>%
 
 ## Waffle
 
-```{r}
+```{r waffle}
 waffle_palette <- wes_palette('Darjeeling2')
 waffle_palette[5] <- 'white' # 
 
@@ -180,7 +180,7 @@ waffle( titanic_class %>%
 
 ## Histogram
 
-```{r}
+```{r histogram}
 # Histogram with autobinning based on gender
 ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
   geom_histogram(aes(fill=gender), 
@@ -196,7 +196,7 @@ ylab('Count')
 
 ## Bar 
 
-```{r}
+```{r bar}
 # A simple bar chart - average heights of the species
 ggplot(data=species_summ,
           aes(x = species, y=average_height, fill = species)) +
@@ -242,7 +242,7 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
 ## Scatter
 
-```{r}
+```{r scatter}
 
 # Linear model
 fit <- lm(height ~ mass, data=starwars_ht_wt)
@@ -283,7 +283,7 @@ ylab('Height (cm)')
 
 ## Line
 
-```{r}
+```{r line}
 
 # Horizontal axis limits (Year)
 eu_plot_lims <- c(round(min(eu_stock$Year)),round(max(eu_stock$Year)))
@@ -322,7 +322,7 @@ ylab('')
 
 ## Stacked Area
 
-```{r}
+```{r stackedarea}
 
 # Number of characters from each species 
 ggplot(data=starwars_species_film,
