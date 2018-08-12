@@ -7,7 +7,9 @@ output:
     toc: true
 ---
 
-An exploratory analysis of the titanic dataset.
+A modeling analysis of the titanic dataset.
+
+To add: imputation, display of coefficients, graphical display of linear regression result
 
 References:
 https://stats.idre.ucla.edu/r/dae/logit-regression/
@@ -87,4 +89,31 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
 ```
 
+## Linear Regression Model
 
+A linear model of how much a passenger's fare cost
+
+```{r linear-regression}
+
+lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
+
+lm_predictions <- titanic %>%
+  dplyr::select(sex,pclass,age,survived,fare) %>%
+  mutate(prediction=predict(lm_fit,newdata=titanic,type='response'))
+
+summary(lm_fit)
+
+
+ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+          aes(x = age, y = prediction, color = pclass)) +
+geom_point() +
+facet_grid(~factor(sex)) +
+scale_y_continuous(labels=scales::comma) +
+#theme(legend.margin=margin(0,0,0,0)) +
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Cost of Fare - Linear Regression') +
+xlab('Age') +
+ylab('Fare Cost') +
+guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
+
+```

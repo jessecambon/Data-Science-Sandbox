@@ -5,8 +5,11 @@ Jesse Cambon
 
 -   [Exploratory Graphs](#exploratory-graphs)
 -   [Logistic Regression Model](#logistic-regression-model)
+-   [Linear Regression Model](#linear-regression-model)
 
-An exploratory analysis of the titanic dataset.
+A modeling analysis of the titanic dataset.
+
+To add: imputation, display of coefficients, graphical display of linear regression result
 
 References: <https://stats.idre.ucla.edu/r/dae/logit-regression/>
 
@@ -150,3 +153,60 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
     ## Warning: Removed 263 rows containing missing values (geom_point).
 
 ![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
+
+Linear Regression Model
+-----------------------
+
+A linear model of how much a passenger's fare cost
+
+``` r
+lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
+
+lm_predictions <- titanic %>%
+  dplyr::select(sex,pclass,age,survived,fare) %>%
+  mutate(prediction=predict(lm_fit,newdata=titanic,type='response'))
+
+summary(lm_fit)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = fare ~ sex + pclass + age + survived, data = titanic)
+    ## 
+    ## Residuals:
+    ##    Min     1Q Median     3Q    Max 
+    ## -86.81 -12.71  -2.53   4.05 424.40 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept) 108.5874     6.2054  17.499  < 2e-16 ***
+    ## sexmale     -11.4555     3.3133  -3.457 0.000567 ***
+    ## pclass2nd   -72.0386     3.9511 -18.232  < 2e-16 ***
+    ## pclass3rd   -81.1666     3.8453 -21.108  < 2e-16 ***
+    ## age          -0.2715     0.1057  -2.569 0.010347 *  
+    ## survived      0.5729     3.4520   0.166 0.868231    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 43.59 on 1039 degrees of freedom
+    ##   (264 observations deleted due to missingness)
+    ## Multiple R-squared:  0.3913, Adjusted R-squared:  0.3884 
+    ## F-statistic: 133.6 on 5 and 1039 DF,  p-value: < 2.2e-16
+
+``` r
+ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+          aes(x = age, y = prediction, color = pclass)) +
+geom_point() +
+facet_grid(~factor(sex)) +
+scale_y_continuous(labels=scales::comma) +
+#theme(legend.margin=margin(0,0,0,0)) +
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Cost of Fare - Linear Regression') +
+xlab('Age') +
+ylab('Fare Cost') +
+guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
+```
+
+    ## Warning: Removed 263 rows containing missing values (geom_point).
+
+![](Titanic_files/figure-markdown_github/linear-regression-1.png)
