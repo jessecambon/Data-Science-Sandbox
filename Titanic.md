@@ -1,11 +1,10 @@
 Titanic Data Analysis
 ================
 Jesse Cambon
-10 August, 2018
+12 August, 2018
 
 -   [Exploratory Graphs](#exploratory-graphs)
--   [Regression Model](#regression-model)
--   [Model Graphs](#model-graphs)
+-   [Logistic Regression Model](#logistic-regression-model)
 
 An exploratory analysis of the titanic dataset.
 
@@ -16,12 +15,14 @@ library(tidyverse)
 library(PASWR) #titanic3 dataset
 library(wesanderson) # color palettes
 library(formattable) # percent format
-library(caret) # regression package
+library(caret) # regression utilities
+library(Hmisc) # capitalize function
 
 titanic <- titanic3 %>% as_tibble()
 
 titanic_summ <- titanic %>%
   count(survived,pclass,sex) %>%
+  mutate(sex=capitalize(as.character(sex))) %>%
   group_by(pclass,sex) %>%
   mutate(perc_surv_num=n/sum(n),
     perc_surv_char=as.character(percent(n/sum(n),0))) %>%
@@ -45,7 +46,7 @@ geom_bar(stat='identity') +
 coord_flip() +
   geom_text(data=titanic_summ,aes(label = ifelse(perc_surv_num > 0.07 ,perc_surv_char,NA)),
     size = 3,position = position_stack(vjust = 0.5)) +
-scale_fill_manual(values=wes_palette('Royal2')) +
+scale_fill_manual(values=wes_palette('FantasticFox1')[c(3,4)]) +
 theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank())+
 labs(title='') +
@@ -56,10 +57,10 @@ guides(fill = guide_legend(title='Survived',reverse=T)) # reverse legend order
 
     ## Warning: Removed 1 rows containing missing values (geom_text).
 
-![](Titanic_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](Titanic_files/figure-markdown_github/explore-1.png)
 
-Regression Model
-----------------
+Logistic Regression Model
+-------------------------
 
 ``` r
 fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
@@ -69,6 +70,38 @@ predictions <- titanic %>%
   mutate(prediction=predict(fit,newdata=titanic,type='response')) %>%
   mutate(prediction_binary=case_when(prediction >0.5 ~ 1, TRUE ~ 0))
 
+summary(fit)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = survived ~ sex + pclass + age, family = binomial(link = "logit"), 
+    ##     data = titanic)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -2.6399  -0.6979  -0.4336   0.6688   2.3964  
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept)  3.522074   0.326702  10.781  < 2e-16 ***
+    ## sexmale     -2.497845   0.166037 -15.044  < 2e-16 ***
+    ## pclass2nd   -1.280570   0.225538  -5.678 1.36e-08 ***
+    ## pclass3rd   -2.289661   0.225802 -10.140  < 2e-16 ***
+    ## age         -0.034393   0.006331  -5.433 5.56e-08 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 1414.62  on 1045  degrees of freedom
+    ## Residual deviance:  982.45  on 1041  degrees of freedom
+    ##   (263 observations deleted due to missingness)
+    ## AIC: 992.45
+    ## 
+    ## Number of Fisher Scoring iterations: 4
+
+``` r
 # Confusion Matrix analysis with assumed cutoff
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
 ```
@@ -100,23 +133,20 @@ confusionMatrix(factor(predictions$prediction_binary), factor(predictions$surviv
     ##        'Positive' Class : 0               
     ## 
 
-Model Graphs
-------------
-
 ``` r
-ggplot(data=predictions,
+ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = age, y = prediction, color = pclass)) +
 geom_point() +
 facet_grid(~factor(sex)) +
 scale_y_continuous(labels=scales::percent) +
 theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
-labs(title='') +
+labs(title='Probability of Survival - Logistic Regression') +
 xlab('Age') +
 ylab('Survival Probability') +
-guides(color = guide_legend(title='Passenger Class',reverse=F)) 
+guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 ```
 
     ## Warning: Removed 263 rows containing missing values (geom_point).
 
-![](Titanic_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
