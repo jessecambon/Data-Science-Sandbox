@@ -139,16 +139,20 @@ eu_stock <- EuStockMarkets %>%
 ## Lollipop
 
 ```{r}
-  
   ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
     geom_segment( aes(x=State ,xend=State, y=0, yend=Murder), color="grey") +
-    geom_point(size=3, color="#69b3a2") +
-    coord_flip() +
-      theme(
+    geom_point(size=3, color=cbPalette[6]) +
+   theme_minimal() +
+  theme(    plot.subtitle= element_text(face="bold",hjust=0.5),
+            plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
       panel.grid.minor.y = element_blank(),
       panel.grid.major.y = element_blank(),
+      panel.grid.minor.x = element_blank(),
       legend.position="none"
     ) +
+  coord_flip() +
+    # expand gets rid of space between labels stem of lollipops
+    scale_y_continuous(expand = expand_scale(mult = c(0, .1))) + 
     labs(title='Murder Rates of Selected States - 1975',
         caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
     xlab("") +
@@ -307,7 +311,7 @@ ggplot(data=starwars_gender_film,
 geom_line() + geom_point() +
 scale_x_continuous(breaks=c(1:7)) +
 scale_y_continuous(labels=scales::percent) + 
-scale_color_manual(values=wes_palette('Darjeeling1')) +
+scale_color_manual(values=cbPalette) +
 labs(title='Percentage of Characters in Each Film by Gender') +
 theme(legend.title = element_blank()) +
 xlab('Episode') +
@@ -343,8 +347,9 @@ ylab('')
 treemap(titanic, #Your data frame object
         index=c("Sex","Class"),  #A list of your categorical variables
         vSize = "n",  #This is your quantitative variable
-        type="index", #Type sets the organization and color scheme of your treemap
-        palette = wes_palette('IsleofDogs2',type='discrete'),  #Select your color palette from the RColorBrewer presets or make your own.
+        vColor='Class',
+        type="categorical", #Type sets the organization and color scheme of your treemap
+        palette = wes_palette('Moonrise3'),  #Select your color palette from the RColorBrewer presets or make your own.
         title="Titanic Passengers", #Customize your title
         fontsize.title = 14 #Change the font size of the title
         )
@@ -353,7 +358,7 @@ treemap(titanic, #Your data frame object
 ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
                 aes(area=mass,fill=gender,label=name)) + 
   labs(title='Relative Weights of Star Wars Characters') +
-  scale_fill_manual(values=wes_palette('FantasticFox1')) +
+  scale_fill_manual(values=wes_palette('Moonrise3')) +
   geom_treemap() +
   geom_treemap_text(colour = "white", place = "centre", grow = TRUE) +
   guides(fill=guide_legend(title="Gender"))
