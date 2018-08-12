@@ -3,12 +3,12 @@
 A collection of code and resources to serve as a starting point for data science projects. 
 
 <span>
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/lollipop-1.png" height="200px"/></a>
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/scatter-1.png" height="200px"/></a>
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/waffle-1.png" height="200px"/></a> 
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/line-1.png" height="200px"/></a> 
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/histogram-1.png" height="200px"/></a> 
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Titanic.md"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Titanic_files/figure-markdown_github/unnamed-chunk-4-1.png" height="200px"/></a> 
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md#lollipop"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/lollipop-1.png" height="200px"/></a>
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md#scatter"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/scatter-1.png" height="200px"/></a>
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md#waffle"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/waffle-1.png" height="200px"/></a> 
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md#line"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/line-1.png" height="200px"/></a> 
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection.md#histogram"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Chart_Collection_files/figure-markdown_github/histogram-1.png" height="200px"/></a> 
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Titanic.md#model-graphs"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Titanic_files/figure-markdown_github/unnamed-chunk-4-1.png" height="200px"/></a> 
 </span>
 
 
