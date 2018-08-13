@@ -11,6 +11,7 @@ A collection of code and resources to serve as a starting point for data science
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Titanic.md#logistic-regression-model"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/Titanic_files/figure-markdown_github/logistic-regression-1.png" height="200px"/></a> 
 </span>
 
+The purpose of this repository is to host code and resources that are applicable to a variety of data science projects. An emphasis is placed on having clear, elegant code and an abundance of visuals to communicate results. 
 
 
 ## Table of Contents 
