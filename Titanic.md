@@ -170,7 +170,7 @@ print(xtable(log_info %>%
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:11:02 2018 -->
+<!-- Mon Aug 13 19:20:33 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -217,7 +217,7 @@ print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='htm
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:11:02 2018 -->
+<!-- Mon Aug 13 19:20:34 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -391,22 +391,20 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
 ``` r
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
-          aes(x = prediction, y = residual, color = pclass)) +
+          aes(x = prediction, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
-geom_hline(slope=0,yintercept=0) + # horizontal line at 0 residual
+geom_hline(yintercept=0) + # horizontal line at 0 residual
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
-theme(legend.pos='none') +
+#theme(legend.pos='none') +
 scale_color_manual(values=wes_palette('Moonrise3')) +
 labs(title='Residuals vs Predictions by Passenger Class') +
 xlab('Prediction') +
 ylab('Residual') + 
-guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
+guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
 ```
-
-    ## Warning: Ignoring unknown parameters: slope
 
     ## Warning: Removed 264 rows containing missing values (geom_point).
 
@@ -438,7 +436,7 @@ print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='ht
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:11:05 2018 -->
+<!-- Mon Aug 13 19:20:36 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -503,7 +501,7 @@ print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:11:05 2018 -->
+<!-- Mon Aug 13 19:20:36 2018 -->
 <table border="1">
 <tr>
 <th>

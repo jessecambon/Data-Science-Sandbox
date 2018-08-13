@@ -166,19 +166,19 @@ ylab('Fare Cost') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
-          aes(x = prediction, y = residual, color = pclass)) +
+          aes(x = prediction, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
-geom_hline(slope=0,yintercept=0) + # horizontal line at 0 residual
+geom_hline(yintercept=0) + # horizontal line at 0 residual
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
-theme(legend.pos='none') +
+#theme(legend.pos='none') +
 scale_color_manual(values=wes_palette('Moonrise3')) +
 labs(title='Residuals vs Predictions by Passenger Class') +
 xlab('Prediction') +
 ylab('Residual') + 
-guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
+guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
 
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = age, y = residual, color = sex)) +
