@@ -91,6 +91,13 @@ log_terms <- tidy(log_fit)
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
 
 
+ggplot(predictions, aes(prediction)) +
+  geom_histogram() +
+  scale_x_continuous(labels=scales::percent) +
+  labs(title="Logistic Regression Probability Distribution") +
+xlab('Survival Probability') +
+ylab('Count')
+
 ggplot(predictions, aes(brier_score)) +
   geom_histogram() +
   labs(title="Brier Score Distribution") +
