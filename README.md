@@ -1,4 +1,4 @@
-# The Data Science Cookbook
+# The Data Science Codex
 
 A collection of code and resources to serve as a starting point for data science projects. 
 
