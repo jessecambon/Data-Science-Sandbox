@@ -12,7 +12,7 @@ A categorized list of data science resources.
 * [Dataviz Project](http://datavizproject.com/)
 * [Flowing Data](http://flowingdata.com/) - Good newsletter and site on data viz techniques.
 * [R plots with Code](https://www.r-graph-gallery.com/)
-* [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
+* [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 * [GGalluvial](https://github.com/corybrunson/ggalluvial) - Flow diagrams
 
 ## Statistics
