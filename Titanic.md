@@ -9,7 +9,7 @@ Jesse Cambon
 
 A modeling analysis of the titanic dataset.
 
-To add: imputation, display of coefficients, graphical display of linear regression result
+To add: imputation
 
 References: <https://stats.idre.ucla.edu/r/dae/logit-regression/>
 
@@ -170,7 +170,7 @@ print(xtable(log_info),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:08:59 2018 -->
+<!-- Mon Aug 13 16:19:42 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -235,7 +235,7 @@ print(xtable(log_terms),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:08:59 2018 -->
+<!-- Mon Aug 13 16:19:42 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -367,7 +367,7 @@ lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
 
 lm_predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived,fare) %>%
-  mutate(prediction=predict(lm_fit,newdata=titanic,type='response')) %>%
+  mutate(prediction=predict(lm_fit,newdata=titanic)) %>%
   mutate(residual=fare-prediction)
 
 lm_info <- glance(lm_fit)
@@ -378,9 +378,10 @@ lm_terms <- tidy(lm_fit)
 # Histogram of Residuals
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram() +
-  labs(title="Residual Distribution") +
+facet_grid(~pclass,scales='free_x') +
+  labs(title="Residual Distribution by Passenger Class") +
 xlab('Residual') +
-ylab('Count')
+ylab('Count') 
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -432,7 +433,7 @@ print(xtable(lm_info),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:09:00 2018 -->
+<!-- Mon Aug 13 16:19:44 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -515,7 +516,7 @@ print(xtable(lm_terms),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:09:00 2018 -->
+<!-- Mon Aug 13 16:19:44 2018 -->
 <table border="1">
 <tr>
 <th>

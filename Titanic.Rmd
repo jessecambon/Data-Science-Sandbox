@@ -9,7 +9,7 @@ output:
 
 A modeling analysis of the titanic dataset.
 
-To add: imputation, display of coefficients, graphical display of linear regression result
+To add: imputation
 
 References:
 https://stats.idre.ucla.edu/r/dae/logit-regression/
@@ -125,6 +125,8 @@ print(xtable(log_terms),type='html')
 ```
 
 
+
+
 ## Linear Regression Model
 
 A linear model of how much a passenger's fare cost
@@ -135,7 +137,7 @@ lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
 
 lm_predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived,fare) %>%
-  mutate(prediction=predict(lm_fit,newdata=titanic,type='response')) %>%
+  mutate(prediction=predict(lm_fit,newdata=titanic)) %>%
   mutate(residual=fare-prediction)
 
 lm_info <- glance(lm_fit)
@@ -146,9 +148,10 @@ lm_terms <- tidy(lm_fit)
 # Histogram of Residuals
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram() +
-  labs(title="Residual Distribution") +
+facet_grid(~pclass,scales='free_x') +
+  labs(title="Residual Distribution by Passenger Class") +
 xlab('Residual') +
-ylab('Count')
+ylab('Count') 
 
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = age, y = prediction, color = pclass,group=1)) +
