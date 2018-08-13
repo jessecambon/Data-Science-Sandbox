@@ -1,11 +1,7 @@
 Chart Collection
 ================
 Jesse Cambon
-<<<<<<< HEAD
 13 August, 2018
-=======
-11 August, 2018
->>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
 
 -   [Data Preparation](#data-preparation)
 -   [Chart Types](#chart-types)
@@ -26,12 +22,8 @@ Data Preparation
 ================
 
 ``` r
-<<<<<<< HEAD
 # Load libraries - you will need to install these with install.packages('packagename')
 # if you do not have them installed
-=======
-# Load libraries
->>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
 library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify) # ggplot treemap
@@ -164,11 +156,7 @@ Lollipop
     ) +
   coord_flip() +
     # expand gets rid of space between labels stem of lollipops
-<<<<<<< HEAD
     scale_y_continuous(expand = c(0, .15)) + 
-=======
-    scale_y_continuous(expand = expand_scale(mult = c(0, .1))) + 
->>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
     labs(title='Murder Rates of Selected States - 1975',
         caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
     xlab("") +
@@ -395,14 +383,7 @@ treemap(titanic, #Your data frame object
         )
 ```
 
-<<<<<<< HEAD
 ![](Chart_Collection_files/figure-markdown_github/treemap-1.png)
-=======
-    ## Warning in `[.data.table`(dtfDT, , `:=`("c", fact), with = FALSE):
-    ## with=FALSE ignored, it isn't needed when using :=. See ?':=' for examples.
-
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-1.png)
->>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
 
 ``` r
 # Treemap of star wars character mass
@@ -415,8 +396,4 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
   guides(fill=guide_legend(title="Gender"))
 ```
 
-<<<<<<< HEAD
 ![](Chart_Collection_files/figure-markdown_github/treemap-2.png)
-=======
-![](Chart_Collection_files/figure-markdown_github/unnamed-chunk-1-2.png)
->>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
