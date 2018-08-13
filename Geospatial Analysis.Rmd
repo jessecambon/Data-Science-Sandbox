@@ -1,0 +1,76 @@
+---
+title: "Geospatial Analysis"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+
+Note: Use devtools::install_github("hrbrmstr/albersusa") to install albersusa
+
+https://github.com/bhaskarvk/colormap
+
+
+c("B23025_005E", # labor force size
+              'B01003_001E', # population
+              'B25056_001E'), # rent
+
+https://github.com/mtennekes/tmap/tree/master/demo/USChoropleth 
+```{r}
+library(tidyverse)
+library(tidycensus) # census data
+library(ggplot2)
+library(sf)
+library(tmap) # thematic mapping
+library(viridis) # color scheme
+
+options(tigris_use_cache = TRUE)
+
+us_county_income <- get_acs(geography = "county", variables = "B19013_001", geometry = TRUE)
+
+qtm(us_county_income, fill = "estimate")
+
+
+us <- get_acs(geography = "county", 
+              variables = 'B25064_001E', # median gross rent
+              geometry = TRUE) 
+
+qtm(us, fill = "estimate")
+
+bos <- get_acs(geography = "tract", 
+              variables = "B19013_001", 
+              state = "MA", 
+              county = "Suffolk", 
+              geometry = TRUE)
+
+qtm(bos, fill = "estimate")
+
+vars <- load_variables(2016,'acs1')
+```
+    
+
+```{r}
+library(maptools)
+library(scales)
+library(ggplot2)
+library(albersusa)
+library(ggthemes)
+library(colormap)
+
+us <- usa_composite()
+us_map <- fortify(us, region="fips_state")
+
+ggplot(us@data, aes(map_id=fips_state,fill=pop_2014)) +
+  geom_map(map=us_map, color='#ffffff', size=0.1) + 
+  expand_limits(x=us_map$long,y=us_map$lat) +
+  theme_map() +  
+  theme(legend.position="right") +
+  coord_map("albers", lat0=30, lat1=40) +
+  scale_fill_colormap("State Population\n(2014 Estimates)", labels=comma,
+                      colormap = colormaps$copper, reverse = T, discrete = F)
+```
+
+
+
