@@ -91,6 +91,18 @@ log_terms <- tidy(log_fit)
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
 
 
+ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
+          aes(x = age, y = prediction, color = pclass)) +
+geom_point() +
+facet_grid(~factor(sex)) +
+scale_y_continuous(labels=scales::percent) +
+theme(legend.margin=margin(0,0,0,0)) +
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Probability of Survival - Logistic Regression') +
+xlab('Age') +
+ylab('Survival Probability') +
+guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
+
 ggplot(predictions, aes(prediction)) +
   geom_histogram() +
   scale_x_continuous(labels=scales::percent) +
@@ -103,18 +115,6 @@ ggplot(predictions, aes(brier_score)) +
   labs(title="Brier Score Distribution") +
 xlab('Brier Score') +
 ylab('Count')
-
-ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
-          aes(x = age, y = prediction, color = pclass)) +
-geom_point() +
-facet_grid(~factor(sex)) +
-scale_y_continuous(labels=scales::percent) +
-theme(legend.margin=margin(0,0,0,0)) +
-scale_color_manual(values=wes_palette('Moonrise3')) +
-labs(title='Probability of Survival - Logistic Regression') +
-xlab('Age') +
-ylab('Survival Probability') +
-guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 
 ```
 
@@ -165,7 +165,7 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = prediction, y = residual, color = pclass)) +
 geom_point() +
-facet_grid(~pclass,scales='free_x',space='free') +
+facet_grid(~pclass,scales='free_x') +
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +

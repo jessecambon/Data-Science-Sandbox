@@ -119,35 +119,6 @@ confusionMatrix(factor(predictions$prediction_binary), factor(predictions$surviv
     ## 
 
 ``` r
-ggplot(predictions, aes(prediction)) +
-  geom_histogram() +
-  scale_x_continuous(labels=scales::percent) +
-  labs(title="Logistic Regression Probability Distribution") +
-xlab('Survival Probability') +
-ylab('Count')
-```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
-
-![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
-
-``` r
-ggplot(predictions, aes(brier_score)) +
-  geom_histogram() +
-  labs(title="Brier Score Distribution") +
-xlab('Brier Score') +
-ylab('Count')
-```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
-
-![](Titanic_files/figure-markdown_github/logistic-regression-2.png)
-
-``` r
 ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = age, y = prediction, color = pclass)) +
 geom_point() +
@@ -163,6 +134,35 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
     ## Warning: Removed 263 rows containing missing values (geom_point).
 
+![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
+
+``` r
+ggplot(predictions, aes(prediction)) +
+  geom_histogram() +
+  scale_x_continuous(labels=scales::percent) +
+  labs(title="Logistic Regression Probability Distribution") +
+xlab('Survival Probability') +
+ylab('Count')
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
+
+![](Titanic_files/figure-markdown_github/logistic-regression-2.png)
+
+``` r
+ggplot(predictions, aes(brier_score)) +
+  geom_histogram() +
+  labs(title="Brier Score Distribution") +
+xlab('Brier Score') +
+ylab('Count')
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
+
 ![](Titanic_files/figure-markdown_github/logistic-regression-3.png)
 
 ``` r
@@ -170,7 +170,7 @@ print(xtable(log_info),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:04:19 2018 -->
+<!-- Mon Aug 13 15:08:59 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -235,7 +235,7 @@ print(xtable(log_terms),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:04:19 2018 -->
+<!-- Mon Aug 13 15:08:59 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -411,7 +411,7 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = prediction, y = residual, color = pclass)) +
 geom_point() +
-facet_grid(~pclass,scales='free_x',space='free') +
+facet_grid(~pclass,scales='free_x') +
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
@@ -432,7 +432,7 @@ print(xtable(lm_info),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:04:20 2018 -->
+<!-- Mon Aug 13 15:09:00 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -515,7 +515,7 @@ print(xtable(lm_terms),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 15:04:20 2018 -->
+<!-- Mon Aug 13 15:09:00 2018 -->
 <table border="1">
 <tr>
 <th>
