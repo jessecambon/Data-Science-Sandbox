@@ -18,10 +18,16 @@ To save any plot use ggsave()
 
 # Data Preparation
 
+<<<<<<< HEAD
 ```{r setup, message=FALSE, results=FALSE,warning=FALSE}
 
 # Load libraries - you will need to install these with install.packages('packagename')
 # if you do not have them installed
+=======
+```{r setup, message=FALSE}
+
+# Load libraries
+>>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
 library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify) # ggplot treemap
@@ -153,7 +159,11 @@ eu_stock <- EuStockMarkets %>%
     ) +
   coord_flip() +
     # expand gets rid of space between labels stem of lollipops
+<<<<<<< HEAD
     scale_y_continuous(expand = c(0, .15)) + 
+=======
+    scale_y_continuous(expand = expand_scale(mult = c(0, .1))) + 
+>>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
     labs(title='Murder Rates of Selected States - 1975',
         caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
     xlab("") +
@@ -342,7 +352,11 @@ ylab('')
 
 ## Treemap
 
+<<<<<<< HEAD
 ```{r treemap, warning=FALSE}
+=======
+```{r}
+>>>>>>> 9f12a379b79c3743de3199fb5c51a98abda9c5ac
 
 # Treemap of titanic
 treemap(titanic, #Your data frame object
