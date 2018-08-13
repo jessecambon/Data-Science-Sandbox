@@ -2,12 +2,17 @@ A categorized list of data science resources.
 
 
 ## General
-* [Data-To-Viz - Comprehensive Data Viz Reference](https://www.data-to-viz.com)
 * [RStudio Cheatsheets](https://www.rstudio.com/resources/cheatsheets/) 
 * [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
-* http://flowingdata.com/ - Data viz ideas
-* https://www.r-bloggers.com/may-2018-top-40-new-packages/ 
+* [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * Thou shalt learn thy Tidyverse  https://www.tidyverse.org/index.html  
+
+## Data Visualization
+* [Data-To-Viz - Comprehensive Data Viz Reference](https://www.data-to-viz.com)
+* [Dataviz Project](http://datavizproject.com/)
+* [Flowing Data](http://flowingdata.com/)
+* https://www.r-graph-gallery.com/ 
+* [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 
 ## Statistics
 * [Cross Validated (StackExchange for Statistics)](https://stats.stackexchange.com/)
@@ -24,12 +29,6 @@ A categorized list of data science resources.
 * Webscraping and Ggplot Geographic Map
 * Interactive Migration Map with IPUMs Data
 * Thematic Maps (tmap)
-
-## Chart Examples
-* [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html) 
-* https://www.r-graph-gallery.com/ 
-* Alluvial (streamgraphs and Sankey diagrams)
-* Infographics in R
 
 ## Interactive Graphs
 * rCharts
