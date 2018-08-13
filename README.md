@@ -12,7 +12,7 @@ A collection of code and resources to serve as a starting point for data science
 </span>
 
 
-The purpose of this repository is to host code and resources that are applicable to a variety of data science projects. An emphasis is placed on having clear, elegant code and an abundance of visuals to communicate results. 
+The purpose of this repository is to host code and resources that are applicable to a variety of data science projects. An emphasis is placed on having clear, elegant code and using data visualizations to intuitively communicate results. 
 
 
 ## Table of Contents 
