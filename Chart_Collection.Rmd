@@ -200,12 +200,17 @@ ylab('Count')
 
 ```{r bar}
 # A simple bar chart - average heights of the species
+# the reorder command orders our bars in order of descending height
 ggplot(data=species_summ,
-          aes(x = species, y=average_height, fill = species)) +
+          aes(x = reorder(species,-average_height), y=average_height, fill = species)) +
 geom_bar(stat='identity',position='dodge') +
 scale_fill_manual(values=wes_palette('Moonrise3')) +
 geom_text(aes(label=round(average_height)), vjust=-0.25) +
-theme(legend.position="none") +
+theme(legend.position="none",
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      panel.grid.major.y = element_blank()) +
 labs(title='Average Height of Selected Star Wars Species (cm)') +
 xlab('Species') +
 ylab('')
@@ -218,7 +223,10 @@ ggplot(data=homeworld_summ,
 facet_grid(~homeworld,scales = 'free',space='free') +
 geom_bar(stat='identity') +
 scale_fill_manual(values=wes_palette('Moonrise2')) +
-theme(legend.position="none",legend.title=element_blank()) +
+theme(legend.position="none",legend.title=element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.y = element_blank()) +
 labs(title='Number of Characters of Each Species from Selected Homeworlds') +
 xlab('') +
 ylab('')
@@ -234,7 +242,10 @@ coord_flip() +
     size = 3,position = position_stack(vjust = 0.5)) +
 scale_fill_manual(values=wes_palette('Royal2')) +
 theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())+
+        axis.ticks.x=element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.major.y = element_blank())+
 labs(title='Titanic Passengers by Survival Status') +
 xlab('') +
 ylab('') +
@@ -300,6 +311,7 @@ scale_color_manual(values=wes_palette('GrandBudapest2')) +
 labs(title='EU Stock Indexes',
      caption='Data provided by Erste Bank AG, Vienna, Austria') +
 theme(legend.title = element_blank(),
+      panel.grid.minor.x = element_blank(),
       legend.text=element_text(size=10),
       legend.position='right') +
 xlab('Year') +
@@ -315,7 +327,8 @@ scale_x_continuous(breaks=c(1:7)) +
 scale_y_continuous(labels=scales::percent) + 
 scale_color_manual(values=cbPalette) +
 labs(title='Percentage of Characters in Each Film by Gender') +
-theme(legend.title = element_blank()) +
+theme(legend.title = element_blank(),
+      panel.grid.minor.x = element_blank()) +
 xlab('Episode') +
 ylab('')
 
@@ -333,7 +346,8 @@ geom_area(aes(group=species_collapsed)) +
 scale_x_continuous(breaks=c(1:7)) +
 scale_fill_manual(values=wes_palette('IsleofDogs1')) +
 labs(title='Number of Characters Appearing from Each Species by Film') +
-theme(legend.title = element_blank()) +
+theme(legend.title = element_blank(),
+      panel.grid.minor.x = element_blank()) +
 xlab('Episode') +
 ylab('')
 
