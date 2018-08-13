@@ -67,17 +67,22 @@ guides(fill = guide_legend(title='Survived',reverse=T)) # reverse legend order
 Logistic Regression Model
 -------------------------
 
+We will use the brier score as one measurement of accuracy for our model: <https://en.wikipedia.org/wiki/Brier_score> The book 'Superforecasting' by Philip Tetlock has a good discussion of brier scores.
+
 ``` r
 log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
 
 predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived) %>%
   mutate(prediction=predict(log_fit,newdata=titanic,type='response')) %>%
-  mutate(prediction_binary=case_when(prediction >0.5 ~ 1, TRUE ~ 0))
+  mutate(prediction_binary=case_when(prediction >0.5 ~ 1, TRUE ~ 0),
+         brier_score=abs(prediction-survived))
 
 #summary(fit)
 
-log_info <- glance(log_fit)
+log_info <- glance(log_fit) %>% 
+  mutate(meanBrierScore=mean(predictions$brier_score,na.rm=T)) %>%
+  dplyr::select(meanBrierScore,everything())
 
 log_terms <- tidy(log_fit)
 
@@ -114,6 +119,20 @@ confusionMatrix(factor(predictions$prediction_binary), factor(predictions$surviv
     ## 
 
 ``` r
+ggplot(predictions, aes(brier_score)) +
+  geom_histogram() +
+  labs(title="Brier Score Distribution") +
+xlab('Brier Score') +
+ylab('Count')
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
+
+![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
+
+``` r
 ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = age, y = prediction, color = pclass)) +
 geom_point() +
@@ -129,17 +148,20 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
     ## Warning: Removed 263 rows containing missing values (geom_point).
 
-![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
+![](Titanic_files/figure-markdown_github/logistic-regression-2.png)
 
 ``` r
 print(xtable(log_info),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 14:07:11 2018 -->
+<!-- Mon Aug 13 14:56:13 2018 -->
 <table border="1">
 <tr>
 <th>
+</th>
+<th>
+meanBrierScore
 </th>
 <th>
 null.deviance
@@ -166,6 +188,9 @@ df.residual
 <tr>
 <td align="right">
 1
+</td>
+<td align="right">
+0.30
 </td>
 <td align="right">
 1414.62
@@ -195,7 +220,7 @@ print(xtable(log_terms),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 14:07:11 2018 -->
+<!-- Mon Aug 13 14:56:13 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -371,13 +396,16 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = prediction, y = residual, color = pclass)) +
 geom_point() +
+facet_grid(~pclass,scales='free_x',space='free') +
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
-#scale_y_continuous(labels=scales::dollar) +
+scale_x_continuous(labels=scales::dollar) +
+scale_y_continuous(labels=scales::dollar) +
 #theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
 labs(title='Residuals vs Predictions') +
 xlab('Prediction') +
-ylab('Residual')
+ylab('Residual') + 
+guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 ```
 
     ## Warning: Removed 264 rows containing missing values (geom_point).
@@ -389,7 +417,7 @@ print(xtable(lm_info),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 14:07:13 2018 -->
+<!-- Mon Aug 13 14:56:14 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -472,7 +500,7 @@ print(xtable(lm_terms),type='html')
 ```
 
 <!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 14:07:13 2018 -->
+<!-- Mon Aug 13 14:56:14 2018 -->
 <table border="1">
 <tr>
 <th>
