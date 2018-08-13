@@ -22,6 +22,7 @@ library(caret) # regression utilities
 library(Hmisc) # capitalize function
 library(broom) # model display capabilities
 library(xtable) # pretty table
+#library(knitr)  
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -137,15 +138,15 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
 
 ``` r
-ggplot(predictions, aes(prediction)) +
-  geom_histogram() +
+ggplot(predictions, aes(prediction))+
+  geom_histogram(binwidth=0.02,aes(fill='1')) + # specify fill so we can use custom color
+  theme(legend.pos='none') +
+  scale_fill_manual(values=wes_palette('Moonrise3'[1])) +
   scale_x_continuous(labels=scales::percent) +
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
 ylab('Count')
 ```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 263 rows containing non-finite values (stat_bin).
 
@@ -153,24 +154,23 @@ ylab('Count')
 
 ``` r
 ggplot(predictions, aes(brier_score)) +
-  geom_histogram() +
+  geom_histogram(binwidth=0.02) +
   labs(title="Brier Score Distribution") +
 xlab('Brier Score') +
 ylab('Count')
 ```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 263 rows containing non-finite values (stat_bin).
 
 ![](Titanic_files/figure-markdown_github/logistic-regression-3.png)
 
 ``` r
-print(xtable(log_info),type='html')
+print(xtable(log_info %>% 
+        dplyr::select(-df.residual,-df.null,-deviance)),type='html')
 ```
 
-<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 16:19:42 2018 -->
+<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 19:11:02 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -182,9 +182,6 @@ meanBrierScore
 null.deviance
 </th>
 <th>
-df.null
-</th>
-<th>
 logLik
 </th>
 <th>
@@ -192,12 +189,6 @@ AIC
 </th>
 <th>
 BIC
-</th>
-<th>
-deviance
-</th>
-<th>
-df.residual
 </th>
 </tr>
 <tr>
@@ -211,9 +202,6 @@ df.residual
 1414.62
 </td>
 <td align="right">
-1045
-</td>
-<td align="right">
 -491.23
 </td>
 <td align="right">
@@ -222,29 +210,23 @@ df.residual
 <td align="right">
 1017.22
 </td>
-<td align="right">
-982.45
-</td>
-<td align="right">
-1041
-</td>
 </tr>
 </table>
 ``` r
-print(xtable(log_terms),type='html')
+print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
 ```
 
-<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 16:19:42 2018 -->
+<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 19:11:02 2018 -->
 <table border="1">
 <tr>
 <th>
 </th>
 <th>
-term
+Variable
 </th>
 <th>
-estimate
+Coefficient
 </th>
 <th>
 std.error
@@ -377,14 +359,13 @@ lm_terms <- tidy(lm_fit)
 
 # Histogram of Residuals
 ggplot(lm_predictions, aes(residual)) +
-  geom_histogram() +
+  geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
+scale_x_continuous(labels=scales::dollar) +
   labs(title="Residual Distribution by Passenger Class") +
 xlab('Residual') +
 ylab('Count') 
 ```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
     ## Warning: Removed 264 rows containing non-finite values (stat_bin).
 
@@ -413,27 +394,51 @@ ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = prediction, y = residual, color = pclass)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
+geom_hline(slope=0,yintercept=0) + # horizontal line at 0 residual
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
-#theme(legend.margin=margin(0,0,0,0)) +
+theme(legend.pos='none') +
 scale_color_manual(values=wes_palette('Moonrise3')) +
-labs(title='Residuals vs Predictions') +
+labs(title='Residuals vs Predictions by Passenger Class') +
 xlab('Prediction') +
 ylab('Residual') + 
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 ```
+
+    ## Warning: Ignoring unknown parameters: slope
 
     ## Warning: Removed 264 rows containing missing values (geom_point).
 
 ![](Titanic_files/figure-markdown_github/linear-regression-3.png)
 
 ``` r
-print(xtable(lm_info),type='html')
+ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+          aes(x = age, y = residual, color = sex)) +
+geom_point() +
+facet_grid(~pclass) +
+  geom_hline(slope=0,yintercept=0) + # horizontal line at 0 residual
+scale_y_continuous(labels=scales::dollar) +
+theme(legend.margin=margin(0,0,0,0)) +
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Residuals By Passenger Class') +
+xlab('Age') +
+ylab('Residual') +
+guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
 ```
 
-<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 16:19:44 2018 -->
+    ## Warning: Ignoring unknown parameters: slope
+
+    ## Warning: Removed 264 rows containing missing values (geom_point).
+
+![](Titanic_files/figure-markdown_github/linear-regression-4.png)
+
+``` r
+print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='html')
+```
+
+<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 19:11:05 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -457,19 +462,10 @@ p.value
 df
 </th>
 <th>
-logLik
-</th>
-<th>
 AIC
 </th>
 <th>
 BIC
-</th>
-<th>
-deviance
-</th>
-<th>
-df.residual
 </th>
 </tr>
 <tr>
@@ -495,37 +491,28 @@ df.residual
 6
 </td>
 <td align="right">
--5424.37
-</td>
-<td align="right">
 10862.73
 </td>
 <td align="right">
 10897.39
 </td>
-<td align="right">
-1973769.11
-</td>
-<td align="right">
-1039
-</td>
 </tr>
 </table>
 ``` r
-print(xtable(lm_terms),type='html')
+print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
 ```
 
-<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 16:19:44 2018 -->
+<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 19:11:05 2018 -->
 <table border="1">
 <tr>
 <th>
 </th>
 <th>
-term
+Variable
 </th>
 <th>
-estimate
+Coefficient
 </th>
 <th>
 std.error

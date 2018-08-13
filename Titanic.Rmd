@@ -23,6 +23,7 @@ library(caret) # regression utilities
 library(Hmisc) # capitalize function
 library(broom) # model display capabilities
 library(xtable) # pretty table
+#library(knitr)  
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -69,7 +70,6 @@ The book 'Superforecasting' by Philip Tetlock has a good discussion of brier sco
 
 
 ```{r logistic-regression}
-
 log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
 
 predictions <- titanic %>%
@@ -103,29 +103,28 @@ xlab('Age') +
 ylab('Survival Probability') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 
-ggplot(predictions, aes(prediction)) +
-  geom_histogram() +
+ggplot(predictions, aes(prediction))+
+  geom_histogram(binwidth=0.02,aes(fill='1')) + # specify fill so we can use custom color
+  theme(legend.pos='none') +
+  scale_fill_manual(values=wes_palette('Moonrise3'[1])) +
   scale_x_continuous(labels=scales::percent) +
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
 ylab('Count')
 
 ggplot(predictions, aes(brier_score)) +
-  geom_histogram() +
+  geom_histogram(binwidth=0.02) +
   labs(title="Brier Score Distribution") +
 xlab('Brier Score') +
 ylab('Count')
-
 ```
 
 ```{r,results='asis'}
-print(xtable(log_info),type='html')
-print(xtable(log_terms),type='html')
+print(xtable(log_info %>% 
+        dplyr::select(-df.residual,-df.null,-deviance)),type='html')
+print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
 
 ```
-
-
-
 
 ## Linear Regression Model
 
@@ -147,8 +146,9 @@ lm_terms <- tidy(lm_fit)
 
 # Histogram of Residuals
 ggplot(lm_predictions, aes(residual)) +
-  geom_histogram() +
+  geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
+scale_x_continuous(labels=scales::dollar) +
   labs(title="Residual Distribution by Passenger Class") +
 xlab('Residual') +
 ylab('Count') 
@@ -169,20 +169,35 @@ ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = prediction, y = residual, color = pclass)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
+geom_hline(slope=0,yintercept=0) + # horizontal line at 0 residual
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
-#theme(legend.margin=margin(0,0,0,0)) +
+theme(legend.pos='none') +
 scale_color_manual(values=wes_palette('Moonrise3')) +
-labs(title='Residuals vs Predictions') +
+labs(title='Residuals vs Predictions by Passenger Class') +
 xlab('Prediction') +
 ylab('Residual') + 
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
+
+ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+          aes(x = age, y = residual, color = sex)) +
+geom_point() +
+facet_grid(~pclass) +
+  geom_hline(slope=0,yintercept=0) + # horizontal line at 0 residual
+scale_y_continuous(labels=scales::dollar) +
+theme(legend.margin=margin(0,0,0,0)) +
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Residuals By Passenger Class') +
+xlab('Age') +
+ylab('Residual') +
+guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
 ```
 
 ```{r,results='asis'}
-print(xtable(lm_info),type='html')
-print(xtable(lm_terms),type='html')
+print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='html')
+
+print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
 ```
 
 
