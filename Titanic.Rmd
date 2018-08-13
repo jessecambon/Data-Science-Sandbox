@@ -21,6 +21,8 @@ library(wesanderson) # color palettes
 library(formattable) # percent format
 library(caret) # regression utilities
 library(Hmisc) # capitalize function
+library(broom) # model display capabilities
+library(xtable) # pretty table
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -63,16 +65,21 @@ guides(fill = guide_legend(title='Survived',reverse=T)) # reverse legend order
 
 ```{r logistic-regression}
 
-fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
+log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
 
 predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived) %>%
-  mutate(prediction=predict(fit,newdata=titanic,type='response')) %>%
+  mutate(prediction=predict(log_fit,newdata=titanic,type='response')) %>%
   mutate(prediction_binary=case_when(prediction >0.5 ~ 1, TRUE ~ 0))
 
-summary(fit)
+#summary(fit)
 
-# Confusion Matrix analysis with assumed cutoff
+log_info <- glance(log_fit)
+
+log_terms <- tidy(log_fit)
+
+
+# An analysis of our model's classification accuracy
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
 
 ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
@@ -89,6 +96,13 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
 ```
 
+```{r,results='asis'}
+print(xtable(log_info),type='html')
+print(xtable(log_terms),type='html')
+
+```
+
+
 ## Linear Regression Model
 
 A linear model of how much a passenger's fare cost
@@ -99,16 +113,26 @@ lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
 
 lm_predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived,fare) %>%
-  mutate(prediction=predict(lm_fit,newdata=titanic,type='response'))
+  mutate(prediction=predict(lm_fit,newdata=titanic,type='response')) %>%
+  mutate(residual=fare-prediction)
 
-summary(lm_fit)
+lm_info <- glance(lm_fit)
+lm_terms <- tidy(lm_fit)
 
+#summary(lm_fit)
+
+# Histogram of Residuals
+ggplot(lm_predictions, aes(residual)) +
+  geom_histogram() +
+  labs(title="Residual Distribution") +
+xlab('Residual') +
+ylab('Count')
 
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
-          aes(x = age, y = prediction, color = pclass)) +
+          aes(x = age, y = prediction, color = pclass,group=1)) +
 geom_point() +
 facet_grid(~factor(sex)) +
-scale_y_continuous(labels=scales::comma) +
+scale_y_continuous(labels=scales::dollar) +
 #theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
 labs(title='Cost of Fare - Linear Regression') +
@@ -116,4 +140,21 @@ xlab('Age') +
 ylab('Fare Cost') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 
+ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+          aes(x = prediction, y = residual, color = pclass)) +
+geom_point() +
+#geom_smooth(method="lm",show.legend=F,size=0.5) +
+#scale_y_continuous(labels=scales::dollar) +
+#theme(legend.margin=margin(0,0,0,0)) +
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Residuals vs Predictions') +
+xlab('Prediction') +
+ylab('Residual')
 ```
+
+```{r,results='asis'}
+print(xtable(lm_info),type='html')
+print(xtable(lm_terms),type='html')
+```
+
+

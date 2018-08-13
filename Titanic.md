@@ -1,7 +1,7 @@
 Titanic Data Analysis
 ================
 Jesse Cambon
-12 August, 2018
+13 August, 2018
 
 -   [Exploratory Graphs](#exploratory-graphs)
 -   [Logistic Regression Model](#logistic-regression-model)
@@ -20,6 +20,8 @@ library(wesanderson) # color palettes
 library(formattable) # percent format
 library(caret) # regression utilities
 library(Hmisc) # capitalize function
+library(broom) # model display capabilities
+library(xtable) # pretty table
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -66,46 +68,21 @@ Logistic Regression Model
 -------------------------
 
 ``` r
-fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
+log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
 
 predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived) %>%
-  mutate(prediction=predict(fit,newdata=titanic,type='response')) %>%
+  mutate(prediction=predict(log_fit,newdata=titanic,type='response')) %>%
   mutate(prediction_binary=case_when(prediction >0.5 ~ 1, TRUE ~ 0))
 
-summary(fit)
-```
+#summary(fit)
 
-    ## 
-    ## Call:
-    ## glm(formula = survived ~ sex + pclass + age, family = binomial(link = "logit"), 
-    ##     data = titanic)
-    ## 
-    ## Deviance Residuals: 
-    ##     Min       1Q   Median       3Q      Max  
-    ## -2.6399  -0.6979  -0.4336   0.6688   2.3964  
-    ## 
-    ## Coefficients:
-    ##              Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept)  3.522074   0.326702  10.781  < 2e-16 ***
-    ## sexmale     -2.497845   0.166037 -15.044  < 2e-16 ***
-    ## pclass2nd   -1.280570   0.225538  -5.678 1.36e-08 ***
-    ## pclass3rd   -2.289661   0.225802 -10.140  < 2e-16 ***
-    ## age         -0.034393   0.006331  -5.433 5.56e-08 ***
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## (Dispersion parameter for binomial family taken to be 1)
-    ## 
-    ##     Null deviance: 1414.62  on 1045  degrees of freedom
-    ## Residual deviance:  982.45  on 1041  degrees of freedom
-    ##   (263 observations deleted due to missingness)
-    ## AIC: 992.45
-    ## 
-    ## Number of Fisher Scoring iterations: 4
+log_info <- glance(log_fit)
 
-``` r
-# Confusion Matrix analysis with assumed cutoff
+log_terms <- tidy(log_fit)
+
+
+# An analysis of our model's classification accuracy
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
 ```
 
@@ -154,6 +131,192 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
 ![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
 
+``` r
+print(xtable(log_info),type='html')
+```
+
+<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 14:07:11 2018 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+null.deviance
+</th>
+<th>
+df.null
+</th>
+<th>
+logLik
+</th>
+<th>
+AIC
+</th>
+<th>
+BIC
+</th>
+<th>
+deviance
+</th>
+<th>
+df.residual
+</th>
+</tr>
+<tr>
+<td align="right">
+1
+</td>
+<td align="right">
+1414.62
+</td>
+<td align="right">
+1045
+</td>
+<td align="right">
+-491.23
+</td>
+<td align="right">
+992.45
+</td>
+<td align="right">
+1017.22
+</td>
+<td align="right">
+982.45
+</td>
+<td align="right">
+1041
+</td>
+</tr>
+</table>
+``` r
+print(xtable(log_terms),type='html')
+```
+
+<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 14:07:11 2018 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+term
+</th>
+<th>
+estimate
+</th>
+<th>
+std.error
+</th>
+<th>
+statistic
+</th>
+<th>
+p.value
+</th>
+</tr>
+<tr>
+<td align="right">
+1
+</td>
+<td>
+(Intercept)
+</td>
+<td align="right">
+3.52
+</td>
+<td align="right">
+0.33
+</td>
+<td align="right">
+10.78
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+2
+</td>
+<td>
+sexmale
+</td>
+<td align="right">
+-2.50
+</td>
+<td align="right">
+0.17
+</td>
+<td align="right">
+-15.04
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+3
+</td>
+<td>
+pclass2nd
+</td>
+<td align="right">
+-1.28
+</td>
+<td align="right">
+0.23
+</td>
+<td align="right">
+-5.68
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+4
+</td>
+<td>
+pclass3rd
+</td>
+<td align="right">
+-2.29
+</td>
+<td align="right">
+0.23
+</td>
+<td align="right">
+-10.14
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+5
+</td>
+<td>
+age
+</td>
+<td align="right">
+-0.03
+</td>
+<td align="right">
+0.01
+</td>
+<td align="right">
+-5.43
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+</table>
 Linear Regression Model
 -----------------------
 
@@ -164,41 +327,34 @@ lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
 
 lm_predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived,fare) %>%
-  mutate(prediction=predict(lm_fit,newdata=titanic,type='response'))
+  mutate(prediction=predict(lm_fit,newdata=titanic,type='response')) %>%
+  mutate(residual=fare-prediction)
 
-summary(lm_fit)
+lm_info <- glance(lm_fit)
+lm_terms <- tidy(lm_fit)
+
+#summary(lm_fit)
+
+# Histogram of Residuals
+ggplot(lm_predictions, aes(residual)) +
+  geom_histogram() +
+  labs(title="Residual Distribution") +
+xlab('Residual') +
+ylab('Count')
 ```
 
-    ## 
-    ## Call:
-    ## lm(formula = fare ~ sex + pclass + age + survived, data = titanic)
-    ## 
-    ## Residuals:
-    ##    Min     1Q Median     3Q    Max 
-    ## -86.81 -12.71  -2.53   4.05 424.40 
-    ## 
-    ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 108.5874     6.2054  17.499  < 2e-16 ***
-    ## sexmale     -11.4555     3.3133  -3.457 0.000567 ***
-    ## pclass2nd   -72.0386     3.9511 -18.232  < 2e-16 ***
-    ## pclass3rd   -81.1666     3.8453 -21.108  < 2e-16 ***
-    ## age          -0.2715     0.1057  -2.569 0.010347 *  
-    ## survived      0.5729     3.4520   0.166 0.868231    
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 43.59 on 1039 degrees of freedom
-    ##   (264 observations deleted due to missingness)
-    ## Multiple R-squared:  0.3913, Adjusted R-squared:  0.3884 
-    ## F-statistic: 133.6 on 5 and 1039 DF,  p-value: < 2.2e-16
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 264 rows containing non-finite values (stat_bin).
+
+![](Titanic_files/figure-markdown_github/linear-regression-1.png)
 
 ``` r
 ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
-          aes(x = age, y = prediction, color = pclass)) +
+          aes(x = age, y = prediction, color = pclass,group=1)) +
 geom_point() +
 facet_grid(~factor(sex)) +
-scale_y_continuous(labels=scales::comma) +
+scale_y_continuous(labels=scales::dollar) +
 #theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
 labs(title='Cost of Fare - Linear Regression') +
@@ -209,4 +365,252 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
     ## Warning: Removed 263 rows containing missing values (geom_point).
 
-![](Titanic_files/figure-markdown_github/linear-regression-1.png)
+![](Titanic_files/figure-markdown_github/linear-regression-2.png)
+
+``` r
+ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+          aes(x = prediction, y = residual, color = pclass)) +
+geom_point() +
+#geom_smooth(method="lm",show.legend=F,size=0.5) +
+#scale_y_continuous(labels=scales::dollar) +
+#theme(legend.margin=margin(0,0,0,0)) +
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Residuals vs Predictions') +
+xlab('Prediction') +
+ylab('Residual')
+```
+
+    ## Warning: Removed 264 rows containing missing values (geom_point).
+
+![](Titanic_files/figure-markdown_github/linear-regression-3.png)
+
+``` r
+print(xtable(lm_info),type='html')
+```
+
+<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 14:07:13 2018 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+r.squared
+</th>
+<th>
+adj.r.squared
+</th>
+<th>
+sigma
+</th>
+<th>
+statistic
+</th>
+<th>
+p.value
+</th>
+<th>
+df
+</th>
+<th>
+logLik
+</th>
+<th>
+AIC
+</th>
+<th>
+BIC
+</th>
+<th>
+deviance
+</th>
+<th>
+df.residual
+</th>
+</tr>
+<tr>
+<td align="right">
+1
+</td>
+<td align="right">
+0.39
+</td>
+<td align="right">
+0.39
+</td>
+<td align="right">
+43.59
+</td>
+<td align="right">
+133.60
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+6
+</td>
+<td align="right">
+-5424.37
+</td>
+<td align="right">
+10862.73
+</td>
+<td align="right">
+10897.39
+</td>
+<td align="right">
+1973769.11
+</td>
+<td align="right">
+1039
+</td>
+</tr>
+</table>
+``` r
+print(xtable(lm_terms),type='html')
+```
+
+<!-- html table generated in R 3.5.0 by xtable 1.8-2 package -->
+<!-- Mon Aug 13 14:07:13 2018 -->
+<table border="1">
+<tr>
+<th>
+</th>
+<th>
+term
+</th>
+<th>
+estimate
+</th>
+<th>
+std.error
+</th>
+<th>
+statistic
+</th>
+<th>
+p.value
+</th>
+</tr>
+<tr>
+<td align="right">
+1
+</td>
+<td>
+(Intercept)
+</td>
+<td align="right">
+108.59
+</td>
+<td align="right">
+6.21
+</td>
+<td align="right">
+17.50
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+2
+</td>
+<td>
+sexmale
+</td>
+<td align="right">
+-11.46
+</td>
+<td align="right">
+3.31
+</td>
+<td align="right">
+-3.46
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+3
+</td>
+<td>
+pclass2nd
+</td>
+<td align="right">
+-72.04
+</td>
+<td align="right">
+3.95
+</td>
+<td align="right">
+-18.23
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+4
+</td>
+<td>
+pclass3rd
+</td>
+<td align="right">
+-81.17
+</td>
+<td align="right">
+3.85
+</td>
+<td align="right">
+-21.11
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+5
+</td>
+<td>
+age
+</td>
+<td align="right">
+-0.27
+</td>
+<td align="right">
+0.11
+</td>
+<td align="right">
+-2.57
+</td>
+<td align="right">
+0.01
+</td>
+</tr>
+<tr>
+<td align="right">
+6
+</td>
+<td>
+survived
+</td>
+<td align="right">
+0.57
+</td>
+<td align="right">
+3.45
+</td>
+<td align="right">
+0.17
+</td>
+<td align="right">
+0.87
+</td>
+</tr>
+</table>
