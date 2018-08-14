@@ -17,7 +17,7 @@ c("B23025\_005E", \# labor force size 'B01003\_001E', \# population 'B25056\_001
 library(tidyverse)
 library(tidycensus) # census data
 library(ggplot2)
-library(sf)
+library(sf) # geospatial methods
 library(tmap) # thematic mapping
 library(viridis) # color scheme
 
@@ -37,18 +37,21 @@ options(tigris_use_cache = TRUE)
 # qtm(us, fill = "estimate")
 
 
-# Rent in Seattle
-sea <- get_acs(geography = "tract", 
+# Rent in Boston
+bos <- get_acs(geography = "tract", 
               variables = "B25064_001E",  # median gross rent
-              state = "WA", 
-              county = "King", 
+              state = "MA", 
+              county = c("Suffolk",'Middlesex'), 
               geometry = TRUE)
 ```
 
     ## Please note: `get_acs()` now defaults to a year or endyear of 2016.
 
 ``` r
-qtm(sea, fill = "estimate")
+qtm(bos, fill = "estimate",fill.title='Median Rent',
+    title='Boston Area Rent by Census Tract',
+    scale=0.75) +
+  tm_layout(inner.margins=c(0,0,.1,0),main.title.position='center',legend.position=c('left','bottom'))
 ```
 
 ![](Geospatial_Analysis_files/figure-markdown_github/locale-1.png)
