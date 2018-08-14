@@ -9,15 +9,15 @@ A categorized list of data science resources.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
 ## Data Visualization
-* [ggplot](https://ggplot2.tidyverse.org/index.html)
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
-* [Dataviz Project](http://datavizproject.com/)
+* [Dataviz Project](http://datavizproject.com/) - Categorized data visualizations.
 * [Flowing Data](http://flowingdata.com/) - Good newsletter and site on data viz techniques.
-* [R plots with Code](https://www.r-graph-gallery.com/)
+* [R-Graph-Gallery](https://www.r-graph-gallery.com/) - R plots with code.
 * [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 * [GGalluvial](https://github.com/corybrunson/ggalluvial) - Flow diagrams
 
 ## Visualization Libraries
+* [ggplot](https://ggplot2.tidyverse.org/index.html)
 * [Plotly](https://plot.ly/r/) - Good tool for interactive graphs.
 * [Dygraphs](https://rstudio.github.io/dygraphs/)
 * [rbokeh](http://hafen.github.io/rbokeh/)
@@ -45,7 +45,6 @@ A categorized list of data science resources.
 * https://github.com/juliasilge/tidytext 
 
 ## RMarkdown
-
 * R Markdown
 * Tables in R Markdown
 * https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet 
