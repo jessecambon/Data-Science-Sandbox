@@ -9,12 +9,21 @@ A categorized list of data science resources.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
 ## Data Visualization
+* [ggplot](https://ggplot2.tidyverse.org/index.html)
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
 * [Dataviz Project](http://datavizproject.com/)
 * [Flowing Data](http://flowingdata.com/) - Good newsletter and site on data viz techniques.
 * [R plots with Code](https://www.r-graph-gallery.com/)
 * [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 * [GGalluvial](https://github.com/corybrunson/ggalluvial) - Flow diagrams
+
+## Visualization Libraries
+* [Plotly](https://plot.ly/r/) - Good tool for interactive graphs.
+* [Dygraphs](https://rstudio.github.io/dygraphs/)
+* [rbokeh](http://hafen.github.io/rbokeh/)
+* [C3](https://github.com/mrjoh3/c3)
+* [rCharts](https://github.com/ramnathv/rCharts)
+* [tmap](https://github.com/mtennekes/tmap) - Geospatial mapping.
 
 ## Statistics
 * [Cross Validated (StackExchange for Statistics)](https://stats.stackexchange.com/)
@@ -31,17 +40,12 @@ A categorized list of data science resources.
 * Mapping with Tidycensus: https://www.mytinyshinys.com/2017/06/30/tidycensus/ 
 * Webscraping and Ggplot Geographic Map
 * Interactive Migration Map with IPUMs Data
-* Thematic Maps (tmap)
-
-## Interactive Graphs
-* rCharts
-* Dygraphs 
-* Plotly 
-* rbokeh
-* C3
 
 ## Text Mining
 * https://github.com/juliasilge/tidytext 
+
+## RMarkdown
+
 * R Markdown
 * Tables in R Markdown
 * https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet 
@@ -49,7 +53,7 @@ A categorized list of data science resources.
 ## Color Palettes
 * http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/ Includes a nice color blind friendly palette 
 * PDF of the named colors in R
-*https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery 
+* https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery 
 
 ## Census Data
 * https://usa.ipums.org/usa/index.shtml 
