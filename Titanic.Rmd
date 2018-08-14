@@ -127,13 +127,17 @@ guides(fill = guide_legend(title='Survived'))
 ```{r,results='asis'}
 print(xtable(log_info %>% 
         dplyr::select(-df.residual,-df.null,-deviance)),type='html')
-print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
-
 ```
+
+```{r,results='asis'}
+print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
+```
+
 
 ## Linear Regression Model
 
-A linear model of how much a passenger's fare cost
+A linear model of passenger fare cost.
+
 
 ```{r linear-regression}
 
@@ -201,7 +205,9 @@ guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.
 
 ```{r,results='asis'}
 print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='html')
+```
 
+```{r,results='asis'}
 print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
 ```
 

@@ -175,7 +175,7 @@ print(xtable(log_info %>%
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:44:16 2018 -->
+<!-- Mon Aug 13 21:53:13 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -222,7 +222,7 @@ print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='htm
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:44:17 2018 -->
+<!-- Mon Aug 13 21:53:14 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -347,7 +347,7 @@ age
 Linear Regression Model
 -----------------------
 
-A linear model of how much a passenger's fare cost
+A linear model of passenger fare cost.
 
 ``` r
 lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
@@ -441,7 +441,7 @@ print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='ht
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:44:20 2018 -->
+<!-- Mon Aug 13 21:53:17 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -506,7 +506,7 @@ print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:44:20 2018 -->
+<!-- Mon Aug 13 21:53:17 2018 -->
 <table border="1">
 <tr>
 <th>
