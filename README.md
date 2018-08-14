@@ -19,3 +19,8 @@ The purpose of this repository is to host code and resources that are applicable
 * [Chart Collection](Chart_Collection.md) - A variety of charts such as scatterplots and treemaps. 
 * [Titanic Analysis](Titanic.md) - An analysis of the classic Titanic dataset with linear and logistic regression.
 * [Resources](Resources.md) - Websites and references that I find helpful.
+
+
+## Todo List
+* Visualization of model coefficients and [their confidence intervals](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/confint.html).
+* Geospatial maps - local, specified countries, and world. 
