@@ -104,19 +104,24 @@ ylab('Survival Probability') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 
 ggplot(predictions, aes(prediction))+
-  geom_histogram(binwidth=0.02,aes(fill='1')) + # specify fill so we can use custom color
-  theme(legend.pos='none') +
-  scale_fill_manual(values=wes_palette('Moonrise3'[1])) +
+  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('No','Yes'))),
+    col='black') + 
+  theme(legend.pos='top') +
+  scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent) +
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
-ylab('Count')
+ylab('Count') +
+guides(fill = guide_legend(title='Survived')) 
 
 ggplot(predictions, aes(brier_score)) +
-  geom_histogram(binwidth=0.02) +
+  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('No','Yes'))),
+                 col='black') +
   labs(title="Brier Score Distribution") +
+    scale_fill_manual(values=wes_palette('Moonrise3')) +
 xlab('Brier Score') +
-ylab('Count')
+ylab('Count') +
+guides(fill = guide_legend(title='Survived')) 
 ```
 
 ```{r,results='asis'}

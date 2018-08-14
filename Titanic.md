@@ -139,13 +139,15 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
 ``` r
 ggplot(predictions, aes(prediction))+
-  geom_histogram(binwidth=0.02,aes(fill='1')) + # specify fill so we can use custom color
-  theme(legend.pos='none') +
-  scale_fill_manual(values=wes_palette('Moonrise3'[1])) +
+  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('No','Yes'))),
+    col='black') + 
+  theme(legend.pos='top') +
+  scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent) +
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
-ylab('Count')
+ylab('Count') +
+guides(fill = guide_legend(title='Survived')) 
 ```
 
     ## Warning: Removed 263 rows containing non-finite values (stat_bin).
@@ -154,10 +156,13 @@ ylab('Count')
 
 ``` r
 ggplot(predictions, aes(brier_score)) +
-  geom_histogram(binwidth=0.02) +
+  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('No','Yes'))),
+                 col='black') +
   labs(title="Brier Score Distribution") +
+    scale_fill_manual(values=wes_palette('Moonrise3')) +
 xlab('Brier Score') +
-ylab('Count')
+ylab('Count') +
+guides(fill = guide_legend(title='Survived')) 
 ```
 
     ## Warning: Removed 263 rows containing non-finite values (stat_bin).
@@ -170,7 +175,7 @@ print(xtable(log_info %>%
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:20:33 2018 -->
+<!-- Mon Aug 13 21:44:16 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -217,7 +222,7 @@ print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='htm
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:20:34 2018 -->
+<!-- Mon Aug 13 21:44:17 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -436,7 +441,7 @@ print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='ht
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:20:36 2018 -->
+<!-- Mon Aug 13 21:44:20 2018 -->
 <table border="1">
 <tr>
 <th>
@@ -501,7 +506,7 @@ print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html
 ```
 
 <!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 19:20:36 2018 -->
+<!-- Mon Aug 13 21:44:20 2018 -->
 <table border="1">
 <tr>
 <th>
