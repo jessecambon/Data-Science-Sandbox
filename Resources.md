@@ -14,16 +14,16 @@ A categorized list of data science resources.
 * [Flowing Data](http://flowingdata.com/) - Good newsletter and site on data viz techniques.
 * [R-Graph-Gallery](https://www.r-graph-gallery.com/) - R plots with code.
 * [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
-* [GGalluvial](https://github.com/corybrunson/ggalluvial) - Flow diagrams
 
 ## Visualization Libraries
 * [ggplot](https://ggplot2.tidyverse.org/index.html)
-* [Plotly](https://plot.ly/r/) - Good tool for interactive graphs.
-* [Dygraphs](https://rstudio.github.io/dygraphs/)
+* [plotly](https://plot.ly/r/) - Good tool for interactive graphs.
+* [dygraphs](https://rstudio.github.io/dygraphs/)
 * [rbokeh](http://hafen.github.io/rbokeh/)
 * [C3](https://github.com/mrjoh3/c3)
 * [rCharts](https://github.com/ramnathv/rCharts)
 * [tmap](https://github.com/mtennekes/tmap) - Geospatial mapping.
+* [ggalluvial](https://github.com/corybrunson/ggalluvial) - Flow diagrams
 
 ## Statistics
 * [Cross Validated (StackExchange for Statistics)](https://stats.stackexchange.com/)
