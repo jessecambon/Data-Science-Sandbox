@@ -16,6 +16,6 @@ The purpose of this repository is to host code and resources that are applicable
 
 
 ## Table of Contents 
-* [Chart Collection](Chart_Collection.md) - Reference code for creating a variety of common charts mainly using ggplot.
-* [Titanic Analysis](Titanic.md) - An analysis of the classic Titanic dataset that includes linear and logistic regression.
+* [Chart Collection](Chart_Collection.md) - A variety of charts such as scatterplots and treemaps. 
+* [Titanic Analysis](Titanic.md) - An analysis of the classic Titanic dataset with linear and logistic regression.
 * [Resources](Resources.md) - Websites and references that I find helpful.
