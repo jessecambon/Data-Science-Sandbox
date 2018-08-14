@@ -3,6 +3,7 @@ A categorized list of data science resources.
 
 ## General
 * [RStudio Cheatsheets](https://www.rstudio.com/resources/cheatsheets/) 
+* [R-Cookbook](http://www.cookbook-r.com) - Categorized useful R code. 
 * [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
