@@ -21,6 +21,6 @@ The purpose of this repository is to host code and resources that are applicable
 * [Resources](Resources.md) - Websites and references that I find helpful.
 
 
-## Todo List
+### Todo List
 * Visualization of model coefficients and [their confidence intervals](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/confint.html).
 * Geospatial maps - local, specified countries, and world. 
