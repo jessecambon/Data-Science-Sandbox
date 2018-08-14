@@ -44,10 +44,12 @@ A categorized list of data science resources.
 ## Text Mining
 * https://github.com/juliasilge/tidytext 
 
-## RMarkdown
+## Report Writing
+* https://github.com/nutterb/pixiedust 
 * R Markdown
 * Tables in R Markdown
 * https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet 
+
 
 ## Color Palettes
 * http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/ Includes a nice color blind friendly palette 
