@@ -26,7 +26,7 @@ A categorized list of data science resources.
 * [ggalluvial](https://github.com/corybrunson/ggalluvial) - Flow diagrams
 
 ## Statistics
-* [Cross Validated (StackExchange for Statistics)](https://stats.stackexchange.com/)
+* [Cross Validated](https://stats.stackexchange.com/) - StackExchange for Statistics
 * [Intro to Statistical Learning Textbook](http://www-bcf.usc.edu/~gareth/ISL/) - Freely available statistics textbook that is tailored to application with lots of code examples in R. This a reworked version of the classic 'Elements of Statistical Learning' text which is heavier on statistical theory.
 * [Elements of Statistical Learning](https://web.stanford.edu/~hastie/ElemStatLearn/) - Freely available classic Statistics textbook.
 * [Biostat Handbook](http://www.biostathandbook.com/) - A great concise and and accessible reference for statistical methods which have relevance in a wide variety of fields (not just Biostatistics).
