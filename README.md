@@ -17,6 +17,5 @@ The purpose of this repository is to host code and resources that are applicable
 
 ## Table of Contents 
 * [Chart Collection](Chart_Collection.md) - Reference code for creating a variety of common charts mainly using ggplot.
-* [Geospatial Analysis](Geospatial_Analysis.md)
 * [Titanic Analysis](Titanic.md) - An analysis of the classic Titanic dataset that includes linear and logistic regression.
 * [Resources](Resources.md) - Websites and references that I find helpful.
