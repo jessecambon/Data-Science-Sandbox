@@ -1,15 +1,15 @@
-Titanic Data Analysis
+Modeling the Titanic
 ================
 Jesse Cambon
-13 August, 2018
+14 August, 2018
 
 -   [Exploratory Graphs](#exploratory-graphs)
 -   [Logistic Regression Model](#logistic-regression-model)
 -   [Linear Regression Model](#linear-regression-model)
 
-A modeling analysis of the titanic dataset.
+A modeling analysis of the titanic dataset using linear and logistic regression.
 
-To add: imputation
+To add: imputation, log-binomial model (risk ratio)
 
 References: <https://stats.idre.ucla.edu/r/dae/logit-regression/>
 
@@ -22,7 +22,9 @@ library(caret) # regression utilities
 library(Hmisc) # capitalize function
 library(broom) # model display capabilities
 library(xtable) # pretty table
-#library(knitr)  
+library(knitr)  
+library(kableExtra)
+library(MASS) # confint for glm
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -81,12 +83,23 @@ predictions <- titanic %>%
 
 #summary(fit)
 
+log_confint <- confint(log_fit) %>% tidy()
+```
+
+    ## Waiting for profiling to be done...
+
+``` r
+colnames(log_confint) <- c('Term','LCLM','UCLM')
+
 log_info <- glance(log_fit) %>% 
   mutate(meanBrierScore=mean(predictions$brier_score,na.rm=T)) %>%
   dplyr::select(meanBrierScore,everything())
 
-log_terms <- tidy(log_fit)
-
+log_terms <- tidy(log_fit) %>% rename(Coefficient=estimate,Term=term) %>%
+   # Order by largest coefficient but put intercept term on bottom
+  arrange(Term=='(Intercept)',desc(Coefficient)) %>%
+  left_join(log_confint,by='Term') %>%
+  dplyr::select(Term,Coefficient,LCLM,UCLM,everything())
 
 # An analysis of our model's classification accuracy
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
@@ -170,180 +183,28 @@ guides(fill = guide_legend(title='Survived'))
 ![](Titanic_files/figure-markdown_github/logistic-regression-3.png)
 
 ``` r
-print(xtable(log_info %>% 
-        dplyr::select(-df.residual,-df.null,-deviance)),type='html')
+kable(log_info %>% 
+        dplyr::select(-df.residual,-df.null,-deviance),format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:53:13 2018 -->
-<table border="1">
-<tr>
-<th>
-</th>
-<th>
-meanBrierScore
-</th>
-<th>
-null.deviance
-</th>
-<th>
-logLik
-</th>
-<th>
-AIC
-</th>
-<th>
-BIC
-</th>
-</tr>
-<tr>
-<td align="right">
-1
-</td>
-<td align="right">
-0.30
-</td>
-<td align="right">
-1414.62
-</td>
-<td align="right">
--491.23
-</td>
-<td align="right">
-992.45
-</td>
-<td align="right">
-1017.22
-</td>
-</tr>
-</table>
+|  meanBrierScore|  null.deviance|     logLik|       AIC|       BIC|
+|---------------:|--------------:|----------:|---------:|---------:|
+|       0.3013701|        1414.62|  -491.2266|  992.4531|  1017.217|
+
 ``` r
-print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
+kable(log_terms,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:53:14 2018 -->
-<table border="1">
-<tr>
-<th>
-</th>
-<th>
-Variable
-</th>
-<th>
-Coefficient
-</th>
-<th>
-std.error
-</th>
-<th>
-statistic
-</th>
-<th>
-p.value
-</th>
-</tr>
-<tr>
-<td align="right">
-1
-</td>
-<td>
-(Intercept)
-</td>
-<td align="right">
-3.52
-</td>
-<td align="right">
-0.33
-</td>
-<td align="right">
-10.78
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-2
-</td>
-<td>
-sexmale
-</td>
-<td align="right">
--2.50
-</td>
-<td align="right">
-0.17
-</td>
-<td align="right">
--15.04
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-3
-</td>
-<td>
-pclass2nd
-</td>
-<td align="right">
--1.28
-</td>
-<td align="right">
-0.23
-</td>
-<td align="right">
--5.68
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-4
-</td>
-<td>
-pclass3rd
-</td>
-<td align="right">
--2.29
-</td>
-<td align="right">
-0.23
-</td>
-<td align="right">
--10.14
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-5
-</td>
-<td>
-age
-</td>
-<td align="right">
--0.03
-</td>
-<td align="right">
-0.01
-</td>
-<td align="right">
--5.43
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-</table>
+| Term        |  Coefficient|        LCLM|        UCLM|  std.error|   statistic|  p.value|
+|:------------|------------:|-----------:|-----------:|----------:|-----------:|--------:|
+| age         |   -0.0343932|  -0.0469813|  -0.0221378|  0.0063310|   -5.432511|    1e-07|
+| pclass2nd   |   -1.2805697|  -1.7280290|  -0.8430583|  0.2255382|   -5.677840|    0e+00|
+| pclass3rd   |   -2.2896606|  -2.7406095|  -1.8545158|  0.2258019|  -10.140129|    0e+00|
+| sexmale     |   -2.4978447|  -2.8290589|  -2.1776176|  0.1660365|  -15.043949|    0e+00|
+| (Intercept) |    3.5220740|   2.8967273|   4.1786006|  0.3267022|   10.780686|    0e+00|
+
 Linear Regression Model
 -----------------------
 
@@ -352,13 +213,21 @@ A linear model of passenger fare cost.
 ``` r
 lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
 
+# Calculate confidence limit
+lm_confint <- confint(lm_fit) %>% tidy()
+colnames(lm_confint) <- c('Term','LCLM','UCLM')
+
 lm_predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived,fare) %>%
   mutate(prediction=predict(lm_fit,newdata=titanic)) %>%
   mutate(residual=fare-prediction)
 
 lm_info <- glance(lm_fit)
-lm_terms <- tidy(lm_fit)
+
+lm_terms <- tidy(lm_fit) %>%
+  rename(Term=term,Coefficient=estimate) %>%
+  left_join(lm_confint,by='Term' ) %>%
+  dplyr::select(Term,Coefficient,LCLM,UCLM,everything())
 
 #summary(lm_fit)
 
@@ -437,214 +306,37 @@ guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.
 ![](Titanic_files/figure-markdown_github/linear-regression-4.png)
 
 ``` r
-print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='html')
+ggplot(data=lm_terms,
+          aes(x = reorder(Term,-Coefficient), y = Coefficient)) +
+geom_point() +
+coord_flip() +
+geom_pointrange(mapping=aes(ymin=LCLM, ymax=UCLM)) + 
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Linear Model Coefficients with Confidence Intervals') +
+xlab('Term')
 ```
 
-<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:53:17 2018 -->
-<table border="1">
-<tr>
-<th>
-</th>
-<th>
-r.squared
-</th>
-<th>
-adj.r.squared
-</th>
-<th>
-sigma
-</th>
-<th>
-statistic
-</th>
-<th>
-p.value
-</th>
-<th>
-df
-</th>
-<th>
-AIC
-</th>
-<th>
-BIC
-</th>
-</tr>
-<tr>
-<td align="right">
-1
-</td>
-<td align="right">
-0.39
-</td>
-<td align="right">
-0.39
-</td>
-<td align="right">
-43.59
-</td>
-<td align="right">
-133.60
-</td>
-<td align="right">
-0.00
-</td>
-<td align="right">
-6
-</td>
-<td align="right">
-10862.73
-</td>
-<td align="right">
-10897.39
-</td>
-</tr>
-</table>
+![](Titanic_files/figure-markdown_github/linear-regression-5.png)
+
 ``` r
-print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
+kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-<!-- html table generated in R 3.4.4 by xtable 1.8-2 package -->
-<!-- Mon Aug 13 21:53:17 2018 -->
-<table border="1">
-<tr>
-<th>
-</th>
-<th>
-Variable
-</th>
-<th>
-Coefficient
-</th>
-<th>
-std.error
-</th>
-<th>
-statistic
-</th>
-<th>
-p.value
-</th>
-</tr>
-<tr>
-<td align="right">
-1
-</td>
-<td>
-(Intercept)
-</td>
-<td align="right">
-108.59
-</td>
-<td align="right">
-6.21
-</td>
-<td align="right">
-17.50
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-2
-</td>
-<td>
-sexmale
-</td>
-<td align="right">
--11.46
-</td>
-<td align="right">
-3.31
-</td>
-<td align="right">
--3.46
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-3
-</td>
-<td>
-pclass2nd
-</td>
-<td align="right">
--72.04
-</td>
-<td align="right">
-3.95
-</td>
-<td align="right">
--18.23
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-4
-</td>
-<td>
-pclass3rd
-</td>
-<td align="right">
--81.17
-</td>
-<td align="right">
-3.85
-</td>
-<td align="right">
--21.11
-</td>
-<td align="right">
-0.00
-</td>
-</tr>
-<tr>
-<td align="right">
-5
-</td>
-<td>
-age
-</td>
-<td align="right">
--0.27
-</td>
-<td align="right">
-0.11
-</td>
-<td align="right">
--2.57
-</td>
-<td align="right">
-0.01
-</td>
-</tr>
-<tr>
-<td align="right">
-6
-</td>
-<td>
-survived
-</td>
-<td align="right">
-0.57
-</td>
-<td align="right">
-3.45
-</td>
-<td align="right">
-0.17
-</td>
-<td align="right">
-0.87
-</td>
-</tr>
-</table>
+|  r.squared|  adj.r.squared|     sigma|  statistic|  p.value|   df|       AIC|       BIC|
+|----------:|--------------:|---------:|----------:|--------:|----:|---------:|---------:|
+|  0.3913351|       0.388406|  43.58534|    133.603|        0|    6|  10862.73|  10897.39|
+
+``` r
+kable(lm_terms,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+```
+
+| Term        |  Coefficient|         LCLM|         UCLM|  std.error|    statistic|    p.value|
+|:------------|------------:|------------:|------------:|----------:|------------:|----------:|
+| (Intercept) |  108.5873881|   96.4108392|  120.7639370|  6.2054020|   17.4988484|  0.0000000|
+| sexmale     |  -11.4555074|  -17.9569857|   -4.9540290|  3.3132776|   -3.4574548|  0.0005674|
+| pclass2nd   |  -72.0386084|  -79.7916925|  -64.2855243|  3.9511198|  -18.2324538|  0.0000000|
+| pclass3rd   |  -81.1666077|  -88.7119998|  -73.6212157|  3.8452759|  -21.1081360|  0.0000000|
+| age         |   -0.2715108|   -0.4789193|   -0.0641024|  0.1056993|   -2.5687094|  0.0103465|
+| survived    |    0.5728532|   -6.2008974|    7.3466038|  3.4520327|    0.1659466|  0.8682312|

@@ -1,5 +1,5 @@
 ---
-title: "Titanic Data Analysis"
+title: "Modeling the Titanic Dataset"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -7,9 +7,9 @@ output:
     toc: true
 ---
 
-A modeling analysis of the titanic dataset.
+A modeling analysis of the titanic dataset using linear and logistic regression.
 
-To add: imputation
+To add: imputation, log-binomial model (risk ratio)
 
 References:
 https://stats.idre.ucla.edu/r/dae/logit-regression/
@@ -23,7 +23,9 @@ library(caret) # regression utilities
 library(Hmisc) # capitalize function
 library(broom) # model display capabilities
 library(xtable) # pretty table
-#library(knitr)  
+library(knitr)  
+library(kableExtra)
+library(MASS) # confint for glm
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -80,12 +82,18 @@ predictions <- titanic %>%
 
 #summary(fit)
 
+log_confint <- confint(log_fit) %>% tidy()
+colnames(log_confint) <- c('Term','LCLM','UCLM')
+
 log_info <- glance(log_fit) %>% 
   mutate(meanBrierScore=mean(predictions$brier_score,na.rm=T)) %>%
   dplyr::select(meanBrierScore,everything())
 
-log_terms <- tidy(log_fit)
-
+log_terms <- tidy(log_fit) %>% rename(Coefficient=estimate,Term=term) %>%
+   # Order by largest coefficient but put intercept term on bottom
+  arrange(Term=='(Intercept)',desc(Coefficient)) %>%
+  left_join(log_confint,by='Term') %>%
+  dplyr::select(Term,Coefficient,LCLM,UCLM,everything())
 
 # An analysis of our model's classification accuracy
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
@@ -124,13 +132,13 @@ ylab('Count') +
 guides(fill = guide_legend(title='Survived')) 
 ```
 
-```{r,results='asis'}
-print(xtable(log_info %>% 
-        dplyr::select(-df.residual,-df.null,-deviance)),type='html')
-```
+```{r,results='asis',warning=F}
+kable(log_info %>% 
+        dplyr::select(-df.residual,-df.null,-deviance),format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 
-```{r,results='asis'}
-print(xtable(log_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
+kable(log_terms,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
 
@@ -143,13 +151,21 @@ A linear model of passenger fare cost.
 
 lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
 
+# Calculate confidence limit
+lm_confint <- confint(lm_fit) %>% tidy()
+colnames(lm_confint) <- c('Term','LCLM','UCLM')
+
 lm_predictions <- titanic %>%
   dplyr::select(sex,pclass,age,survived,fare) %>%
   mutate(prediction=predict(lm_fit,newdata=titanic)) %>%
   mutate(residual=fare-prediction)
 
 lm_info <- glance(lm_fit)
-lm_terms <- tidy(lm_fit)
+
+lm_terms <- tidy(lm_fit) %>%
+  rename(Term=term,Coefficient=estimate) %>%
+  left_join(lm_confint,by='Term' ) %>%
+  dplyr::select(Term,Coefficient,LCLM,UCLM,everything())
 
 #summary(lm_fit)
 
@@ -201,14 +217,25 @@ labs(title='Residuals By Passenger Class') +
 xlab('Age') +
 ylab('Residual') +
 guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
+
+ggplot(data=lm_terms,
+          aes(x = reorder(Term,-Coefficient), y = Coefficient)) +
+geom_point() +
+coord_flip() +
+geom_pointrange(mapping=aes(ymin=LCLM, ymax=UCLM)) + 
+scale_color_manual(values=wes_palette('Moonrise3')) +
+labs(title='Linear Model Coefficients with Confidence Intervals') +
+xlab('Term')
+
+
 ```
 
-```{r,results='asis'}
-print(xtable(lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),type='html')
-```
+```{r,results='asis',warning=F}
+kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 
-```{r,results='asis'}
-print(xtable(lm_terms %>% rename(Coefficient=estimate,Variable=term)),type='html')
+kable(lm_terms,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
 
