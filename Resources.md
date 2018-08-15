@@ -16,6 +16,7 @@ A categorized list of data science resources.
 
 ## Visualization Libraries
 * [ggplot](https://ggplot2.tidyverse.org/index.html)
+* [cowplot](https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html) - Tweaks to ggplot for publication charts.
 * [plotly](https://plot.ly/r/) - Good tool for interactive graphs.
 * [dygraphs](https://rstudio.github.io/dygraphs/)
 * [rbokeh](http://hafen.github.io/rbokeh/)
