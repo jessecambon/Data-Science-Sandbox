@@ -46,7 +46,7 @@ A categorized list of data science resources.
 
 ## Color Palettes
 * [R-Cookbook Color Tutorial](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/) - Includes a good color blind palette
-* [Vidiris](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery)
+* [Viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery)
 
 ## Census Data
 * [IPUMS](https://usa.ipums.org/) - Documented Census Microdata
