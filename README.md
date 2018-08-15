@@ -17,8 +17,8 @@ The purpose of this repository is to host code and resources that can be quickly
 
 ## Table of Contents 
 * [Chart Collection](Chart_Collection.md) - A variety of charts such as scatterplots and treemaps. 
-* [Statistical Modeling and the Titanic](Titanic.md) - An analysis of the classic Titanic dataset with linear and logistic regression.
-* [Geospatial Data Analysis](Geospatial_Analysis.md)
+* [Titanic Statistical Modeling](Titanic.md) - Linear and Logistic regression demonstrated on the classic Titanic Dataset.
+* [Geospatial Data Analysis](Geospatial_Analysis.md) - A work-in-progress collection of maps. 
 * [Resources](Resources.md) - Websites and references that I find helpful.
 
 
