@@ -1,5 +1,4 @@
-A categorized list of data science resources.
-
+A categorized list of data science resources. 
 
 ## General
 * [RStudio Cheatsheets](https://www.rstudio.com/resources/cheatsheets/) 
@@ -34,31 +33,23 @@ A categorized list of data science resources.
 * [Survival analysis tutorial](http://rpubs.com/sinhrks/plot_surv)
 * [A very comprehensive article on regression](https://www.r-bloggers.com/15-types-of-regression-you-should-know/)
 * [Tidyverse style survey package](https://cran.r-project.org/web/packages/srvyr/vignettes/srvyr-vs-survey.html)
-* Discriminant Statistical Analysis 
 
-## Mapping
-* Mapping with Tidycensus: https://www.mytinyshinys.com/2017/06/30/tidycensus/ 
-* Webscraping and Ggplot Geographic Map
-* Interactive Migration Map with IPUMs Data
-
-## Text Mining
-* https://github.com/juliasilge/tidytext 
+## Miscellaneous Packages
+* [TidyText](https://github.com/juliasilge/tidytext)
+* [Broom](https://github.com/tidymodels/broom) - Useful functions for formatting the output of statistical models. 
 
 ## Report Writing
-* https://github.com/nutterb/pixiedust 
-* R Markdown
-* Tables in R Markdown
-* https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet 
-
+* [R Markdown](https://rmarkdown.rstudio.com/)
+* [Tables in R Markdown](https://haozhu233.github.io/kableExtra/awesome_table_in_html.html)
+* [RMarkdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 
 ## Color Palettes
-* http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/ Includes a nice color blind friendly palette 
-* PDF of the named colors in R
-* https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery 
+* [R-Cookbook Color Tutorial](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/) - Includes a good color blind palette
+* [Vidiris](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery)
 
 ## Census Data
-* https://usa.ipums.org/usa/index.shtml 
-* ipumsr – for loading and manipulating IPUMs data in R
-* IPUMS with dplyr and PostgresSQL: https://rpubs.com/walkerke/ipums_dplyr 
-* Geographic data in IPUMsR
-* https://censusreporter.org/
+* [IPUMS](https://usa.ipums.org/) - Documented Census Microdata
+* [ipumsr](https://cran.r-project.org/web/packages/ipumsr/vignettes/ipums.html) – for loading and manipulating IPUMs data in R
+* [Tidycensus](https://walkerke.github.io/tidycensus/) - Great package for Census data analysis, particularly for geospatial analysis.
+* [Tidycensus Tutorial](https://www.mytinyshinys.com/2017/06/30/tidycensus/)
+* [CensusReporter](https://censusreporter.org/) - Tools for exploring Census data.
