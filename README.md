@@ -17,13 +17,12 @@ The purpose of this repository is to host code and resources that can be quickly
 
 ## Table of Contents 
 * [Chart Collection](Chart_Collection.md) - A variety of charts such as scatterplots and treemaps. 
-* [A satistical modeling analysis of the Titanic](Titanic.md) - An analysis of the classic Titanic dataset with linear and logistic regression.
+* [Statistical Modeling and the Titanic](Titanic.md) - An analysis of the classic Titanic dataset with linear and logistic regression.
 * [Geospatial Data Analysis](Geospatial_Analysis.md)
 * [Resources](Resources.md) - Websites and references that I find helpful.
 
 
-
 #### Todo List
-* Visualization of model coefficients and [their confidence intervals](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/confint.html).
+* Log-binomial model (risk ratios)
 * Data imputation for modeling
 * Maps / Geospatial data viz 
