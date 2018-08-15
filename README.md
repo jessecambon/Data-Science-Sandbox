@@ -12,12 +12,13 @@ A collection of code and resources to serve as a starting point for data science
 </span>
 
 
-The purpose of this repository is to host code and resources that are applicable to a variety of data science projects. An emphasis is placed on having clear, elegant code and using data visualizations to intuitively communicate results. 
+The purpose of this repository is to host code and resources that can be quickly adapted for use in data science projects. An emphasis is placed on having elegant and easily reproducible code so that you can easily run the code without needing to download other datasets.
 
 
 ## Table of Contents 
 * [Chart Collection](Chart_Collection.md) - A variety of charts such as scatterplots and treemaps. 
-* [Titanic Analysis](Titanic.md) - An analysis of the classic Titanic dataset with linear and logistic regression.
+* [A satistical modeling analysis of the Titanic](Titanic.md) - An analysis of the classic Titanic dataset with linear and logistic regression.
+* [Geospatial Data Analysis](Geospatial_Analysis.md)
 * [Resources](Resources.md) - Websites and references that I find helpful.
 
 
