@@ -51,8 +51,11 @@ A categorized list of data science resources.
 * [Tables in R Markdown](https://haozhu233.github.io/kableExtra/awesome_table_in_html.html)
 * [RMarkdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 
-## Color Palettes
+## Colors
 * [R-Cookbook Color Tutorial](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/) - Includes a good color blind palette
+* [Datawrawpper - Colorguide](https://blog.datawrapper.de/colorguide/)
+* [Color Brewer](http://colorbrewer2.org)
+* [Viz Palette](http://projects.susielu.com/viz-palette?colors=%5B%22#1DABE6%22,%22#1C366A%22,%22#C3CED0%22,%22#E43034%22,%22#FC4E51%22,%22#AF060F%22%5D&backgroundColor=%22white%22&fontColor=%22black%22)
 * [Viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery)
 
 ## Census Data
