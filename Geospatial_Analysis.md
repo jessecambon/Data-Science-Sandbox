@@ -1,17 +1,26 @@
 Geospatial Analysis
 ================
 Jesse Cambon
-13 August, 2018
+15 August, 2018
 
-Note: Use devtools::install\_github("hrbrmstr/albersusa") to install albersusa
+-   [References](#references)
+-   [Setup](#setup)
+-   [Geographies](#geographies)
+    -   [Locales](#locales)
+    -   [United States](#united-states)
+    -   [The World](#the-world)
 
-<https://github.com/bhaskarvk/colormap>
+References
+----------
 
-c("B23025\_005E", \# labor force size 'B01003\_001E', \# population 'B25056\_001E'), \# rent
+-   <https://github.com/mtennekes/tmap>
+-   <https://ggplot2.tidyverse.org/reference/index.html>
+-   <https://github.com/wmurphyrd/fiftystater>
+-   <https://github.com/mtennekes/tmap/tree/master/demo/USChoropleth>
+-   <https://mran.revolutionanalytics.com/snapshot/2016-03-22/web/packages/tmap/vignettes/tmap-nutshell.html>
 
-<https://github.com/mtennekes/tmap/tree/master/demo/USChoropleth>
-
-<https://mran.revolutionanalytics.com/snapshot/2016-03-22/web/packages/tmap/vignettes/tmap-nutshell.html>
+Setup
+-----
 
 ``` r
 library(tidyverse)
@@ -20,9 +29,22 @@ library(ggplot2)
 library(sf) # geospatial methods
 library(tmap) # thematic mapping
 library(viridis) # color scheme
+#library(albersusa) # US country map
+#library(ggthemes)
+#library(spData)
+library(wbstats) # world bank
+#library(maps)
+library(wesanderson) # colors
+library(fiftystater) # US state geometries
 
 options(tigris_use_cache = TRUE)
 ```
+
+Geographies
+===========
+
+Locales
+-------
 
 ``` r
 # us_county_income <- get_acs(geography = "county", variables = "B19013_001", geometry = TRUE)
@@ -62,70 +84,55 @@ qtm(bos, fill = "estimate",fill.title='Median Rent',
 
 <http://www.robinlovelace.net/presentations/spatial-tidyverse.html#11> <https://cran.r-project.org/web/packages/wbstats/vignettes/Using_the_wbstats_package.html>
 
-``` r
-#library(maptools)
-#library(scales)
-library(ggplot2)
-library(albersusa) # US country map
-library(ggthemes)
-library(spData)
-```
-
-    ## To access larger datasets in this package, install the spDataLarge
-    ## package with: `install.packages('spDataLarge',
-    ## repos='https://nowosad.github.io/drat/', type='source'))`
+United States
+-------------
 
 ``` r
-library(wbstats)
-library(tmap)
-library(maps)
+data("fifty_states") # fiftystater package
+
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+
+# map_id creates the aesthetic mapping to the state name column in your data
+ggplot(crimes, aes(map_id = state)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = Murder), 
+           map = fifty_states, color='white',size=0.2) +  # geometry from fiftystater package
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) + 
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  
+  labs(x = "", y = "",title='State Murder Rates in 1975',
+   caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
+  theme(legend.position = "right", 
+        panel.background = element_blank(),
+        panel.border=element_blank())  +
+  scale_fill_viridis_c(direction=-1,option='inferno') 
 ```
-
-    ## 
-    ## Attaching package: 'maps'
-
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     map
-
-``` r
-library(wesanderson)
-
-tm_shape(world, projection="wintri") +
-        tm_polygons("lifeExp", title=c("Life expectancy"),
-          style="pretty", palette='RdYlGn') +
-        tm_style('grey') + tmap_mode("plot")
-```
-
-    ## tmap mode set to plotting
-
-    ## OGR: Corrupt data
-    ## OGR: Corrupt data
 
 ![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
-    ## OGR: Corrupt data
-    ## OGR: Corrupt data
-
 ``` r
-tm_shape(world, projection="wintri") +
-        tm_polygons("gdpPercap", title=c("GDP Per Capita"),
-          style="pretty", palette='RdYlGn') +
-        tm_style('grey') + tmap_mode("plot")
+#  guides(color = guide_legend(title='Murders Per 100,000 Residents'))
 ```
 
-    ## tmap mode set to plotting
-
-    ## OGR: Corrupt data
-    ## OGR: Corrupt data
-
-![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-2-2.png)
-
-    ## OGR: Corrupt data
-    ## OGR: Corrupt data
+The World
+---------
 
 ``` r
-map('county', 'virginia', fill = TRUE, col = wes_palette('Moonrise3'))
+data(World)
+tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
+         ) +
+  tm_polygons("gdp_cap_est",
+              palette = "Greens",
+              breaks = c(0, 1000, 5000, 10000, 25000, 50000, Inf),
+              title = "GDP per capita") +
+  tm_style("grey",
+           earth.boundary = c(-180, -87, 180, 87))  +
+#  tm_format("World", inner.margins = 0.02, frame = FALSE) 
+  tm_legend(position = "bottom", frame = TRUE, legend.outside=F) +
+ tm_format("World",frame=F) 
 ```
 
-![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-2-3.png)
+![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)

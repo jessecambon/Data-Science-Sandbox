@@ -8,16 +8,21 @@ output:
     toc: true
 ---
 
-This notebook contains code for producing a variety of charts with ggplot.
-The charts are for demonstration purposes and are not necessarily meant to 
-represent best practices.
+The purpose of this document is to provide code that can be easily copied and adapted for use in data science projects to generate a wide variety of data visualizations. Because of this, I have opted to use inbuilt datasets in R so that you should not have to download any datasets external to R packages.
 
-Notes:
-Use 'fill' commands for areas and 'color' for lines.
-To save any plot use ggsave()
+## Readme
 
-# Data Preparation
+* Install all the listed packages in the setup block using install.packages('package') or install.packages('package1','package2','package3',...) for multiple packages.
+* To recreate any graph, make sure to first run the theme_set() command from the setup code block and also the relevant code from the data preparation code block to create the relevant dataset.
+* Use 'fill' commands for areas and 'color' for lines.
+* To save any plot to a file, use the ggsave() command
 
+## References
+
+* ggplot: https://ggplot2.tidyverse.org/reference/index.html
+* dplyr: https://dplyr.tidyverse.org/
+
+# Setup
 
 ```{r setup, message=FALSE, results=FALSE,warning=FALSE}
 
@@ -26,20 +31,11 @@ To save any plot use ggsave()
 library(tidyverse)
 library(ggrepel) # loads ggplot2 as well
 library(treemapify) # ggplot treemap
-#library(knitr)
 library(treemap)
 library(formattable) # percent format
 library(wesanderson) # Color Palettes from Wes Anderson Movies
 library(waffle) # waffle charts, make sure to install the github version with devtools::install_github("hrbrmstr/waffle")
-library(lubridate) # time/date related functions
-
-
-# Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
-cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
-               "#D55E00", "#CC79A7")
-
-film_chron_order = c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith",
-  "A New Hope","The Empire Strikes Back", "Return of the Jedi","The Force Awakens")  
+library(R.utils) # capitalize function
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -47,9 +43,19 @@ theme_set(theme_bw()+
             plot.subtitle= element_text(face="bold",hjust=0.5),
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 
+# Color blind friendly palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
+               "#D55E00", "#CC79A7")
+
+```
+
+## Data Preparation
+
+```{r dataprep, message=FALSE, results=FALSE,warning=FALSE}
+
+### Titanic Data
 data(Titanic)
 titanic <- Titanic %>% as_tibble() 
-
 
 titanic_bar <- titanic %>%
   # add a percent for Class 
@@ -64,15 +70,19 @@ titanic_class <- titanic %>%
   summarize(n=sum(n)) %>%
   ungroup()
 
+### Starwars Data
+
+# The chronological order of the star wars films
+film_chron_order = c("The Phantom Menace", "Attack of the Clones", "Revenge of the Sith",
+  "A New Hope","The Empire Strikes Back", "Return of the Jedi","The Force Awakens")
+
 # Average height and weight by species
 starwars_jac <- starwars %>% group_by(name) %>%
   mutate(num_films=length(unlist(films)),
          height_to_mass_ratio = height / mass,
-           # bucket species
-  species_collapsed=case_when(
-    !(species %in% c('Human','Droid')) ~ 'Other',
-    TRUE ~ species
-  )) %>%
+           # bucket species variable
+  species_collapsed=case_when(!(species %in% c('Human','Droid')) ~ 'Other',
+    TRUE ~ species)) %>%
   ungroup() 
 
 # put each film on a different row
@@ -102,9 +112,6 @@ species_summ <- starwars_jac %>% group_by(species) %>%
   mutate(height_to_mass_ratio = average_height / average_mass) %>%
   filter(count!=1) # don't look at species that only have one member
 
-# Display in table
-#kable(species_summ)
-
 homeworld_summ <- starwars_jac %>%
   count(homeworld,species_collapsed) %>%
   group_by(homeworld) %>%
@@ -119,7 +126,10 @@ homeworld_summ <- starwars_jac %>%
 # Also drop Jabba and Yoda because they are outliers
 starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
   filter(!str_detect(name,'Jabba|Yoda')) %>% 
-  filter(num_films >= 3)
+  filter(num_films >= 3) %>%
+  mutate(gender=capitalize(gender))
+
+### Crime Data
 
 murder_rates <- USArrests %>% 
   rownames_to_column('State') %>%
@@ -128,6 +138,8 @@ murder_rates <- USArrests %>%
   head(15) %>%
   arrange(desc(Murder)) %>% 
   mutate(State=factor(State,levels=rev(State)))
+
+### Stock Data
 
 eu_stock <- EuStockMarkets %>% 
   as_tibble() %>%
@@ -184,7 +196,8 @@ waffle( titanic_class %>%
 
 ```{r histogram}
 # Histogram with autobinning based on gender
-ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
+ggplot(starwars_jac %>% replace_na(list(gender='none')) %>%
+         mutate(gender=capitalize(gender)), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
   geom_histogram(aes(fill=gender), 
                    binwidth = 10, 
                    col="black") +
@@ -192,7 +205,10 @@ ggplot(starwars_jac %>% replace_na(list(gender='none')), aes(height)) + scale_fi
   labs(title="Height Distribution of Star Wars Characters", 
        caption="Han Shot First") +
 xlab('Height (cm)') +
-ylab('Count')
+ylab('Count') +
+guides(fill = guide_legend(title='Gender'))
+
+
 ```
 
 
@@ -203,7 +219,7 @@ ylab('Count')
 # the reorder command orders our bars in order of descending height
 ggplot(data=species_summ,
           aes(x = reorder(species,-average_height), y=average_height, fill = species)) +
-geom_bar(stat='identity',position='dodge') +
+geom_bar(stat='identity',position='dodge',color='black') +
 scale_fill_manual(values=wes_palette('Moonrise3')) +
 geom_text(aes(label=round(average_height)), vjust=-0.25) +
 theme(legend.position="none",
@@ -221,13 +237,13 @@ ggplot(data=homeworld_summ,
 # The scales argument suppress the presense of an empty "Other" species
 # slot on Tatooine
 facet_grid(~homeworld,scales = 'free',space='free') +
-geom_bar(stat='identity') +
+geom_bar(stat='identity',color='black') +
 scale_fill_manual(values=wes_palette('Moonrise2')) +
 theme(legend.position="none",legend.title=element_blank(),
       panel.grid.minor.x = element_blank(),
       panel.grid.major.x = element_blank(),
       panel.grid.minor.y = element_blank()) +
-labs(title='Number of Characters of Each Species from Selected Homeworlds') +
+labs(title='Number of Star Wars Characters of Each Species from Selected Homeworlds') +
 xlab('') +
 ylab('')
 
@@ -236,7 +252,7 @@ ylab('')
 ggplot(data=titanic_bar,
           aes(x = Sex, y=percent_num,fill = fct_rev(Class))) +
 facet_grid(~Survived) +
-geom_bar(stat='identity') +
+geom_bar(stat='identity',color='black') +
 coord_flip() +
   geom_text(data=titanic_bar,aes(label = ifelse(percent_num > 0.07 ,percent_char,NA)),
     size = 3,position = position_stack(vjust = 0.5)) +
@@ -268,8 +284,8 @@ r_square <- summary(fit)$r.squared
 ggplot(data=starwars_ht_wt,
           aes(x = mass, y = height, color = gender,group=1)) +
 geom_point() +
-theme(legend.title=element_blank(),
-      legend.margin=margin(0,0,0,0)) +
+theme(legend.margin=margin(0,0,0,0),
+      legend.box.margin=margin(0,0,0,0)) +
 geom_label_repel(
     data = starwars_ht_wt,
     aes(label = name),
@@ -280,14 +296,15 @@ geom_label_repel(
     show.legend = F # need this to fix legend
   ) +
 geom_smooth(method="lm",show.legend=F,size=0.5) +
-scale_color_manual(values=c(cbPalette[2:3])) +
+scale_color_manual(values=c(cbPalette[2:5])) +
 labs(title='Heights and Weights of Selected Star Wars Characters',
      subtitle = bquote(Slope == .(round(coeff,2)) ~ ' | ' ~ R^2  ==  .(round(r_square,2)) )) +
        
       # str_c('Slope: ',as.character(round(coeff,2)),'  |  ',
       #                expression(paste("R"^"2")),as.character(round(r_square,2)))) +
 xlab('Mass (kg)') +
-ylab('Height (cm)')
+ylab('Height (cm)') +
+guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 
 # Create interactive data table of raw data
 # This only works in HTML format so comment it out if knitting to github format 
@@ -315,22 +332,24 @@ theme(legend.title = element_blank(),
       legend.text=element_text(size=10),
       legend.position='right') +
 xlab('Year') +
-ylab('Price') +
+ylab('Value') +
 # make legend lines bigger
 guides(colour = guide_legend(override.aes = list(size=2.5))) 
 
 # Number of characters from each species 
-ggplot(data=starwars_gender_film,
+ggplot(data=starwars_gender_film %>% mutate(gender=capitalize(gender)),
           aes(x = episode, y=prop,color = gender)) +
-geom_line() + geom_point() +
+geom_line(show.legend=F) + geom_point() +
 scale_x_continuous(breaks=c(1:7)) +
 scale_y_continuous(labels=scales::percent) + 
 scale_color_manual(values=cbPalette) +
-labs(title='Percentage of Characters in Each Film by Gender') +
+labs(title='Percentage of Star Wars Characters in Each Film by Gender') +
 theme(legend.title = element_blank(),
       panel.grid.minor.x = element_blank()) +
 xlab('Episode') +
-ylab('')
+ylab('') +
+  guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
+
 
 ```
 
@@ -342,10 +361,10 @@ ylab('')
 # Number of characters from each species 
 ggplot(data=starwars_species_film,
           aes(x = episode, y=n,fill = species_collapsed)) +
-geom_area(aes(group=species_collapsed)) +
+geom_area(aes(group=species_collapsed),color='black') +
 scale_x_continuous(breaks=c(1:7)) +
-scale_fill_manual(values=wes_palette('IsleofDogs1')) +
-labs(title='Number of Characters Appearing from Each Species by Film') +
+scale_fill_manual(values=wes_palette('Moonrise2')) +
+labs(title='Number of Star Wars Characters Appearing from Each Species by Film') +
 theme(legend.title = element_blank(),
       panel.grid.minor.x = element_blank()) +
 xlab('Episode') +
@@ -365,17 +384,18 @@ treemap(titanic, #Your data frame object
         vColor='Class',
         type="categorical", #Type sets the organization and color scheme of your treemap
         palette = wes_palette('Moonrise3'),  #Select your color palette from the RColorBrewer presets or make your own.
-        title="Titanic Passengers", #Customize your title
-        fontsize.title = 14 #Change the font size of the title
+        title="Titanic Passengers by Class and Gender", #Customize your title
+        fontsize.title = 15 #Change the font size of the title
         )
 
 # Treemap of star wars character mass
-ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')),
+ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')) %>%
+         mutate(gender=capitalize(gender)),
                 aes(area=mass,fill=gender,label=name)) + 
   labs(title='Relative Weights of Star Wars Characters') +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   geom_treemap() +
-  geom_treemap_text(colour = "white", place = "centre", grow = TRUE) +
+  geom_treemap_text(colour = "white", place = "centre", grow = F) +
   guides(fill=guide_legend(title="Gender"))
 
 ```
