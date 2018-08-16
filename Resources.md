@@ -50,6 +50,7 @@ A categorized list of data science resources.
 * [R Markdown](https://rmarkdown.rstudio.com/)
 * [Tables in R Markdown](https://haozhu233.github.io/kableExtra/awesome_table_in_html.html)
 * [RMarkdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+* [officer](https://davidgohel.github.io/officer/index.html) - Creating Microsoft Office deliverables in R.
 
 ## Colors
 * [R-Cookbook Color Tutorial](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/) - Includes a good color blind palette
