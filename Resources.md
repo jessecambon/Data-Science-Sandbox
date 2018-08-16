@@ -7,12 +7,19 @@ A categorized list of data science resources.
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
-## Data Visualization
+## Visualization General Resources
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
 * [Dataviz Project](http://datavizproject.com/) - Categorized data visualizations.
 * [Flowing Data](http://flowingdata.com/) - Good newsletter and site on data viz techniques.
-* [R-Graph-Gallery](https://www.r-graph-gallery.com/) - R plots with code.
+* [Stephen Few](http://www.perceptualedge.com/) - A data visualization expert.
+* [Edward Tufte](https://www.edwardtufte.com/tufte/) - Another data viz expert.
+
+## Visualization Galleries
 * [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
+* [R-Shiny Gallery](https://shiny.rstudio.com/gallery/)
+* [D3.JS Gallery](https://github.com/d3/d3/wiki/Gallery)
+* [D3 Blocks](https://bl.ocks.org/)
+* [R-Graph-Gallery](https://www.r-graph-gallery.com/) - R plots with code.
 
 ## Visualization Libraries
 * [ggplot](https://ggplot2.tidyverse.org/index.html)
@@ -39,7 +46,7 @@ A categorized list of data science resources.
 * [TidyText](https://github.com/juliasilge/tidytext)
 * [Broom](https://github.com/tidymodels/broom) - Useful functions for formatting the output of statistical models. 
 
-## Report Writing
+## Creating Deliverables
 * [R Markdown](https://rmarkdown.rstudio.com/)
 * [Tables in R Markdown](https://haozhu233.github.io/kableExtra/awesome_table_in_html.html)
 * [RMarkdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
