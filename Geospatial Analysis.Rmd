@@ -136,7 +136,6 @@ us <- usa_composite() %>% forti
   left_join(U)
 
 
-
 us_map <- fortify(usa_composite() , region="fips_state")
 ggplot(us_map, aes(map_id=fips_state,fill=pop_2014)) +
   geom_map(map=us_map, color='#ffffff', size=0.1) + 

@@ -1,7 +1,7 @@
 Chart Collection
 ================
 Jesse Cambon
-15 August, 2018
+16 August, 2018
 
 -   [Readme](#readme)
 -   [References](#references)
@@ -11,6 +11,7 @@ Jesse Cambon
     -   [Lollipop](#lollipop)
     -   [Waffle](#waffle)
     -   [Histogram](#histogram)
+    -   [Boxplot](#boxplot)
     -   [Bar](#bar)
     -   [Scatter](#scatter)
     -   [Line](#line)
@@ -215,6 +216,8 @@ ggplot(starwars_jac %>% replace_na(list(gender='none')) %>%
                    binwidth = 10, 
                    col="black") +
             #       size=.1) +  # change binwidth
+  # remove bottom inner margin with expand
+scale_y_continuous(expand = c(0,0,0.08,0)) + 
   labs(title="Height Distribution of Star Wars Characters", 
        caption="Han Shot First") +
 xlab('Height (cm)') +
@@ -226,6 +229,24 @@ guides(fill = guide_legend(title='Gender'))
 
 ![](Chart_Collection_files/figure-markdown_github/histogram-1.png)
 
+Boxplot
+-------
+
+``` r
+ ggplot(eu_stock, aes(x=Index, y=Price,fill=Index)) + 
+  geom_boxplot(outlier.shape = NA) + # outliers removed
+  theme(legend.position='none',panel.grid.major.x=element_blank()) +
+  ylab('Value') +
+  labs(title='Boxplot of EU Stock Indexes') +
+   # imperfect solution but the negative third argument in expand 
+   # shrinks the ylimit. (the hidden outliers otherwise expand the graph)
+  scale_y_continuous(labels=scales::comma,expand=c(0.1,0,-.20,0)) +
+ #  geom_jitter(width = 0.1) +
+  scale_fill_manual(values = wes_palette('Zissou1'))
+```
+
+![](Chart_Collection_files/figure-markdown_github/boxplot-1.png)
+
 Bar
 ---
 
@@ -235,13 +256,12 @@ Bar
 ggplot(data=species_summ,
           aes(x = reorder(species,-average_height), y=average_height, fill = species)) +
 geom_bar(stat='identity',position='dodge',color='black') +
+# remove bottom inner margin with expand
+scale_y_continuous(expand = c(0,0,0.08,0)) + 
 scale_fill_manual(values=wes_palette('Moonrise3')) +
-geom_text(aes(label=round(average_height)), vjust=-0.25) +
+geom_text(aes(label=round(average_height)), vjust=-0.5) +
 theme(legend.position="none",
-      panel.grid.minor.x = element_blank(),
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      panel.grid.major.y = element_blank()) +
+      panel.grid = element_blank()) + # turn off grid
 labs(title='Average Height of Selected Star Wars Species (cm)') +
 xlab('Species') +
 ylab('')
@@ -257,6 +277,8 @@ ggplot(data=homeworld_summ,
 # slot on Tatooine
 facet_grid(~homeworld,scales = 'free',space='free') +
 geom_bar(stat='identity',color='black') +
+# remove bottom inner margin with expand
+scale_y_continuous(expand = c(0,0,0.08,0)) + 
 scale_fill_manual(values=wes_palette('Moonrise2')) +
 theme(legend.position="none",legend.title=element_blank(),
       panel.grid.minor.x = element_blank(),
@@ -282,9 +304,7 @@ coord_flip() +
 scale_fill_manual(values=wes_palette('Royal2')) +
 theme(axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
-      panel.grid.minor.x = element_blank(),
-      panel.grid.major.x = element_blank(),
-      panel.grid.major.y = element_blank())+
+      panel.grid = element_blank())+
 labs(title='Titanic Passengers by Survival Status') +
 xlab('') +
 ylab('') +
@@ -395,7 +415,9 @@ Stacked Area
 ggplot(data=starwars_species_film,
           aes(x = episode, y=n,fill = species_collapsed)) +
 geom_area(aes(group=species_collapsed),color='black') +
-scale_x_continuous(breaks=c(1:7)) +
+# remove bottom inner margin with expand
+scale_y_continuous(expand = c(0,0,0.05,0)) + 
+scale_x_continuous(breaks=c(1:7),expand=c(0,0)) +
 scale_fill_manual(values=wes_palette('Moonrise2')) +
 labs(title='Number of Star Wars Characters Appearing from Each Species by Film') +
 theme(legend.title = element_blank(),
@@ -431,7 +453,7 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')) %>%
                 aes(area=mass,fill=gender,label=name)) + 
   labs(title='Relative Weights of Star Wars Characters') +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
-  geom_treemap() +
+  geom_treemap(color='black') +
   geom_treemap_text(colour = "white", place = "centre", grow = F) +
   guides(fill=guide_legend(title="Gender"))
 ```
