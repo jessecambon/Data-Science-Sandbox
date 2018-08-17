@@ -197,10 +197,11 @@ waffle_palette[5] <- 'white' #
 waffle( titanic_class %>% 
     rename(names=Class,vals=n),  # rename data to match waffle chart syntax
   rows = 30, size = 0.5, 
-  colors = waffle_palette, legend_pos = "bottom") +
+  colors = waffle_palette) +
   labs(title='Titanic Passengers by Class') +
-  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14)
-       ) +
+  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14),
+        legend.margin = margin(0,0,0,0),legend.box.margin=margin(0,0,0,0),
+        legend.position='bottom') +
   guides(fill = guide_legend(title='Class'))
 ```
 
