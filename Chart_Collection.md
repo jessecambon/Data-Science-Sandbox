@@ -196,14 +196,22 @@ waffle_palette[5] <- 'white' #
 
 waffle( titanic_class %>% 
     rename(names=Class,vals=n),  # rename data to match waffle chart syntax
-  rows = 30, size = 0.5, 
+  rows = 33, size = 0.5, 
   colors = waffle_palette) +
+  # remove margin around graph with expand
+  scale_x_continuous(expand=c(0,0,0,0)) +
+  scale_y_continuous(expand=c(0,0,0,0)) +
   labs(title='Titanic Passengers by Class') +
   theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14),
-        legend.margin = margin(0,0,0,0),legend.box.margin=margin(0,0,0,0),
         legend.position='bottom') +
   guides(fill = guide_legend(title='Class'))
 ```
+
+    ## Scale for 'x' is already present. Adding another scale for 'x', which
+    ## will replace the existing scale.
+
+    ## Scale for 'y' is already present. Adding another scale for 'y', which
+    ## will replace the existing scale.
 
 ![](Chart_Collection_files/figure-markdown_github/waffle-1.png)
 
