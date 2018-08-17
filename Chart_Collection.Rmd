@@ -184,7 +184,8 @@ waffle( titanic_class %>%
   rows = 30, size = 0.5, 
   colors = waffle_palette, legend_pos = "bottom") +
   labs(title='Titanic Passengers by Class') +
-  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14)) +
+  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14)
+       ) +
   guides(fill = guide_legend(title='Class'))
   
   
@@ -289,7 +290,6 @@ guides(fill = guide_legend(title='Class',reverse=T))
 ## Scatter
 
 ```{r scatter}
-
 # Linear model
 fit <- lm(height ~ mass, data=starwars_ht_wt)
 coeff <- as.numeric(fit$coefficients[2])
@@ -301,9 +301,10 @@ r_square <- summary(fit)$r.squared
 ggplot(data=starwars_ht_wt,
           aes(x = mass, y = height, color = gender,group=1)) +
 geom_point() +
-theme(legend.margin=margin(0,0,0,0),
+  # remove legend margins
+theme( legend.margin=margin(0,0,0,0),
       legend.box.margin=margin(0,0,0,0)) +
-geom_label_repel(
+geom_label_repel( # Labels
     data = starwars_ht_wt,
     aes(label = name),
     size = 3,
@@ -312,20 +313,14 @@ geom_label_repel(
     segment.color = 'grey',
     show.legend = F # need this to fix legend
   ) +
-geom_smooth(method="lm",show.legend=F,size=0.5) +
+
+geom_smooth(method="lm",show.legend=F,size=0.5) + # Regression line
 scale_color_manual(values=c(cbPalette[2:5])) +
 labs(title='Heights and Weights of Selected Star Wars Characters',
      subtitle = bquote(Slope == .(round(coeff,2)) ~ ' | ' ~ R^2  ==  .(round(r_square,2)) )) +
-       
-      # str_c('Slope: ',as.character(round(coeff,2)),'  |  ',
-      #                expression(paste("R"^"2")),as.character(round(r_square,2)))) +
 xlab('Mass (kg)') +
 ylab('Height (cm)') +
 guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
-
-# Create interactive data table of raw data
-# This only works in HTML format so comment it out if knitting to github format 
-#datatable(starwars %>% select(-hair_color,skin_color,-birth_year), options = list(pageLength = 10))
 ```
 
 ## Line
