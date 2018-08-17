@@ -17,6 +17,7 @@ A categorized list of data science resources.
 ## Visualization Galleries
 * [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 * [R-Shiny Gallery](https://shiny.rstudio.com/gallery/)
+* [Visual Capitalist](http://www.visualcapitalist.com/)
 * [D3.JS Gallery](https://github.com/d3/d3/wiki/Gallery)
 * [D3 Blocks](https://bl.ocks.org/)
 * [R-Graph-Gallery](https://www.r-graph-gallery.com/) - R plots with code.
