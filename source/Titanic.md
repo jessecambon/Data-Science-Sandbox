@@ -1,7 +1,7 @@
-Modeling the Titanic
+Modeling the Titanic Dataset
 ================
 Jesse Cambon
-14 August, 2018
+18 August, 2018
 
 -   [Exploratory Graphs](#exploratory-graphs)
 -   [Logistic Regression Model](#logistic-regression-model)
@@ -34,7 +34,8 @@ titanic_summ <- titanic %>%
   group_by(pclass,sex) %>%
   mutate(perc_surv_num=n/sum(n),
     perc_surv_char=as.character(percent(n/sum(n),0))) %>%
-  ungroup()
+  ungroup() %>%
+  mutate(survived=factor(survived,labels=c('Died','Survied')))
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -48,19 +49,20 @@ Exploratory Graphs
 
 ``` r
 ggplot(data=titanic_summ,
-       aes(x = fct_rev(pclass), y=perc_surv_num,fill = factor(survived,labels=c('No','Yes')))) +
+       aes(x = fct_rev(pclass), y=perc_surv_num,fill = survived)) +
 facet_grid(~factor(sex)) +
-geom_bar(stat='identity') +
+geom_bar(stat='identity',color='black') +
 coord_flip() +
   geom_text(data=titanic_summ,aes(label = ifelse(perc_surv_num > 0.07 ,perc_surv_char,NA)),
     size = 3,position = position_stack(vjust = 0.5)) +
 scale_fill_manual(values=wes_palette('FantasticFox1')[c(3,4)]) +
 theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())+
-labs(title='') +
+        axis.ticks.x=element_blank(),
+      panel.grid = element_blank())+
+labs(title='Passenger Survival Rates by Gender and Class') +
 xlab('Passenger Class') +
 ylab('') +
-guides(fill = guide_legend(title='Survived',reverse=T)) # reverse legend order
+guides(fill = guide_legend(title='',reverse=T)) # reverse legend order
 ```
 
     ## Warning: Removed 1 rows containing missing values (geom_text).
@@ -152,15 +154,18 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 
 ``` r
 ggplot(predictions, aes(prediction))+
-  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('No','Yes'))),
+  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
   theme(legend.pos='top') +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
-  scale_x_continuous(labels=scales::percent) +
+  scale_x_continuous(labels=scales::percent,
+                     expand=c(0,0,0,0),
+                     limits=c(0,1)) +
+    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
 ylab('Count') +
-guides(fill = guide_legend(title='Survived')) 
+guides(fill = guide_legend(title='')) 
 ```
 
     ## Warning: Removed 263 rows containing non-finite values (stat_bin).
@@ -168,19 +173,44 @@ guides(fill = guide_legend(title='Survived'))
 ![](Titanic_files/figure-markdown_github/logistic-regression-2.png)
 
 ``` r
-ggplot(predictions, aes(brier_score)) +
-  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('No','Yes'))),
-                 col='black') +
-  labs(title="Brier Score Distribution") +
-    scale_fill_manual(values=wes_palette('Moonrise3')) +
-xlab('Brier Score') +
+# Same graph as prior but faceted on class
+
+ggplot(predictions, aes(prediction))+
+  geom_histogram(binwidth=0.05,aes(fill=factor(survived,labels=c('Died','Survived'))),
+    col='black') + 
+  facet_wrap(~pclass,scales='free_y') +
+  theme(legend.pos='top') +
+  scale_fill_manual(values=wes_palette('Moonrise3')) +
+  scale_x_continuous(labels=scales::percent, limits=c(0,1),
+                     expand=c(0,0,0,0)
+                     ) +
+    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
+  labs(title="Logistic Regression Probability Distribution by Passenger Class") +
+xlab('Survival Probability') +
 ylab('Count') +
-guides(fill = guide_legend(title='Survived')) 
+guides(fill = guide_legend(title='')) 
 ```
 
     ## Warning: Removed 263 rows containing non-finite values (stat_bin).
 
 ![](Titanic_files/figure-markdown_github/logistic-regression-3.png)
+
+``` r
+ggplot(predictions, aes(brier_score)) +
+  geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('Died','Survived'))),
+                 col='black') +
+  labs(title="Brier Score Distribution") +
+    scale_fill_manual(values=wes_palette('Moonrise3')) +
+    scale_x_continuous(expand=c(0,0,0,0),limits=c(0,1)) +
+    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
+xlab('Brier Score') +
+ylab('Count') +
+guides(fill = guide_legend(title='')) 
+```
+
+    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
+
+![](Titanic_files/figure-markdown_github/logistic-regression-4.png)
 
 ``` r
 kable(log_info %>% 
@@ -235,7 +265,10 @@ lm_terms <- tidy(lm_fit) %>%
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
-scale_x_continuous(labels=scales::dollar) +
+geom_vline(xintercept=0,color='blue') +
+scale_x_continuous(labels=scales::dollar #,expand=c(0,0,0,0)
+                   ) +
+scale_y_continuous(expand=c(0,0,0.07,0)) +  
   labs(title="Residual Distribution by Passenger Class") +
 xlab('Residual') +
 ylab('Count') 
