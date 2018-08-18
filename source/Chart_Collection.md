@@ -1,22 +1,27 @@
 Chart Collection
 ================
 Jesse Cambon
-16 August, 2018
+18 August, 2018
 
 -   [Readme](#readme)
 -   [References](#references)
 -   [Setup](#setup)
     -   [Data Preparation](#data-preparation)
 -   [Chart Types](#chart-types)
-    -   [Lollipop](#lollipop)
-    -   [Waffle](#waffle)
-    -   [Histogram](#histogram)
-    -   [Boxplot](#boxplot)
-    -   [Bar](#bar)
-    -   [Scatter](#scatter)
-    -   [Line](#line)
-    -   [Stacked Area](#stacked-area)
-    -   [Treemap](#treemap)
+    -   [Distribution](#distribution)
+        -   [Histogram](#histogram)
+        -   [Boxplot](#boxplot)
+    -   [Ranking](#ranking)
+        -   [Lollipop](#lollipop)
+        -   [Bar](#bar)
+    -   [Correlation](#correlation)
+        -   [Scatterplot](#scatterplot)
+    -   [Change](#change)
+        -   [Line](#line)
+        -   [Stacked Area](#stacked-area)
+    -   [Composition](#composition)
+        -   [Treemap](#treemap)
+        -   [Waffle](#waffle)
 
 The purpose of this document is to provide code that can be easily copied and adapted for use in data science projects to generate a wide variety of data visualizations. Because of this, I have opted to use inbuilt datasets in R so that you should not have to download any datasets external to R packages.
 
@@ -33,6 +38,7 @@ References
 
 -   ggplot: <https://ggplot2.tidyverse.org/reference/index.html>
 -   dplyr: <https://dplyr.tidyverse.org/>
+-   ["Top 50 GGplots"](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 
 Setup
 =====
@@ -161,8 +167,53 @@ eu_stock <- EuStockMarkets %>%
 Chart Types
 ===========
 
-Lollipop
---------
+Distribution
+------------
+
+### Histogram
+
+``` r
+# Histogram with autobinning based on gender
+ggplot(starwars_jac %>% replace_na(list(gender='none')) %>%
+         mutate(gender=capitalize(gender)), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
+  geom_histogram(aes(fill=gender), 
+                   binwidth = 10, 
+                   col="black") +
+            #       size=.1) +  # change binwidth
+  # remove bottom inner margin with expand
+scale_y_continuous(expand = c(0,0,0.08,0)) + 
+  labs(title="Height Distribution of Star Wars Characters", 
+       caption="Han Shot First") +
+xlab('Height (cm)') +
+ylab('Count') +
+guides(fill = guide_legend(title='Gender'))
+```
+
+    ## Warning: Removed 6 rows containing non-finite values (stat_bin).
+
+![](Chart_Collection_files/figure-markdown_github/histogram-1.png)
+
+### Boxplot
+
+``` r
+ ggplot(eu_stock, aes(x=Index, y=Price,fill=Index)) + 
+  geom_boxplot(outlier.shape = NA) + # outliers removed
+  theme(legend.position='none',panel.grid.major.x=element_blank()) +
+  ylab('Value') +
+  labs(title='Boxplot of EU Stock Indexes') +
+   # imperfect solution but the negative third argument in expand 
+   # shrinks the ylimit. (the hidden outliers otherwise expand the graph)
+  scale_y_continuous(labels=scales::comma,expand=c(0.1,0,-.20,0)) +
+ #  geom_jitter(width = 0.1) +
+  scale_fill_manual(values = wes_palette('Zissou1'))
+```
+
+![](Chart_Collection_files/figure-markdown_github/boxplot-1.png)
+
+Ranking
+-------
+
+### Lollipop
 
 ``` r
   ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
@@ -187,78 +238,7 @@ Lollipop
 
 ![](Chart_Collection_files/figure-markdown_github/lollipop-1.png)
 
-Waffle
-------
-
-``` r
-waffle_palette <- wes_palette('Darjeeling2')
-waffle_palette[5] <- 'white' # 
-
-waffle( titanic_class %>% 
-    rename(names=Class,vals=n),  # rename data to match waffle chart syntax
-  rows = 33, size = 0.5, 
-  colors = waffle_palette) +
-  # remove margin around graph with expand
-  scale_x_continuous(expand=c(0,0,0,0)) +
-  scale_y_continuous(expand=c(0,0,0,0)) +
-  labs(title='Titanic Passengers by Class') +
-  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14),
-        legend.position='bottom') +
-  guides(fill = guide_legend(title='Class'))
-```
-
-    ## Scale for 'x' is already present. Adding another scale for 'x', which
-    ## will replace the existing scale.
-
-    ## Scale for 'y' is already present. Adding another scale for 'y', which
-    ## will replace the existing scale.
-
-![](Chart_Collection_files/figure-markdown_github/waffle-1.png)
-
-Histogram
----------
-
-``` r
-# Histogram with autobinning based on gender
-ggplot(starwars_jac %>% replace_na(list(gender='none')) %>%
-         mutate(gender=capitalize(gender)), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
-  geom_histogram(aes(fill=gender), 
-                   binwidth = 10, 
-                   col="black") +
-            #       size=.1) +  # change binwidth
-  # remove bottom inner margin with expand
-scale_y_continuous(expand = c(0,0,0.08,0)) + 
-  labs(title="Height Distribution of Star Wars Characters", 
-       caption="Han Shot First") +
-xlab('Height (cm)') +
-ylab('Count') +
-guides(fill = guide_legend(title='Gender'))
-```
-
-    ## Warning: Removed 6 rows containing non-finite values (stat_bin).
-
-![](Chart_Collection_files/figure-markdown_github/histogram-1.png)
-
-Boxplot
--------
-
-``` r
- ggplot(eu_stock, aes(x=Index, y=Price,fill=Index)) + 
-  geom_boxplot(outlier.shape = NA) + # outliers removed
-  theme(legend.position='none',panel.grid.major.x=element_blank()) +
-  ylab('Value') +
-  labs(title='Boxplot of EU Stock Indexes') +
-   # imperfect solution but the negative third argument in expand 
-   # shrinks the ylimit. (the hidden outliers otherwise expand the graph)
-  scale_y_continuous(labels=scales::comma,expand=c(0.1,0,-.20,0)) +
- #  geom_jitter(width = 0.1) +
-  scale_fill_manual(values = wes_palette('Zissou1'))
-```
-
-![](Chart_Collection_files/figure-markdown_github/boxplot-1.png)
-
-Bar
----
+### Bar
 
 ``` r
 # A simple bar chart - average heights of the species
@@ -325,8 +305,10 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
 ![](Chart_Collection_files/figure-markdown_github/bar-3.png)
 
-Scatter
--------
+Correlation
+-----------
+
+### Scatterplot
 
 ``` r
 # Linear model
@@ -364,8 +346,10 @@ guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 
 ![](Chart_Collection_files/figure-markdown_github/scatter-1.png)
 
-Line
-----
+Change
+------
+
+### Line
 
 ``` r
 # Horizontal axis limits (Year)
@@ -410,8 +394,7 @@ ylab('') +
 
 ![](Chart_Collection_files/figure-markdown_github/line-2.png)
 
-Stacked Area
-------------
+### Stacked Area
 
 ``` r
 # Number of characters from each species 
@@ -431,8 +414,10 @@ ylab('')
 
 ![](Chart_Collection_files/figure-markdown_github/stackedarea-1.png)
 
-Treemap
--------
+Composition
+-----------
+
+### Treemap
 
 ``` r
 # Treemap of titanic
@@ -462,3 +447,30 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')) %>%
 ```
 
 ![](Chart_Collection_files/figure-markdown_github/treemap-2.png)
+
+### Waffle
+
+``` r
+waffle_palette <- wes_palette('Darjeeling2')
+waffle_palette[5] <- 'white' # 
+
+waffle( titanic_class %>% 
+    rename(names=Class,vals=n),  # rename data to match waffle chart syntax
+  rows = 33, size = 0.5, 
+  colors = waffle_palette) +
+  # remove margin around graph with expand
+  scale_x_continuous(expand=c(0,0,0,0)) +
+  scale_y_continuous(expand=c(0,0,0,0)) +
+  labs(title='Titanic Passengers by Class') +
+  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5,size=14),
+        legend.position='bottom') +
+  guides(fill = guide_legend(title='Class'))
+```
+
+    ## Scale for 'x' is already present. Adding another scale for 'x', which
+    ## will replace the existing scale.
+
+    ## Scale for 'y' is already present. Adding another scale for 'y', which
+    ## will replace the existing scale.
+
+![](Chart_Collection_files/figure-markdown_github/waffle-1.png)
