@@ -65,8 +65,6 @@ ylab('') +
 guides(fill = guide_legend(title='',reverse=T)) # reverse legend order
 ```
 
-    ## Warning: Removed 1 rows containing missing values (geom_text).
-
 ![](Titanic_files/figure-markdown_github/explore-1.png)
 
 Logistic Regression Model
@@ -156,11 +154,11 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
-  theme(legend.pos='top') +
+  theme(legend.pos='top'  ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent,
-                     expand=c(0,0,0,0),
-                     limits=c(0,1)) +
+                     limits=c(0,1),
+                     expand=c(0,0)) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
@@ -179,10 +177,13 @@ ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.05,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
   facet_wrap(~pclass,scales='free_y') +
-  theme(legend.pos='top') +
+  theme(legend.pos='top',
+        # prevent right label on axis from being clipped
+        plot.margin=margin(r = 20, unit = "pt")
+        ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent, limits=c(0,1),
-                     expand=c(0,0,0,0)
+                     expand=c(0,0)
                      ) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution by Passenger Class") +
@@ -201,7 +202,8 @@ ggplot(predictions, aes(brier_score)) +
                  col='black') +
   labs(title="Brier Score Distribution") +
     scale_fill_manual(values=wes_palette('Moonrise3')) +
-    scale_x_continuous(expand=c(0,0,0,0),limits=c(0,1)) +
+  # Use expand to make sure right axis label isn't clipped
+    scale_x_continuous(expand=c(0,0,0.01,0),limits=c(0,1)) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
 xlab('Brier Score') +
 ylab('Count') +
@@ -214,26 +216,26 @@ guides(fill = guide_legend(title=''))
 
 ``` r
 kable(log_info %>% 
-        dplyr::select(-df.residual,-df.null,-deviance),format='markdown') %>%
+        dplyr::select(-df.residual,-df.null,-deviance),format='markdown',digits=2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-|  meanBrierScore|  null.deviance|     logLik|       AIC|       BIC|
-|---------------:|--------------:|----------:|---------:|---------:|
-|       0.3013701|        1414.62|  -491.2266|  992.4531|  1017.217|
+|  meanBrierScore|  null.deviance|   logLik|     AIC|      BIC|
+|---------------:|--------------:|--------:|-------:|--------:|
+|             0.3|        1414.62|  -491.23|  992.45|  1017.22|
 
 ``` r
-kable(log_terms,format='markdown') %>%
+kable(log_terms,format='markdown',digits = 2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-| Term        |  Coefficient|        LCLM|        UCLM|  std.error|   statistic|  p.value|
-|:------------|------------:|-----------:|-----------:|----------:|-----------:|--------:|
-| age         |   -0.0343932|  -0.0469813|  -0.0221378|  0.0063310|   -5.432511|    1e-07|
-| pclass2nd   |   -1.2805697|  -1.7280290|  -0.8430583|  0.2255382|   -5.677840|    0e+00|
-| pclass3rd   |   -2.2896606|  -2.7406095|  -1.8545158|  0.2258019|  -10.140129|    0e+00|
-| sexmale     |   -2.4978447|  -2.8290589|  -2.1776176|  0.1660365|  -15.043949|    0e+00|
-| (Intercept) |    3.5220740|   2.8967273|   4.1786006|  0.3267022|   10.780686|    0e+00|
+| Term        |  Coefficient|   LCLM|   UCLM|  std.error|  statistic|  p.value|
+|:------------|------------:|------:|------:|----------:|----------:|--------:|
+| age         |        -0.03|  -0.05|  -0.02|       0.01|      -5.43|        0|
+| pclass2nd   |        -1.28|  -1.73|  -0.84|       0.23|      -5.68|        0|
+| pclass3rd   |        -2.29|  -2.74|  -1.85|       0.23|     -10.14|        0|
+| sexmale     |        -2.50|  -2.83|  -2.18|       0.17|     -15.04|        0|
+| (Intercept) |         3.52|   2.90|   4.18|       0.33|      10.78|        0|
 
 Linear Regression Model
 -----------------------
@@ -265,8 +267,8 @@ lm_terms <- tidy(lm_fit) %>%
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
-geom_vline(xintercept=0,color='blue') +
-scale_x_continuous(labels=scales::dollar #,expand=c(0,0,0,0)
+geom_vline(xintercept=0,color='red',size=0.4) +
+scale_x_continuous(labels=scales::dollar ,expand=c(0,0,0,0)
                    ) +
 scale_y_continuous(expand=c(0,0,0.07,0)) +  
   labs(title="Residual Distribution by Passenger Class") +
@@ -352,24 +354,24 @@ xlab('Term')
 ![](Titanic_files/figure-markdown_github/linear-regression-5.png)
 
 ``` r
-kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdown') %>%
+kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdown',digits = 2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-|  r.squared|  adj.r.squared|     sigma|  statistic|  p.value|   df|       AIC|       BIC|
-|----------:|--------------:|---------:|----------:|--------:|----:|---------:|---------:|
-|  0.3913351|       0.388406|  43.58534|    133.603|        0|    6|  10862.73|  10897.39|
+|  r.squared|  adj.r.squared|  sigma|  statistic|  p.value|   df|       AIC|       BIC|
+|----------:|--------------:|------:|----------:|--------:|----:|---------:|---------:|
+|       0.39|           0.39|  43.59|      133.6|        0|    6|  10862.73|  10897.39|
 
 ``` r
-kable(lm_terms,format='markdown') %>%
+kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-| Term        |  Coefficient|         LCLM|         UCLM|  std.error|    statistic|    p.value|
-|:------------|------------:|------------:|------------:|----------:|------------:|----------:|
-| (Intercept) |  108.5873881|   96.4108392|  120.7639370|  6.2054020|   17.4988484|  0.0000000|
-| sexmale     |  -11.4555074|  -17.9569857|   -4.9540290|  3.3132776|   -3.4574548|  0.0005674|
-| pclass2nd   |  -72.0386084|  -79.7916925|  -64.2855243|  3.9511198|  -18.2324538|  0.0000000|
-| pclass3rd   |  -81.1666077|  -88.7119998|  -73.6212157|  3.8452759|  -21.1081360|  0.0000000|
-| age         |   -0.2715108|   -0.4789193|   -0.0641024|  0.1056993|   -2.5687094|  0.0103465|
-| survived    |    0.5728532|   -6.2008974|    7.3466038|  3.4520327|    0.1659466|  0.8682312|
+| Term        |  Coefficient|   LCLM|   UCLM|  std.error|  statistic|  p.value|
+|:------------|------------:|------:|------:|----------:|----------:|--------:|
+| (Intercept) |        108.6|   96.4|  120.8|       6.21|      17.50|     0.00|
+| sexmale     |        -11.5|  -18.0|   -5.0|       3.31|      -3.46|     0.00|
+| pclass2nd   |        -72.0|  -79.8|  -64.3|       3.95|     -18.23|     0.00|
+| pclass3rd   |        -81.2|  -88.7|  -73.6|       3.85|     -21.11|     0.00|
+| age         |         -0.3|   -0.5|   -0.1|       0.11|      -2.57|     0.01|
+| survived    |          0.6|   -6.2|    7.3|       3.45|       0.17|     0.87|

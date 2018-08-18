@@ -48,7 +48,7 @@ theme_set(theme_bw()+
 
 ## Exploratory Graphs 
 
-```{r explore}
+```{r explore, warning=F}
 ggplot(data=titanic_summ,
        aes(x = fct_rev(pclass), y=perc_surv_num,fill = survived)) +
 facet_grid(~factor(sex)) +
@@ -116,11 +116,11 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
-  theme(legend.pos='top') +
+  theme(legend.pos='top'  ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent,
-                     expand=c(0,0,0,0),
-                     limits=c(0,1)) +
+                     limits=c(0,1),
+                     expand=c(0,0)) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
@@ -133,10 +133,13 @@ ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.05,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
   facet_wrap(~pclass,scales='free_y') +
-  theme(legend.pos='top') +
+  theme(legend.pos='top',
+        # prevent right label on axis from being clipped
+        plot.margin=margin(r = 20, unit = "pt")
+        ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent, limits=c(0,1),
-                     expand=c(0,0,0,0)
+                     expand=c(0,0)
                      ) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution by Passenger Class") +
@@ -149,7 +152,8 @@ ggplot(predictions, aes(brier_score)) +
                  col='black') +
   labs(title="Brier Score Distribution") +
     scale_fill_manual(values=wes_palette('Moonrise3')) +
-    scale_x_continuous(expand=c(0,0,0,0),limits=c(0,1)) +
+  # Use expand to make sure right axis label isn't clipped
+    scale_x_continuous(expand=c(0,0,0.01,0),limits=c(0,1)) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
 xlab('Brier Score') +
 ylab('Count') +
@@ -158,10 +162,10 @@ guides(fill = guide_legend(title=''))
 
 ```{r,results='asis',warning=F}
 kable(log_info %>% 
-        dplyr::select(-df.residual,-df.null,-deviance),format='markdown') %>%
+        dplyr::select(-df.residual,-df.null,-deviance),format='markdown',digits=2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 
-kable(log_terms,format='markdown') %>%
+kable(log_terms,format='markdown',digits = 2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
@@ -197,8 +201,8 @@ lm_terms <- tidy(lm_fit) %>%
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
-geom_vline(xintercept=0,color='blue') +
-scale_x_continuous(labels=scales::dollar #,expand=c(0,0,0,0)
+geom_vline(xintercept=0,color='red',size=0.4) +
+scale_x_continuous(labels=scales::dollar ,expand=c(0,0,0,0)
                    ) +
 scale_y_continuous(expand=c(0,0,0.07,0)) +  
   labs(title="Residual Distribution by Passenger Class") +
@@ -258,10 +262,10 @@ xlab('Term')
 ```
 
 ```{r,results='asis',warning=F}
-kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdown') %>%
+kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdown',digits = 2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 
-kable(lm_terms,format='markdown') %>%
+kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
