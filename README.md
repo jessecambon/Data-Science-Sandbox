@@ -4,9 +4,9 @@ A collection of code and resources to serve as a starting point for data science
 
 <span>
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection.md#lollipop"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection_files/figure-markdown_github/lollipop-1.png" height="200px"/></a>
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection.md#scatter"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection_files/figure-markdown_github/scatter-1.png" height="200px"/></a>
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection.md#scatterplot"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection_files/figure-markdown_github/scatter-1.png" height="200px"/></a>
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/source/Geospatial_Analysis.md"><img src="https://github.com/jessecambon/Data-Science-Codex/blob/master/source/Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-2-1.png" height="200px"/></a> 
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection.md#line"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection_files/figure-markdown_github/line-1.png" height="200px"/></a> 
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Chart_Collection.md#ridgeplot"><img src="https://raw.githubusercontent.com/jessecambon/Data-Science-Codex/master/source/Chart_Collection_files/figure-markdown_github/ridge-1.png" height="200px"/></a> 
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Titanic.md#logistic-regression-model"><img src="https://github.com/jessecambon/Data-Science-Codex/blob/master/source/Titanic_files/figure-markdown_github/logistic-regression-2.png" height="200px"/></a> 
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Titanic.md#logistic-regression-model"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/source/Titanic_files/figure-markdown_github/logistic-regression-1.png" height="200px"/></a> 
 </span>
