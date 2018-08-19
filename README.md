@@ -16,7 +16,7 @@ The purpose of this repository is to host code and resources that can be quickly
 
 
 ## Table of Contents 
-* [Chart Collection](source/Chart_Collection.md) - A variety of charts such as scatterplots and treemaps. 
+* [Data Viz Cookbook](source/Chart_Collection.md) - A repository of a wide variety of visuals
 * [Regression Primer](source/Titanic.md) - Fundamental linear and logistic regression modeling with the classic Titanic dataset.
 * [Geospatial Data Analysis](source/Geospatial_Analysis.md) - A work-in-progress collection of maps. 
 * [Resources](Resources.md) - Websites and references that I find helpful.
