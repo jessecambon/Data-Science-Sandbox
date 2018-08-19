@@ -10,15 +10,19 @@ Jesse Cambon
 -   [Chart Types](#chart-types)
     -   [Distribution](#distribution)
         -   [Histogram](#histogram)
+        -   [Population Pyramid](#population-pyramid)
         -   [Boxplot](#boxplot)
+        -   [Dotplot](#dotplot)
+        -   [Violin](#violin)
     -   [Ranking](#ranking)
         -   [Lollipop](#lollipop)
         -   [Bar](#bar)
     -   [Correlation](#correlation)
         -   [Scatterplot](#scatterplot)
-    -   [Change](#change)
+    -   [Evolution](#evolution)
         -   [Line](#line)
         -   [Stacked Area](#stacked-area)
+        -   [Ridgeplot](#ridgeplot)
     -   [Composition](#composition)
         -   [Treemap](#treemap)
         -   [Waffle](#waffle)
@@ -46,14 +50,24 @@ Setup
 ``` r
 # Load libraries - you will need to install these with install.packages('packagename')
 # if you do not have them installed
-library(tidyverse)
-library(ggrepel) # loads ggplot2 as well
-library(treemapify) # ggplot treemap
-library(treemap)
+
+# Need to load this package first to prevent it
+# from masking the 'select' command in dplyr (tidyverse)
+library(PASWR) #titanic3 dataset (for age-sex population pyramid)
+
+## General:
+library(tidyverse) # dplyr, data manipulation
 library(formattable) # percent format
 library(wesanderson) # Color Palettes from Wes Anderson Movies
+
+## For specific plots:
 library(waffle) # waffle charts, make sure to install the github version with devtools::install_github("hrbrmstr/waffle")
 library(R.utils) # capitalize function
+library(ggridges) # ridge plots
+library(ggrepel) # text labels
+library(treemapify) # ggplot treemap
+library(treemap) 
+library(viridis) # colors
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -193,11 +207,48 @@ guides(fill = guide_legend(title='Gender'))
 
 ![](Chart_Collection_files/figure-markdown_github/histogram-1.png)
 
+### Population Pyramid
+
+``` r
+## Transform titanic data with age into format for population pyramid
+titanic_age_sex <- titanic3 %>% as_tibble() %>%
+  filter(!is.na(age)) %>%
+  select(sex,age) %>%
+  mutate(age_cat=cut(age, breaks=c(0,10,20,30,40,50,60,80),
+    labels=c('0-10','11-20','21-30','31-40','41-50','51-60','61-80')
+  )) %>%
+  count(sex,age_cat) %>%
+  # invert counts for pyramid
+  # need as.numeric() since introducing negative values means we need
+  # to use the double format (numeric) instead of integer
+  mutate(n=case_when(sex=='female' ~ -1*n, TRUE ~ as.numeric(n)))
+
+
+ggplot(data=titanic_age_sex %>% mutate(sex=capitalize(sex)), aes(x = age_cat, y = n, fill = sex)) + 
+geom_bar(stat='identity',color='black',size=0.25) +  
+  scale_y_continuous(limits=c(-240,240),
+    breaks = seq(-240, 240, 80), 
+                     labels = as.character(c(seq(240,0,-80), seq(80,240,80)))) + 
+  coord_flip() + 
+  scale_fill_manual(values = wes_palette('Darjeeling2')[c(2,3)]) +
+  theme(legend.position='top',panel.grid.minor.x=element_blank()) +
+  labs(title='Passengers on the Titanic') +
+  xlab('Age') +
+  ylab('Passengers') +
+  guides(fill = guide_legend(title='')) # remove legend title
+```
+
+![](Chart_Collection_files/figure-markdown_github/pyramid-1.png)
+
 ### Boxplot
+
+A tukey-style boxplot.
+
+Note: "The upper whisker extends from the \[ upper hinge (ie. 75 percentile) \] to the largest value no further than 1.5 \* IQR from the \[upper hinge\] (where IQR is the inter-quartile range, or distance between the first and third quartiles). The lower whisker extends from the \[lower hinge (ie. 25 percentile)\] to the smallest value at most 1.5 \* IQR of the \[lower hinge\]. Data beyond the end of the whiskers are called "outlying" points and are plotted individually." <https://ggplot2.tidyverse.org/reference/geom_boxplot.html>
 
 ``` r
  ggplot(eu_stock, aes(x=Index, y=Price,fill=Index)) + 
-  geom_boxplot(outlier.shape = NA) + # outliers removed
+  geom_boxplot(outlier.shape = NA) + # outliers hidden
   theme(legend.position='none',panel.grid.major.x=element_blank()) +
   ylab('Value') +
   labs(title='Boxplot of EU Stock Indexes') +
@@ -209,6 +260,38 @@ guides(fill = guide_legend(title='Gender'))
 ```
 
 ![](Chart_Collection_files/figure-markdown_github/boxplot-1.png)
+
+### Dotplot
+
+``` r
+ggplot(starwars_jac %>% filter(gender %in% c('male','female')), aes(x = factor(gender), y = height,fill=gender)) +
+  geom_dotplot(binaxis = "y", stackdir = "center") +
+  xlab('Gender') +
+  ylab('Height (cm)') +
+  theme(legend.position='none') +
+  labs(title='Height Distribution of Starwars Characters')
+```
+
+    ## `stat_bindot()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 5 rows containing non-finite values (stat_bindot).
+
+![](Chart_Collection_files/figure-markdown_github/dotplot-1.png)
+
+### Violin
+
+``` r
+ggplot(starwars_jac %>% filter(gender %in% c('male','female')), aes(x = factor(gender), y = mass,fill=gender)) +
+  geom_violin() +
+  xlab('Gender') +
+  ylab('Weight (kg)') +
+  theme(legend.position='none') +
+  labs(title='Weight Distribution of Starwars Characters')
+```
+
+    ## Warning: Removed 27 rows containing non-finite values (stat_ydensity).
+
+![](Chart_Collection_files/figure-markdown_github/violin-1.png)
 
 Ranking
 -------
@@ -339,15 +422,15 @@ geom_smooth(method="lm",show.legend=F,size=0.5) + # Regression line
 scale_color_manual(values=c(cbPalette[2:5])) +
 labs(title='Heights and Weights of Selected Star Wars Characters',
      subtitle = bquote(Slope == .(round(coeff,2)) ~ ' | ' ~ R^2  ==  .(round(r_square,2)) )) +
-xlab('Mass (kg)') +
+xlab('Weight (kg)') +
 ylab('Height (cm)') +
 guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 ```
 
 ![](Chart_Collection_files/figure-markdown_github/scatter-1.png)
 
-Change
-------
+Evolution
+---------
 
 ### Line
 
@@ -413,6 +496,25 @@ ylab('')
 ```
 
 ![](Chart_Collection_files/figure-markdown_github/stackedarea-1.png)
+
+### Ridgeplot
+
+<https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html>
+
+``` r
+ggplot(lincoln_weather , aes(x = `Mean Wind Speed[MPH]`, y = `Month`, fill = ..x..)) +
+  geom_density_ridges_gradient(scale =2, rel_min_height = 0.01) +
+  scale_y_discrete(expand=c(0,0,0.2,0)) + # add top margin
+  scale_x_continuous(expand=c(0,0)) +
+  theme(legend.position='none') +
+  scale_fill_viridis(option='C',direction=-1) +
+  labs(title = 'Daily Mean Wind Speeds in Lincoln, NE in 2016') +
+  xlab('Mean Wind Speed (MPH)')
+```
+
+    ## Picking joint bandwidth of 1.32
+
+![](Chart_Collection_files/figure-markdown_github/ridge-1.png)
 
 Composition
 -----------

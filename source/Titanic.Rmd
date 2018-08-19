@@ -70,7 +70,7 @@ guides(fill = guide_legend(title='',reverse=T)) # reverse legend order
 
 We will use the brier score as one measurement of accuracy for our model:
 https://en.wikipedia.org/wiki/Brier_score 
-The book 'Superforecasting' by Philip Tetlock has a good discussion of brier scores.
+The book 'Superforecasting' by Philip Tetlock has a good discussion of the use of brier scores.
 
 
 ```{r logistic-regression}
@@ -116,11 +116,12 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
-  theme(legend.pos='top'  ) +
+  # prevent right label on axis from being clipped
+  theme(legend.pos='top',plot.margin=margin(r = 20, unit = "pt")  ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent,
                      limits=c(0,1),
-                     expand=c(0,0)) +
+                     expand=c(0,0)) + # eliminate left/right margin
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
@@ -139,7 +140,7 @@ ggplot(predictions, aes(prediction))+
         ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent, limits=c(0,1),
-                     expand=c(0,0)
+                     expand=c(0,0) # eliminate left/right margin
                      ) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution by Passenger Class") +
