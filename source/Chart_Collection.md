@@ -1,7 +1,7 @@
 Chart Collection
 ================
 Jesse Cambon
-18 August, 2018
+19 August, 2018
 
 -   [Readme](#readme)
 -   [References](#references)
@@ -10,6 +10,7 @@ Jesse Cambon
 -   [Chart Types](#chart-types)
     -   [Distribution](#distribution)
         -   [Histogram](#histogram)
+        -   [Ridgeplot](#ridgeplot)
         -   [Population Pyramid](#population-pyramid)
         -   [Boxplot](#boxplot)
         -   [Dotplot](#dotplot)
@@ -19,10 +20,10 @@ Jesse Cambon
         -   [Bar](#bar)
     -   [Correlation](#correlation)
         -   [Scatterplot](#scatterplot)
+        -   [Bubbleplot](#bubbleplot)
     -   [Evolution](#evolution)
         -   [Line](#line)
         -   [Stacked Area](#stacked-area)
-        -   [Ridgeplot](#ridgeplot)
     -   [Composition](#composition)
         -   [Treemap](#treemap)
         -   [Waffle](#waffle)
@@ -68,6 +69,7 @@ library(ggrepel) # text labels
 library(treemapify) # ggplot treemap
 library(treemap) 
 library(viridis) # colors
+library(gapminder) # gdp life expectancy data
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -207,6 +209,25 @@ guides(fill = guide_legend(title='Gender'))
 
 ![](Chart_Collection_files/figure-markdown_github/histogram-1.png)
 
+### Ridgeplot
+
+<https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html>
+
+``` r
+ggplot(lincoln_weather , aes(x = `Mean Wind Speed[MPH]`, y = `Month`, fill = ..x..)) +
+  geom_density_ridges_gradient(scale =2, rel_min_height = 0.01) +
+  scale_y_discrete(expand=c(0,0,0.2,0)) + # add top margin
+  scale_x_continuous(expand=c(0,0)) +
+  theme(legend.position='none') +
+  scale_fill_viridis(option='C',direction=-1) +
+  labs(title = 'Daily Mean Wind Speeds in Lincoln, NE in 2016') +
+  xlab('Mean Wind Speed (MPH)')
+```
+
+    ## Picking joint bandwidth of 1.32
+
+![](Chart_Collection_files/figure-markdown_github/ridge-1.png)
+
 ### Population Pyramid
 
 ``` r
@@ -226,12 +247,14 @@ titanic_age_sex <- titanic3 %>% as_tibble() %>%
 
 ggplot(data=titanic_age_sex %>% mutate(sex=capitalize(sex)), aes(x = age_cat, y = n, fill = sex)) + 
 geom_bar(stat='identity',color='black',size=0.25) +  
+#  facet_grid(~sex,scales='free',space='free') +
   scale_y_continuous(limits=c(-240,240),
     breaks = seq(-240, 240, 80), 
                      labels = as.character(c(seq(240,0,-80), seq(80,240,80)))) + 
   coord_flip() + 
   scale_fill_manual(values = wes_palette('Darjeeling2')[c(2,3)]) +
-  theme(legend.position='top',panel.grid.minor.x=element_blank()) +
+  theme(legend.position='top',panel.grid.minor.x=element_blank(),
+        strip.placement = "outside") +
   labs(title='Passengers on the Titanic') +
   xlab('Age') +
   ylab('Passengers') +
@@ -429,6 +452,29 @@ guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 
 ![](Chart_Collection_files/figure-markdown_github/scatter-1.png)
 
+### Bubbleplot
+
+``` r
+ggplot(data=gapminder %>% filter(year==2007),
+          aes(x = gdpPercap, y = lifeExp, color = continent,size=pop,group=1)) +
+geom_point() +
+  # remove legend margins
+theme( legend.margin=margin(0,0,0,0),
+      legend.box.margin=margin(0,0,0,0),
+      legend.pos='right') +
+scale_x_continuous(labels=scales::dollar) +
+geom_smooth(method="loess",show.legend=F,size=0.5) + # Regression line
+#scale_color_manual(values=wes_palette('Royal2')) +
+labs(title='Relationship between GDP per capita and Life Expectancy for Countries',
+     caption='Data is for 2007') +
+xlab('GDP Per Capita (USD, inflation-adjusted)') +
+ylab('Life Expectancy (at birth)') +
+guides(color=guide_legend(title='Continent',override.aes = list(size=2.5)),
+       size=guide_legend(title='Population'))
+```
+
+![](Chart_Collection_files/figure-markdown_github/bubbleplot-1.png)
+
 Evolution
 ---------
 
@@ -463,13 +509,27 @@ guides(colour = guide_legend(override.aes = list(size=2.5)))
 # Number of characters from each species 
 ggplot(data=starwars_gender_film %>% mutate(gender=capitalize(gender)),
           aes(x = episode, y=prop,color = gender)) +
+# show.legend=F prevents the geom (in this case a line) from being in the legend
 geom_line(show.legend=F) + geom_point() +
-scale_x_continuous(breaks=c(1:7)) +
+geom_text_repel( # Labels
+    data = starwars_gender_film %>% mutate(gender=capitalize(gender)) %>%
+      group_by(gender) %>% filter(episode==max(episode)), # only display label on last episode
+    aes(label =gender),
+    size = 3,
+    nudge_x=0.3,
+    point.padding=.4, # give the data points room
+    force = 1,
+    box.padding = 0.2, # use this to control label spacing
+    segment.color = NA,
+    show.legend = F # need this to fix legend
+  ) +
+scale_x_continuous(breaks=c(1:7),expand=c(0.03,0,0.1,0)) +
 scale_y_continuous(labels=scales::percent) + 
 scale_color_manual(values=cbPalette) +
 labs(title='Percentage of Star Wars Characters in Each Film by Gender') +
 theme(legend.title = element_blank(),
-      panel.grid.minor.x = element_blank()) +
+      panel.grid.minor.x = element_blank(),
+      legend.position='none') +
 xlab('Episode') +
 ylab('') +
   guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
@@ -496,25 +556,6 @@ ylab('')
 ```
 
 ![](Chart_Collection_files/figure-markdown_github/stackedarea-1.png)
-
-### Ridgeplot
-
-<https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html>
-
-``` r
-ggplot(lincoln_weather , aes(x = `Mean Wind Speed[MPH]`, y = `Month`, fill = ..x..)) +
-  geom_density_ridges_gradient(scale =2, rel_min_height = 0.01) +
-  scale_y_discrete(expand=c(0,0,0.2,0)) + # add top margin
-  scale_x_continuous(expand=c(0,0)) +
-  theme(legend.position='none') +
-  scale_fill_viridis(option='C',direction=-1) +
-  labs(title = 'Daily Mean Wind Speeds in Lincoln, NE in 2016') +
-  xlab('Mean Wind Speed (MPH)')
-```
-
-    ## Picking joint bandwidth of 1.32
-
-![](Chart_Collection_files/figure-markdown_github/ridge-1.png)
 
 Composition
 -----------
