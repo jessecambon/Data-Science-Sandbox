@@ -43,6 +43,11 @@ A categorized list of data science resources.
 * [A very comprehensive article on regression](https://www.r-bloggers.com/15-types-of-regression-you-should-know/)
 * [Tidyverse style survey package](https://cran.r-project.org/web/packages/srvyr/vignettes/srvyr-vs-survey.html)
 
+## Maps
+* [Sample maps](https://bhaskarvk.github.io/user2017.geodataviz/notebooks/02-Static-Maps.nb.html)
+* [Making Maps with R](http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html)
+* [Wind Maps](http://www.hilltop-analytics.com/2018/08/football-wind-maps/)
+
 ## Miscellaneous Packages
 * [TidyText](https://github.com/juliasilge/tidytext)
 * [Broom](https://github.com/tidymodels/broom) - Useful functions for formatting the output of statistical models. 
