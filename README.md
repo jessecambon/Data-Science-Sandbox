@@ -23,11 +23,6 @@ The purpose of this repository is to host code and resources that can be quickly
 
 
 #### Todo List
-* Log-binomial model (risk ratios)
 * Data imputation for modeling
-* Bubblechart 
-* Github basic usage guide
-* Comments around data viz and modeling best practices
-* Format regression tables (rounding, etc.)
 * Maps / Geospatial data viz 
 
