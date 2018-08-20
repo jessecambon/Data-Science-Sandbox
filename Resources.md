@@ -7,6 +7,13 @@ A categorized list of data science resources.
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
+## Datasets
+* [KDNuggets](https://www.kdnuggets.com/datasets/index.html)
+* [Kaggle](https://www.kaggle.com/datasets) - Datasets used for Kaggle competitions.
+* [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml)
+* [R Datasets](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/00Index.html) - Documentation on the inbuilt datasets in R.
+* [Data.gov](https://www.data.gov/) - A good place to start for government data.
+
 ## Visualization General Resources
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
 * [Dataviz Project](http://datavizproject.com/) - Categorized data visualizations.
