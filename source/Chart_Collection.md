@@ -16,6 +16,7 @@ Jesse Cambon
         -   [Dotplot](#dotplot)
         -   [Violin](#violin)
     -   [Ranking](#ranking)
+        -   [Dotplot](#dotplot-1)
         -   [Lollipop](#lollipop)
         -   [Bar](#bar)
     -   [Correlation](#correlation)
@@ -319,6 +320,34 @@ ggplot(starwars_jac %>% filter(gender %in% c('male','female')), aes(x = factor(g
 Ranking
 -------
 
+### Dotplot
+
+``` r
+gapminder_continent_life <- gapminder %>% filter(year==2007) %>% group_by(continent) %>%
+         summarize(mean_life=mean(lifeExp),min_life=min(lifeExp),max_life=max(lifeExp))
+
+ggplot(gapminder_continent_life, aes(x=continent, y=mean_life,color=continent)) + 
+#  geom_point(col="tomato2", size=3) +   # Draw points
+geom_pointrange(mapping=aes(ymin=min_life, ymax=max_life)) + 
+  theme(legend.position='none',
+        panel.grid.major.y=element_blank(),
+        panel.grid.minor.x =element_blank()) +
+  scale_y_continuous(expand=c(0,0)) +
+  # geom_segment(aes(x=continent,
+  #                  xend=continent,
+  #                  y=min(min_life),
+  #                  yend=max(max_life)),
+  #              linetype="dashed", color='black',
+  #              size=0.1) +   # Draw dashed lines
+  labs(title="Life Expectancy by Continent",
+       caption="Data: 2007") +  
+  coord_flip() +
+  xlab('Continent') +
+  ylab('Life Expectancy at Birth') 
+```
+
+![](Chart_Collection_files/figure-markdown_github/dotplot-rank-1.png)
+
 ### Lollipop
 
 ``` r
@@ -441,10 +470,11 @@ geom_label_repel( # Labels
     show.legend = F # need this to fix legend
   ) +
 
-geom_smooth(method="lm",show.legend=F,size=0.5) + # Regression line
+geom_smooth(method="lm",show.legend=F,size=0.25,alpha=0.25,color='black') + # Regression line
 scale_color_manual(values=c(cbPalette[2:5])) +
 labs(title='Heights and Weights of Selected Star Wars Characters',
-     subtitle = bquote(Slope == .(round(coeff,2)) ~ ' | ' ~ R^2  ==  .(round(r_square,2)) )) +
+     subtitle = bquote(Slope == .(round(coeff,2)) ~ ' | ' ~ R^2  ==  .(round(r_square,2)) ),
+     caption='95% confidence interval is shaded') +
 xlab('Weight (kg)') +
 ylab('Height (cm)') +
 guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
@@ -463,10 +493,10 @@ theme( legend.margin=margin(0,0,0,0),
       legend.box.margin=margin(0,0,0,0),
       legend.pos='right') +
 scale_x_continuous(labels=scales::dollar) +
-geom_smooth(method="loess",show.legend=F,size=0.5) + # Regression line
+geom_smooth(method="loess",show.legend=F,size=0.25,color='black',alpha=0.25) + # Regression line
 #scale_color_manual(values=wes_palette('Royal2')) +
-labs(title='Relationship between GDP per capita and Life Expectancy for Countries',
-     caption='Data is for 2007') +
+labs(title='The Wealth of Nations - GDP v. Life Expectancy',
+     caption='Data is for 2007. 95% confidence interval is shaded.') +
 xlab('GDP Per Capita (USD, inflation-adjusted)') +
 ylab('Life Expectancy (at birth)') +
 guides(color=guide_legend(title='Continent',override.aes = list(size=2.5)),

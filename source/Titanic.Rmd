@@ -15,8 +15,8 @@ References:
 https://stats.idre.ucla.edu/r/dae/logit-regression/
 
 ```{r setup,warning=F,message=F}
-library(tidyverse)
 library(PASWR) #titanic3 dataset
+library(MASS) # confint for glm
 library(wesanderson) # color palettes
 library(formattable) # percent format
 library(caret) # regression utilities
@@ -25,7 +25,7 @@ library(broom) # model display capabilities
 library(xtable) # pretty table
 library(knitr)  
 library(kableExtra)
-library(MASS) # confint for glm
+library(tidyverse)
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -36,7 +36,7 @@ titanic_summ <- titanic %>%
   mutate(perc_surv_num=n/sum(n),
     perc_surv_char=as.character(percent(n/sum(n),0))) %>%
   ungroup() %>%
-  mutate(survived=factor(survived,labels=c('Died','Survied')))
+  mutate(survived=factor(survived,labels=c('Died','Survived')))
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -49,6 +49,36 @@ theme_set(theme_bw()+
 ## Exploratory Graphs 
 
 ```{r explore, warning=F}
+
+titanic_summ_dot <- titanic_summ %>%
+  filter(survived=="Survived") %>%
+  mutate(group=str_c(sex,'-',pclass))
+  
+# Analyze where age is missing
+titanic_miss <- titanic %>% dplyr::select(pclass,sex,age,survived) %>%
+  mutate(sex=capitalize(as.character(sex)),missing_age=is.na(age)) %>%
+  group_by(pclass,sex) %>%
+  dplyr::summarize(perc_missing=mean(missing_age)) %>%
+  mutate(group=str_c(sex,'-',pclass))
+  
+
+ggplot(titanic_summ_dot, aes(x=reorder(group,-perc_surv_num), y=perc_surv_num)) + 
+  geom_point(size=3,color='black') +   # Draw points
+  theme(legend.position='none',
+        panel.grid=element_blank()) +
+  scale_y_continuous(expand=c(0,0,0.015,0),labels=scales::percent) +
+  geom_segment(aes(x=group,
+                   xend=group,
+                   y=min(0),
+                   yend=max(1)),
+               linetype="dashed", color='black',
+               size=0.1) +   # Draw dashed lines
+  labs(title="Titanic Passenger Survival Rates") +  
+  coord_flip() +
+  xlab('Group') +
+  ylab('Survival Rate') 
+
+
 ggplot(data=titanic_summ,
        aes(x = fct_rev(pclass), y=perc_surv_num,fill = survived)) +
 facet_grid(~factor(sex)) +
@@ -64,6 +94,24 @@ labs(title='Passenger Survival Rates by Gender and Class') +
 xlab('Passenger Class') +
 ylab('') +
 guides(fill = guide_legend(title='',reverse=T)) # reverse legend order
+
+ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) + 
+  geom_point(size=3,color='black') +   # Draw points
+  theme(legend.position='none',
+        panel.grid=element_blank()) +
+  scale_y_continuous(expand=c(0,0,0.015,0),labels=scales::percent) +
+  geom_segment(aes(x=group,
+                   xend=group,
+                   y=min(0),
+                   yend=max(1)),
+               linetype="dashed", color='black',
+               size=0.1) +   # Draw dashed lines
+  labs(title="Which Passengers Have Missing Age") +  
+  coord_flip() +
+  xlab('Group') +
+  ylab('Percent Missing Age') 
+
+
 ```
 
 ## Logistic Regression Model

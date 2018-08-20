@@ -1,7 +1,7 @@
 Modeling the Titanic Dataset
 ================
 Jesse Cambon
-18 August, 2018
+20 August, 2018
 
 -   [Exploratory Graphs](#exploratory-graphs)
 -   [Logistic Regression Model](#logistic-regression-model)
@@ -14,8 +14,8 @@ To add: imputation, log-binomial model (risk ratio)
 References: <https://stats.idre.ucla.edu/r/dae/logit-regression/>
 
 ``` r
-library(tidyverse)
 library(PASWR) #titanic3 dataset
+library(MASS) # confint for glm
 library(wesanderson) # color palettes
 library(formattable) # percent format
 library(caret) # regression utilities
@@ -24,7 +24,7 @@ library(broom) # model display capabilities
 library(xtable) # pretty table
 library(knitr)  
 library(kableExtra)
-library(MASS) # confint for glm
+library(tidyverse)
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -35,7 +35,7 @@ titanic_summ <- titanic %>%
   mutate(perc_surv_num=n/sum(n),
     perc_surv_char=as.character(percent(n/sum(n),0))) %>%
   ungroup() %>%
-  mutate(survived=factor(survived,labels=c('Died','Survied')))
+  mutate(survived=factor(survived,labels=c('Died','Survived')))
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -46,6 +46,38 @@ theme_set(theme_bw()+
 
 Exploratory Graphs
 ------------------
+
+``` r
+titanic_summ_dot <- titanic_summ %>%
+  filter(survived=="Survived") %>%
+  mutate(group=str_c(sex,'-',pclass))
+  
+# Analyze where age is missing
+titanic_miss <- titanic %>% dplyr::select(pclass,sex,age,survived) %>%
+  mutate(sex=capitalize(as.character(sex)),missing_age=is.na(age)) %>%
+  group_by(pclass,sex) %>%
+  dplyr::summarize(perc_missing=mean(missing_age)) %>%
+  mutate(group=str_c(sex,'-',pclass))
+  
+
+ggplot(titanic_summ_dot, aes(x=reorder(group,-perc_surv_num), y=perc_surv_num)) + 
+  geom_point(size=3,color='black') +   # Draw points
+  theme(legend.position='none',
+        panel.grid=element_blank()) +
+  scale_y_continuous(expand=c(0,0,0.015,0),labels=scales::percent) +
+  geom_segment(aes(x=group,
+                   xend=group,
+                   y=min(0),
+                   yend=max(1)),
+               linetype="dashed", color='black',
+               size=0.1) +   # Draw dashed lines
+  labs(title="Titanic Passenger Survival Rates") +  
+  coord_flip() +
+  xlab('Group') +
+  ylab('Survival Rate') 
+```
+
+![](Titanic_files/figure-markdown_github/explore-1.png)
 
 ``` r
 ggplot(data=titanic_summ,
@@ -65,12 +97,32 @@ ylab('') +
 guides(fill = guide_legend(title='',reverse=T)) # reverse legend order
 ```
 
-![](Titanic_files/figure-markdown_github/explore-1.png)
+![](Titanic_files/figure-markdown_github/explore-2.png)
+
+``` r
+ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) + 
+  geom_point(size=3,color='black') +   # Draw points
+  theme(legend.position='none',
+        panel.grid=element_blank()) +
+  scale_y_continuous(expand=c(0,0,0.015,0),labels=scales::percent) +
+  geom_segment(aes(x=group,
+                   xend=group,
+                   y=min(0),
+                   yend=max(1)),
+               linetype="dashed", color='black',
+               size=0.1) +   # Draw dashed lines
+  labs(title="Which Passengers Have Missing Age") +  
+  coord_flip() +
+  xlab('Group') +
+  ylab('Percent Missing Age') 
+```
+
+![](Titanic_files/figure-markdown_github/explore-3.png)
 
 Logistic Regression Model
 -------------------------
 
-We will use the brier score as one measurement of accuracy for our model: <https://en.wikipedia.org/wiki/Brier_score> The book 'Superforecasting' by Philip Tetlock has a good discussion of brier scores.
+We will use the brier score as one measurement of accuracy for our model: <https://en.wikipedia.org/wiki/Brier_score> The book 'Superforecasting' by Philip Tetlock has a good discussion of the use of brier scores.
 
 ``` r
 log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
@@ -154,11 +206,12 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.02,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
-  theme(legend.pos='top'  ) +
+  # prevent right label on axis from being clipped
+  theme(legend.pos='top',plot.margin=margin(r = 20, unit = "pt")  ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent,
                      limits=c(0,1),
-                     expand=c(0,0)) +
+                     expand=c(0,0)) + # eliminate left/right margin
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
@@ -183,7 +236,7 @@ ggplot(predictions, aes(prediction))+
         ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent, limits=c(0,1),
-                     expand=c(0,0)
+                     expand=c(0,0) # eliminate left/right margin
                      ) +
     scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
   labs(title="Logistic Regression Probability Distribution by Passenger Class") +
