@@ -3,7 +3,8 @@ Modeling the Titanic Dataset
 Jesse Cambon
 20 August, 2018
 
--   [Exploratory Graphs](#exploratory-graphs)
+-   [Exploratory Analysis](#exploratory-analysis)
+-   [Imputation](#imputation)
 -   [Logistic Regression Model](#logistic-regression-model)
 -   [Linear Regression Model](#linear-regression-model)
 
@@ -25,6 +26,7 @@ library(xtable) # pretty table
 library(knitr)  
 library(kableExtra)
 library(tidyverse)
+library(rms)
 
 titanic <- titanic3 %>% as_tibble()
 
@@ -44,8 +46,8 @@ theme_set(theme_bw()+
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
-Exploratory Graphs
-------------------
+Exploratory Analysis
+--------------------
 
 ``` r
 titanic_summ_dot <- titanic_summ %>%
@@ -53,7 +55,7 @@ titanic_summ_dot <- titanic_summ %>%
   mutate(group=str_c(sex,'-',pclass))
   
 # Analyze where age is missing
-titanic_miss <- titanic %>% dplyr::select(pclass,sex,age,survived) %>%
+titanic_miss <- titanic %>% select(pclass,sex,age,survived) %>%
   mutate(sex=capitalize(as.character(sex)),missing_age=is.na(age)) %>%
   group_by(pclass,sex) %>%
   dplyr::summarize(perc_missing=mean(missing_age)) %>%
@@ -104,11 +106,11 @@ ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) +
   geom_point(size=3,color='black') +   # Draw points
   theme(legend.position='none',
         panel.grid=element_blank()) +
-  scale_y_continuous(expand=c(0,0,0.015,0),labels=scales::percent) +
+  scale_y_continuous(labels=scales::percent) +
   geom_segment(aes(x=group,
                    xend=group,
-                   y=min(0),
-                   yend=max(1)),
+                   y=min(perc_missing),
+                   yend=max(perc_missing)),
                linetype="dashed", color='black',
                size=0.1) +   # Draw dashed lines
   labs(title="Which Passengers Have Missing Age") +  
@@ -118,6 +120,69 @@ ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) +
 ```
 
 ![](Titanic_files/figure-markdown_github/explore-3.png)
+
+Imputation
+----------
+
+<https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/> <https://www.andrew.cmu.edu/user/aurorat/MIA_r.html>
+
+``` r
+library(mice)
+```
+
+    ## 
+    ## Attaching package: 'mice'
+
+    ## The following object is masked from 'package:tidyr':
+    ## 
+    ##     complete
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     cbind, rbind
+
+``` r
+# Use mice to impute data
+titanic_imputed <- mice(titanic %>% select(pclass,age,sex), m=10, maxit = 50, method = 'pmm', seed = 13,printFlag=F)
+
+# Add imputed Data
+titanic_imp <- complete(titanic_imputed,3) %>%
+  bind_cols(titanic %>% select(age,survived) %>% rename(age_orig=age)) %>%
+  mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original'))
+
+
+# Plot
+ggplot(data=titanic_imp) +
+ geom_density(aes(x=age,color=imputed), alpha=0.8) + 
+  facet_grid(vars(sex),vars(pclass)) +
+  theme(legend.position='top') +
+    labs(title="Distributions of Original v. Imputed Age") +
+  guides(color=guide_legend(title=''))
+```
+
+![](Titanic_files/figure-markdown_github/imputation-1.png)
+
+``` r
+# titanic_imp <- titanic %>%
+  # select(survived,sex,pclass,age) %>%
+# titanic_imputed <- impute.transcan(impute_arg, imputation=1, data=iris.mis, list.out=TRUE,pr=FALSE, check=FALSE) 
+
+
+
+
+
+
+# imp_obj <- aregImpute(~age + pclass + sex, data = titanic, n.impute = 5)
+# 
+# titanic_imp <- titanic %>%
+#   mutate(imputed_age=imp_obj$imputed$age)
+
+
+# Imputate with k nearest neighbors method
+# imp_model <- preProcess(titanic %>% select(pclass,survived,sex,age), method = c("knnImpute"))
+# library(RANN) # nearest neighbors library
+# titanic_imputed <- predict(imp_model,titanic %>% select(pclass,survived,sex,age))
+```
 
 Logistic Regression Model
 -------------------------
