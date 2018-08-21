@@ -1,7 +1,7 @@
 Modeling the Titanic Dataset
 ================
 Jesse Cambon
-20 August, 2018
+21 August, 2018
 
 -   [Exploratory Analysis](#exploratory-analysis)
 -   [Imputation](#imputation)
@@ -22,7 +22,7 @@ library(formattable) # percent format
 library(caret) # regression utilities
 library(Hmisc) # capitalize function
 library(broom) # model display capabilities
-library(xtable) # pretty table
+#library(xtable) # pretty table
 library(knitr)  
 library(kableExtra)
 library(tidyverse)
@@ -124,7 +124,7 @@ ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) +
 Imputation
 ----------
 
-<https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/> <https://www.andrew.cmu.edu/user/aurorat/MIA_r.html>
+<https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/> <https://www.andrew.cmu.edu/user/aurorat/MIA_r.html> <http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html>
 
 ``` r
 library(mice)
@@ -142,16 +142,43 @@ library(mice)
     ##     cbind, rbind
 
 ``` r
-# Use mice to impute data
-titanic_imputed <- mice(titanic %>% select(pclass,age,sex), m=10, maxit = 50, method = 'pmm', seed = 13,printFlag=F)
+# Use mice to impute data - takes a few seconds on my laptop
+titanic_imputed <- mice(titanic %>% select(pclass,age,sex), m=10, maxit = 50, method = 'pmm', seed = 3530,printFlag=F)
 
+imp_with <- with(titanic_imputed, lm(age ~ pclass + sex))
+
+pooled <- pool(imp_with)
+
+# check the fit
+summary(pooled)
+```
+
+    ##               estimate std.error  statistic       df      p.value
+    ## (Intercept)  37.023647 0.8928789  41.465473 318.0088 0.000000e+00
+    ## pclass2nd    -9.855947 1.1234681  -8.772787 405.7172 0.000000e+00
+    ## pclass3rd   -14.945784 0.9483567 -15.759665 268.3844 0.000000e+00
+    ## sexmale       3.843549 0.8355924   4.599789 187.5426 5.660992e-06
+
+``` r
 # Add imputed Data
-titanic_imp <- complete(titanic_imputed,3) %>%
+titanic_imp <- complete(titanic_imputed,10) %>%
   bind_cols(titanic %>% select(age,survived) %>% rename(age_orig=age)) %>%
   mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original'))
 
 
 # Plot
+
+ggplot(data=titanic_imp) +
+ geom_density(aes(x=age,color=imputed), alpha=0.8) + 
+  #facet_grid(vars(sex),vars(pclass)) +
+  theme(legend.position='top') +
+    labs(title="Distributions of Original v. Imputed Age") +
+  guides(color=guide_legend(title=''))
+```
+
+![](Titanic_files/figure-markdown_github/imputation-1.png)
+
+``` r
 ggplot(data=titanic_imp) +
  geom_density(aes(x=age,color=imputed), alpha=0.8) + 
   facet_grid(vars(sex),vars(pclass)) +
@@ -160,7 +187,7 @@ ggplot(data=titanic_imp) +
   guides(color=guide_legend(title=''))
 ```
 
-![](Titanic_files/figure-markdown_github/imputation-1.png)
+![](Titanic_files/figure-markdown_github/imputation-2.png)
 
 ``` r
 # titanic_imp <- titanic %>%

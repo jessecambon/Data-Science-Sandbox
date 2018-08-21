@@ -22,7 +22,7 @@ library(formattable) # percent format
 library(caret) # regression utilities
 library(Hmisc) # capitalize function
 library(broom) # model display capabilities
-library(xtable) # pretty table
+#library(xtable) # pretty table
 library(knitr)  
 library(kableExtra)
 library(tidyverse)
@@ -119,20 +119,36 @@ ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) +
 
 https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/ 
 https://www.andrew.cmu.edu/user/aurorat/MIA_r.html
+http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html 
 ```{r imputation}
 
 library(mice)
 
-# Use mice to impute data
-titanic_imputed <- mice(titanic %>% select(pclass,age,sex), m=10, maxit = 50, method = 'pmm', seed = 13,printFlag=F)
+# Use mice to impute data - takes a few seconds on my laptop
+titanic_imputed <- mice(titanic %>% select(pclass,age,sex), m=10, maxit = 50, method = 'pmm', seed = 3530,printFlag=F)
+
+imp_with <- with(titanic_imputed, lm(age ~ pclass + sex))
+
+pooled <- pool(imp_with)
+
+# check the fit
+summary(pooled)
 
 # Add imputed Data
-titanic_imp <- complete(titanic_imputed,3) %>%
+titanic_imp <- complete(titanic_imputed,10) %>%
   bind_cols(titanic %>% select(age,survived) %>% rename(age_orig=age)) %>%
   mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original'))
 
 
 # Plot
+
+ggplot(data=titanic_imp) +
+ geom_density(aes(x=age,color=imputed), alpha=0.8) + 
+  #facet_grid(vars(sex),vars(pclass)) +
+  theme(legend.position='top') +
+    labs(title="Distributions of Original v. Imputed Age") +
+  guides(color=guide_legend(title=''))
+
 ggplot(data=titanic_imp) +
  geom_density(aes(x=age,color=imputed), alpha=0.8) + 
   facet_grid(vars(sex),vars(pclass)) +
