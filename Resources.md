@@ -7,6 +7,13 @@ A categorized list of data science resources.
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
+## Datasets
+* [KDNuggets](https://www.kdnuggets.com/datasets/index.html)
+* [Kaggle](https://www.kaggle.com/datasets) - Datasets used for Kaggle competitions.
+* [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml)
+* [R Datasets](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/00Index.html) - Documentation on the inbuilt datasets in R.
+* [Data.gov](https://www.data.gov/) - A good place to start for government data.
+
 ## Visualization General Resources
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
 * [Dataviz Project](http://datavizproject.com/) - Categorized data visualizations.
@@ -42,6 +49,11 @@ A categorized list of data science resources.
 * [Survival analysis tutorial](http://rpubs.com/sinhrks/plot_surv)
 * [A very comprehensive article on regression](https://www.r-bloggers.com/15-types-of-regression-you-should-know/)
 * [Tidyverse style survey package](https://cran.r-project.org/web/packages/srvyr/vignettes/srvyr-vs-survey.html)
+
+## Maps
+* [Sample maps](https://bhaskarvk.github.io/user2017.geodataviz/notebooks/02-Static-Maps.nb.html)
+* [Making Maps with R](http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html)
+* [Wind Maps](http://www.hilltop-analytics.com/2018/08/football-wind-maps/)
 
 ## Miscellaneous Packages
 * [TidyText](https://github.com/juliasilge/tidytext)
