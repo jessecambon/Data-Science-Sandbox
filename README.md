@@ -17,7 +17,7 @@ The purpose of this repository is to provide code and resources that can be quic
 
 ## Table of Contents 
 * [Data Viz Toolbox](source/Chart_Collection.md) - A wide variety of visuals demonstrated.
-* [Regression Fundamentals](source/Titanic.md) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
+* [Modeling Fundamentals](source/Titanic.md) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
 * [Geospatial Data Analysis](source/Geospatial_Analysis.md) - A work-in-progress collection of maps. 
 * [Resources](Resources.md) - Websites and references that I find helpful for data science projects..
 
