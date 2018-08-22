@@ -12,7 +12,7 @@ A collection of code and resources to serve as a starting point for data science
 </span>
 
 
-The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. An emphasis is placed on having clear understandable code that can be easily replicated. I make use of inbuilt datasets R in packages so that there is no need to download anything beyond the packages themselves.
+The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. An emphasis is placed on having clear understandable code that can be easily replicated. I make use of inbuilt datasets in R so that there is no need to download external datasets.
 
 
 ## Table of Contents 
