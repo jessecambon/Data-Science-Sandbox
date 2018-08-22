@@ -23,6 +23,5 @@ The purpose of this repository is to provide code and resources that can be quic
 
 
 #### Todo List
-* Data imputation for modeling
-* Maps / Geospatial data viz 
-
+* Survival Analysis
+* Marker Maps
