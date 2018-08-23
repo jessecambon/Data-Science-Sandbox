@@ -12,17 +12,18 @@ A collection of code and resources to serve as a starting point for data science
 </span>
 
 
-The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. An emphasis is placed on having clear understandable code that can be easily replicated. I make use of inbuilt datasets R in packages so that there is no need to download anything beyond the packages themselves.
+The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. An emphasis is placed on having clear understandable code that can be easily replicated. I make use of inbuilt datasets in R so that there is no need to download external datasets.
 
 
 ## Table of Contents 
-* [Data Viz Toolbox](source/Chart_Collection.md) - A wide variety of visuals demonstrated.
-* [Regression Fundamentals](source/Titanic.md) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
+* [Visualization Cookbook](source/Chart_Collection.md) - A wide variety of data visualizations demonstrated.
+* [Modeling Fundamentals](source/Titanic.md) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
 * [Geospatial Data Analysis](source/Geospatial_Analysis.md) - A work-in-progress collection of maps. 
 * [Resources](Resources.md) - Websites and references that I find helpful for data science projects..
 
 
 #### Todo List
-* Data imputation for modeling
-* Maps / Geospatial data viz 
-
+* Survival Analysis
+* Interactive Data Viz
+* Marker Maps
+* Machine Learning 
