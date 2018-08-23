@@ -1,18 +1,24 @@
-Modeling the Titanic Dataset
+Modeling Fundamentals - The Titanic
 ================
 Jesse Cambon
-21 August, 2018
+22 August, 2018
 
+-   [References](#references)
+-   [Setup](#setup)
 -   [Exploratory Analysis](#exploratory-analysis)
 -   [Imputation](#imputation)
 -   [Logistic Regression Model](#logistic-regression-model)
 -   [Linear Regression Model](#linear-regression-model)
 
-A modeling analysis of the titanic dataset using linear and logistic regression.
+This page is meant to serve as a primer for modeling in R. A linear and logistic regression are demonstrated on the Titanic dataset to model fare prices and survival rates using gender, age, and passenger class as covariates. Data imputation is performed on age in order to avoid biasing results. The broom package is used to display the results of the models and graphical methods are used throughout to explore the dataset and evaluate the fit of each model.
 
-To add: imputation, log-binomial model (risk ratio)
+### References
 
-References: <https://stats.idre.ucla.edu/r/dae/logit-regression/>
+-   Intro to Statistical Learning: <http://www-bcf.usc.edu/~gareth/ISL/>
+-   Logistic Regression: <https://stats.idre.ucla.edu/r/dae/logit-regression/>
+
+Setup
+-----
 
 ``` r
 library(PASWR) #titanic3 dataset
@@ -124,6 +130,8 @@ ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) +
 Imputation
 ----------
 
+Discarding rows with missing age has the potential to bias our data so we will impute.
+
 <https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/> <https://www.andrew.cmu.edu/user/aurorat/MIA_r.html> <http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html>
 
 ``` r
@@ -143,26 +151,19 @@ library(mice)
 
 ``` r
 # Use mice to impute data - takes a few seconds on my laptop
-titanic_imputed <- mice(titanic %>% select(pclass,age,sex), m=10, maxit = 50, method = 'pmm', seed = 3530,printFlag=F)
+# Increasing maxit from the default gives better results
+# Making sure to not sure the outcome variable to impute.
+titanic_imputed <- mice(titanic %>% select(sex,pclass,age), method = 'pmm', maxit=80,seed = 3530,printFlag=F)
 
-imp_with <- with(titanic_imputed, lm(age ~ pclass + sex))
-
-pooled <- pool(imp_with)
+#imp_with <- with(titanic_imputed, lm(age ~ pclass + sex + fare))
+#pooled <- pool(imp_with)
 
 # check the fit
-summary(pooled)
-```
+#summary(pooled)
 
-    ##               estimate std.error  statistic       df      p.value
-    ## (Intercept)  37.023647 0.8928789  41.465473 318.0088 0.000000e+00
-    ## pclass2nd    -9.855947 1.1234681  -8.772787 405.7172 0.000000e+00
-    ## pclass3rd   -14.945784 0.9483567 -15.759665 268.3844 0.000000e+00
-    ## sexmale       3.843549 0.8355924   4.599789 187.5426 5.660992e-06
-
-``` r
 # Add imputed Data
-titanic_imp <- complete(titanic_imputed,10) %>%
-  bind_cols(titanic %>% select(age,survived) %>% rename(age_orig=age)) %>%
+titanic_imp <- complete(titanic_imputed,5) %>%
+  bind_cols(titanic %>% select(survived,age,fare) %>% rename(age_orig=age)) %>%
   mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original'))
 
 
@@ -189,39 +190,17 @@ ggplot(data=titanic_imp) +
 
 ![](Titanic_files/figure-markdown_github/imputation-2.png)
 
-``` r
-# titanic_imp <- titanic %>%
-  # select(survived,sex,pclass,age) %>%
-# titanic_imputed <- impute.transcan(impute_arg, imputation=1, data=iris.mis, list.out=TRUE,pr=FALSE, check=FALSE) 
-
-
-
-
-
-
-# imp_obj <- aregImpute(~age + pclass + sex, data = titanic, n.impute = 5)
-# 
-# titanic_imp <- titanic %>%
-#   mutate(imputed_age=imp_obj$imputed$age)
-
-
-# Imputate with k nearest neighbors method
-# imp_model <- preProcess(titanic %>% select(pclass,survived,sex,age), method = c("knnImpute"))
-# library(RANN) # nearest neighbors library
-# titanic_imputed <- predict(imp_model,titanic %>% select(pclass,survived,sex,age))
-```
-
 Logistic Regression Model
 -------------------------
 
 We will use the brier score as one measurement of accuracy for our model: <https://en.wikipedia.org/wiki/Brier_score> The book 'Superforecasting' by Philip Tetlock has a good discussion of the use of brier scores.
 
 ``` r
-log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic)
+log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic_imp)
 
-predictions <- titanic %>%
-  dplyr::select(sex,pclass,age,survived) %>%
-  mutate(prediction=predict(log_fit,newdata=titanic,type='response')) %>%
+predictions <- titanic_imp %>%
+  select(sex,pclass,age,survived) %>%
+  mutate(prediction=predict(log_fit,newdata=titanic_imp,type='response')) %>%
   mutate(prediction_binary=case_when(prediction >0.5 ~ 1, TRUE ~ 0),
          brier_score=abs(prediction-survived))
 
@@ -241,9 +220,10 @@ log_info <- glance(log_fit) %>%
 
 log_terms <- tidy(log_fit) %>% rename(Coefficient=estimate,Term=term) %>%
    # Order by largest coefficient but put intercept term on bottom
-  arrange(Term=='(Intercept)',desc(Coefficient)) %>%
   left_join(log_confint,by='Term') %>%
-  dplyr::select(Term,Coefficient,LCLM,UCLM,everything())
+  mutate(OR=exp(Coefficient),LCLM_OR=exp(LCLM),UCLM_OR=exp(UCLM)) %>%
+  select(Term,Coefficient,LCLM,UCLM,OR,LCLM_OR,UCLM_OR,everything()) %>%
+  arrange(Term=='(Intercept)',desc(abs(Coefficient)))
 
 # An analysis of our model's classification accuracy
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
@@ -253,27 +233,27 @@ confusionMatrix(factor(predictions$prediction_binary), factor(predictions$surviv
     ## 
     ##           Reference
     ## Prediction   0   1
-    ##          0 710 199
-    ##          1  99 301
-    ##                                           
-    ##                Accuracy : 0.7723          
-    ##                  95% CI : (0.7487, 0.7948)
-    ##     No Information Rate : 0.618           
-    ##     P-Value [Acc > NIR] : < 2.2e-16       
-    ##                                           
-    ##                   Kappa : 0.4987          
-    ##  Mcnemar's Test P-Value : 9.756e-09       
-    ##                                           
-    ##             Sensitivity : 0.8776          
-    ##             Specificity : 0.6020          
-    ##          Pos Pred Value : 0.7811          
-    ##          Neg Pred Value : 0.7525          
-    ##              Prevalence : 0.6180          
-    ##          Detection Rate : 0.5424          
-    ##    Detection Prevalence : 0.6944          
-    ##       Balanced Accuracy : 0.7398          
-    ##                                           
-    ##        'Positive' Class : 0               
+    ##          0 686 157
+    ##          1 123 343
+    ##                                          
+    ##                Accuracy : 0.7861         
+    ##                  95% CI : (0.7629, 0.808)
+    ##     No Information Rate : 0.618          
+    ##     P-Value [Acc > NIR] : <2e-16         
+    ##                                          
+    ##                   Kappa : 0.541          
+    ##  Mcnemar's Test P-Value : 0.0486         
+    ##                                          
+    ##             Sensitivity : 0.8480         
+    ##             Specificity : 0.6860         
+    ##          Pos Pred Value : 0.8138         
+    ##          Neg Pred Value : 0.7361         
+    ##              Prevalence : 0.6180         
+    ##          Detection Rate : 0.5241         
+    ##    Detection Prevalence : 0.6440         
+    ##       Balanced Accuracy : 0.7670         
+    ##                                          
+    ##        'Positive' Class : 0              
     ## 
 
 ``` r
@@ -289,8 +269,6 @@ xlab('Age') +
 ylab('Survival Probability') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 ```
-
-    ## Warning: Removed 263 rows containing missing values (geom_point).
 
 ![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
 
@@ -311,33 +289,27 @@ ylab('Count') +
 guides(fill = guide_legend(title='')) 
 ```
 
-    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
-
 ![](Titanic_files/figure-markdown_github/logistic-regression-2.png)
 
 ``` r
 # Same graph as prior but faceted on class
 
-ggplot(predictions, aes(prediction))+
+ggplot(predictions %>% mutate(sex=capitalize(as.character(sex))), aes(prediction))+
   geom_histogram(binwidth=0.05,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
-  facet_wrap(~pclass,scales='free_y') +
+  facet_wrap(~sex,scales='free_y') +
   theme(legend.pos='top',
         # prevent right label on axis from being clipped
         plot.margin=margin(r = 20, unit = "pt")
         ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
-  scale_x_continuous(labels=scales::percent, limits=c(0,1),
-                     expand=c(0,0) # eliminate left/right margin
-                     ) +
-    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
-  labs(title="Logistic Regression Probability Distribution by Passenger Class") +
+  scale_x_continuous(labels=scales::percent ) +
+    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top, none on bottom
+  labs(title="Logistic Regression Probability Distribution by Gender") +
 xlab('Survival Probability') +
 ylab('Count') +
 guides(fill = guide_legend(title='')) 
 ```
-
-    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
 
 ![](Titanic_files/figure-markdown_github/logistic-regression-3.png)
 
@@ -355,32 +327,32 @@ ylab('Count') +
 guides(fill = guide_legend(title='')) 
 ```
 
-    ## Warning: Removed 263 rows containing non-finite values (stat_bin).
-
 ![](Titanic_files/figure-markdown_github/logistic-regression-4.png)
+
+OR = Odds Ratio. LCLM and UCLM are lower and upper 95% confidence limits.
 
 ``` r
 kable(log_info %>% 
-        dplyr::select(-df.residual,-df.null,-deviance),format='markdown',digits=2) %>%
+        select(-df.residual,-df.null,-deviance),format='markdown',digits=2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-|  meanBrierScore|  null.deviance|   logLik|     AIC|      BIC|
-|---------------:|--------------:|--------:|-------:|--------:|
-|             0.3|        1414.62|  -491.23|  992.45|  1017.22|
+|  meanBrierScore|  null.deviance|   logLik|      AIC|      BIC|
+|---------------:|--------------:|--------:|--------:|--------:|
+|             0.3|        1741.02|  -616.08|  1242.16|  1268.04|
 
 ``` r
 kable(log_terms,format='markdown',digits = 2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-| Term        |  Coefficient|   LCLM|   UCLM|  std.error|  statistic|  p.value|
-|:------------|------------:|------:|------:|----------:|----------:|--------:|
-| age         |        -0.03|  -0.05|  -0.02|       0.01|      -5.43|        0|
-| pclass2nd   |        -1.28|  -1.73|  -0.84|       0.23|      -5.68|        0|
-| pclass3rd   |        -2.29|  -2.74|  -1.85|       0.23|     -10.14|        0|
-| sexmale     |        -2.50|  -2.83|  -2.18|       0.17|     -15.04|        0|
-| (Intercept) |         3.52|   2.90|   4.18|       0.33|      10.78|        0|
+| Term        |  Coefficient|   LCLM|   UCLM|     OR|  LCLM\_OR|  UCLM\_OR|  std.error|  statistic|  p.value|
+|:------------|------------:|------:|------:|------:|---------:|---------:|----------:|----------:|--------:|
+| sexmale     |        -2.46|  -2.76|  -2.18|   0.09|      0.06|      0.11|       0.15|     -16.63|        0|
+| pclass3rd   |        -2.18|  -2.57|  -1.79|   0.11|      0.08|      0.17|       0.20|     -10.88|        0|
+| pclass2nd   |        -1.18|  -1.59|  -0.77|   0.31|      0.20|      0.46|       0.21|      -5.61|        0|
+| age         |        -0.03|  -0.04|  -0.02|   0.97|      0.96|      0.98|       0.01|      -4.91|        0|
+| (Intercept) |         3.18|   2.63|   3.76|  24.14|     13.88|     42.95|       0.29|      11.06|        0|
 
 Linear Regression Model
 -----------------------
@@ -388,15 +360,15 @@ Linear Regression Model
 A linear model of passenger fare cost.
 
 ``` r
-lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic)
+lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic_imp)
 
 # Calculate confidence limit
 lm_confint <- confint(lm_fit) %>% tidy()
 colnames(lm_confint) <- c('Term','LCLM','UCLM')
 
-lm_predictions <- titanic %>%
-  dplyr::select(sex,pclass,age,survived,fare) %>%
-  mutate(prediction=predict(lm_fit,newdata=titanic)) %>%
+lm_predictions <- titanic_imp %>%
+  select(sex,pclass,age,survived,fare) %>%
+  mutate(prediction=predict(lm_fit,newdata=titanic_imp)) %>%
   mutate(residual=fare-prediction)
 
 lm_info <- glance(lm_fit)
@@ -404,7 +376,8 @@ lm_info <- glance(lm_fit)
 lm_terms <- tidy(lm_fit) %>%
   rename(Term=term,Coefficient=estimate) %>%
   left_join(lm_confint,by='Term' ) %>%
-  dplyr::select(Term,Coefficient,LCLM,UCLM,everything())
+  select(Term,Coefficient,LCLM,UCLM,everything()) %>%
+  arrange(Term=='(Intercept)',desc(abs(Coefficient)))
 
 #summary(lm_fit)
 
@@ -421,7 +394,7 @@ xlab('Residual') +
 ylab('Count') 
 ```
 
-    ## Warning: Removed 264 rows containing non-finite values (stat_bin).
+    ## Warning: Removed 1 rows containing non-finite values (stat_bin).
 
 ![](Titanic_files/figure-markdown_github/linear-regression-1.png)
 
@@ -438,8 +411,6 @@ xlab('Age') +
 ylab('Fare Cost') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 ```
-
-    ## Warning: Removed 263 rows containing missing values (geom_point).
 
 ![](Titanic_files/figure-markdown_github/linear-regression-2.png)
 
@@ -460,7 +431,7 @@ ylab('Residual') +
 guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
 ```
 
-    ## Warning: Removed 264 rows containing missing values (geom_point).
+    ## Warning: Removed 1 rows containing missing values (geom_point).
 
 ![](Titanic_files/figure-markdown_github/linear-regression-3.png)
 
@@ -469,7 +440,7 @@ ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
           aes(x = age, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass) +
-  geom_hline(slope=0,yintercept=0) + # horizontal line at 0 residual
+  geom_hline(yintercept=0) + # horizontal line at 0 residual
 scale_y_continuous(labels=scales::dollar) +
 theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
@@ -479,9 +450,7 @@ ylab('Residual') +
 guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
 ```
 
-    ## Warning: Ignoring unknown parameters: slope
-
-    ## Warning: Removed 264 rows containing missing values (geom_point).
+    ## Warning: Removed 1 rows containing missing values (geom_point).
 
 ![](Titanic_files/figure-markdown_github/linear-regression-4.png)
 
@@ -505,7 +474,7 @@ kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdo
 
 |  r.squared|  adj.r.squared|  sigma|  statistic|  p.value|   df|       AIC|       BIC|
 |----------:|--------------:|------:|----------:|--------:|----:|---------:|---------:|
-|       0.39|           0.39|  43.59|      133.6|        0|    6|  10862.73|  10897.39|
+|       0.38|           0.38|  40.79|     160.46|        0|    6|  13421.27|  13457.51|
 
 ``` r
 kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
@@ -514,9 +483,9 @@ kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
 
 | Term        |  Coefficient|   LCLM|   UCLM|  std.error|  statistic|  p.value|
 |:------------|------------:|------:|------:|----------:|----------:|--------:|
-| (Intercept) |        108.6|   96.4|  120.8|       6.21|      17.50|     0.00|
-| sexmale     |        -11.5|  -18.0|   -5.0|       3.31|      -3.46|     0.00|
-| pclass2nd   |        -72.0|  -79.8|  -64.3|       3.95|     -18.23|     0.00|
-| pclass3rd   |        -81.2|  -88.7|  -73.6|       3.85|     -21.11|     0.00|
-| age         |         -0.3|   -0.5|   -0.1|       0.11|      -2.57|     0.01|
-| survived    |          0.6|   -6.2|    7.3|       3.45|       0.17|     0.87|
+| pclass3rd   |        -75.9|  -82.2|  -69.5|       3.23|     -23.52|     0.00|
+| pclass2nd   |        -67.8|  -74.7|  -60.9|       3.50|     -19.36|     0.00|
+| sexmale     |        -11.6|  -17.1|   -6.2|       2.78|      -4.18|     0.00|
+| survived    |          0.5|   -5.1|    6.2|       2.89|       0.18|     0.85|
+| age         |         -0.2|   -0.4|   -0.1|       0.09|      -2.72|     0.01|
+| (Intercept) |        103.1|   93.0|  113.3|       5.17|      19.95|     0.00|

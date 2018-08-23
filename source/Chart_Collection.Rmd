@@ -1,5 +1,5 @@
 ---
-title: "Chart Collection"
+title: "Visualization Cookbook"
 author: "Jesse Cambon"
 
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -10,18 +10,24 @@ output:
 
 The purpose of this document is to provide code that can be easily copied and adapted for use in data science projects to generate a wide variety of data visualizations. Because of this, I have opted to use inbuilt datasets in R so that you should not have to download any datasets external to R packages.
 
-## Readme
+## Getting Started
 
 * Install all the listed packages in the setup block using install.packages('package') or install.packages('package1','package2','package3',...) for multiple packages.
-* To recreate any graph, make sure to first run the theme_set() command from the setup code block and also the relevant code from the data preparation code block to create the relevant dataset.
+* To recreate any graph, make sure to first run the theme_set() command from the setup code block and also the relevant code from the data preparation code block to create the relevant dataset. After you have successfully recreated a graph, you can switch out the data and variable names for your own uses.
 * Use 'fill' commands for areas and 'color' for lines.
 * To save any plot to a file, use the ggsave() command
 
 ## References
 
 * ggplot: https://ggplot2.tidyverse.org/reference/index.html
+* ggplot cheat sheet: https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
 * dplyr: https://dplyr.tidyverse.org/
 * ["Top 50 GGplots"](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
+
+## Tips for Effective Visual Communication
+* Simplicity is key. Remove duplicative labels or other elements, hide gridlines that aren't visually helpful, and remove everything from the graph that isn't part of the story you are looking to tell. 
+* Make use of ordering as a visual cue. For example, a bar chart that is ordered from largest bar to smallest bar is much easier to read.
+* Experiment with variations of a graph. For example, changing the bin width for histograms can yield different results.
 
 # Setup
 
@@ -237,7 +243,7 @@ geom_bar(stat='identity',color='black',size=0.25) +
 
 A tukey-style boxplot.
 
-Note: "The upper whisker extends from the [ upper hinge (ie. 75 percentile) ] to the largest value no further than 1.5 * IQR from the [upper hinge] (where IQR is the inter-quartile range, or distance between the first and third quartiles). The lower whisker extends from the [lower hinge (ie. 25 percentile)] to the smallest value at most 1.5 * IQR of the [lower hinge]. Data beyond the end of the whiskers are called "outlying" points and are plotted individually."
+"The upper whisker extends from the [ upper hinge (ie. 75 percentile) ] to the largest value no further than 1.5 * IQR from the [upper hinge] (where IQR is the inter-quartile range, or distance between the first and third quartiles). The lower whisker extends from the [lower hinge (ie. 25 percentile)] to the smallest value at most 1.5 * IQR of the [lower hinge]. Data beyond the end of the whiskers are called "outlying" points and are plotted individually."
 https://ggplot2.tidyverse.org/reference/geom_boxplot.html 
 
 ```{r boxplot}
@@ -292,17 +298,16 @@ ggplot(gapminder_continent_life, aes(x=continent, y=mean_life,color=continent)) 
 #  geom_point(col="tomato2", size=3) +   # Draw points
 geom_pointrange(mapping=aes(ymin=min_life, ymax=max_life)) + 
   theme(legend.position='none',
-        panel.grid.major.y=element_blank(),
-        panel.grid.minor.x =element_blank()) +
-  scale_y_continuous(expand=c(0,0)) +
+        panel.grid.major.y=element_blank()) +
+#  scale_y_continuous(expand=c(.1,0,0.1,1)) +
   # geom_segment(aes(x=continent,
   #                  xend=continent,
   #                  y=min(min_life),
   #                  yend=max(max_life)),
   #              linetype="dashed", color='black',
   #              size=0.1) +   # Draw dashed lines
-  labs(title="Life Expectancy by Continent",
-       caption="Data: 2007") +  
+  labs(title="Life Expectancy Range by Continent",
+       caption="Data: 2007. Minimum, Mean, and Maximum Life Expectancies Shown") +  
   coord_flip() +
   xlab('Continent') +
   ylab('Life Expectancy at Birth') 
