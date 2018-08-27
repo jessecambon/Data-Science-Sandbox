@@ -10,6 +10,7 @@ A categorized list of data science resources.
 
 ## Datasets
 * [KDNuggets](https://www.kdnuggets.com/datasets/index.html)
+* [Microsoft's List of R Data Sources](https://mran.microsoft.com/documents/data)
 * [Kaggle](https://www.kaggle.com/datasets) - Datasets used for Kaggle competitions.
 * [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml)
 * [R Datasets](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/00Index.html) - Documentation on the inbuilt datasets in R.
