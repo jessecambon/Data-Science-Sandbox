@@ -63,6 +63,7 @@ A categorized list of data science resources.
 
 ## Creating Deliverables
 * [R Markdown](https://rmarkdown.rstudio.com/)
+* [R Markdown - The Definitive Guide](https://bookdown.org/yihui/rmarkdown/) - Free book on RMarkdown.
 * [Tables in R Markdown](https://haozhu233.github.io/kableExtra/awesome_table_in_html.html)
 * [RMarkdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 * [officer](https://davidgohel.github.io/officer/index.html) - Creating Microsoft Office deliverables in R.
