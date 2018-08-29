@@ -1,7 +1,7 @@
 Visualization Cookbook
 ================
 Jesse Cambon
-22 August, 2018
+29 August, 2018
 
 -   [Getting Started](#getting-started)
 -   [References](#references)
@@ -51,8 +51,8 @@ References
 Tips for Effective Visual Communication
 ---------------------------------------
 
--   Simplicity is key. Remove duplicative labels or other elements, hide gridlines that aren't visually helpful, and remove everything from the graph that isn't part of the story you are looking to tell.
--   Make use of ordering as a visual cue. For example, a bar chart that is ordered from largest bar to smallest bar is much easier to read.
+-   Simplicity is key. Remove duplicative labels and other elements, hide gridlines that aren't visually helpful, and remove everything from the graph that isn't part of the story you are looking to tell.
+-   Make use of ordering as a visual cue. For example, a bar chart that has the bars ordered by size is much easier to read.
 -   Experiment with variations of a graph. For example, changing the bin width for histograms can yield different results.
 
 Setup
@@ -73,7 +73,6 @@ library(wesanderson) # Color Palettes from Wes Anderson Movies
 
 ## For specific plots:
 library(waffle) # waffle charts, make sure to install the github version with devtools::install_github("hrbrmstr/waffle")
-library(R.utils) # capitalize function
 library(ggridges) # ridge plots
 library(ggrepel) # text labels
 library(treemapify) # ggplot treemap
@@ -98,7 +97,8 @@ Data Preparation
 ``` r
 ### Titanic Data
 data(Titanic)
-titanic <- Titanic %>% as_tibble() 
+titanic <- Titanic %>% as_tibble()  %>%
+  mutate(Sex=str_to_title(Sex)) # capitalize
 
 titanic_bar <- titanic %>%
   # add a percent for Class 
@@ -126,7 +126,8 @@ starwars_jac <- starwars %>% group_by(name) %>%
            # bucket species variable
   species_collapsed=case_when(!(species %in% c('Human','Droid')) ~ 'Other',
     TRUE ~ species)) %>%
-  ungroup() 
+  ungroup() %>%
+  mutate(gender=str_to_title(gender)) # capitalize gender
 
 # put each film on a different row
 # ie. character-film level dataset
@@ -169,8 +170,7 @@ homeworld_summ <- starwars_jac %>%
 # Also drop Jabba and Yoda because they are outliers
 starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
   filter(!str_detect(name,'Jabba|Yoda')) %>% 
-  filter(num_films >= 3) %>%
-  mutate(gender=capitalize(gender))
+  filter(num_films >= 3) 
 
 ### Crime Data
 
@@ -200,8 +200,7 @@ Distribution
 
 ``` r
 # Histogram with autobinning based on gender
-ggplot(starwars_jac %>% replace_na(list(gender='none')) %>%
-         mutate(gender=capitalize(gender)), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
+ggplot(starwars_jac %>% replace_na(list(gender='None')), aes(height)) + scale_fill_manual(values = wes_palette('Moonrise2')) +
   geom_histogram(aes(fill=gender), 
                    binwidth = 10, 
                    col="black") +
@@ -249,13 +248,14 @@ titanic_age_sex <- titanic3 %>% as_tibble() %>%
     labels=c('0-10','11-20','21-30','31-40','41-50','51-60','61-80')
   )) %>%
   count(sex,age_cat) %>%
+  mutate(sex=str_to_title(sex)) %>% # capitalize
   # invert counts for pyramid
   # need as.numeric() since introducing negative values means we need
   # to use the double format (numeric) instead of integer
-  mutate(n=case_when(sex=='female' ~ -1*n, TRUE ~ as.numeric(n)))
+  mutate(n=case_when(sex=='Female' ~ -1*n, TRUE ~ as.numeric(n)))
 
 
-ggplot(data=titanic_age_sex %>% mutate(sex=capitalize(sex)), aes(x = age_cat, y = n, fill = sex)) + 
+ggplot(data=titanic_age_sex %>% mutate(sex=str_to_title(sex)), aes(x = age_cat, y = n, fill = sex)) + 
 geom_bar(stat='identity',color='black',size=0.25) +  
 #  facet_grid(~sex,scales='free',space='free') +
   scale_y_continuous(limits=c(-240,240),
@@ -297,7 +297,7 @@ A tukey-style boxplot.
 ### Dotplot
 
 ``` r
-ggplot(starwars_jac %>% filter(gender %in% c('male','female')), aes(x = factor(gender), y = height,fill=gender)) +
+ggplot(starwars_jac %>% filter(gender %in% c('Male','Female')), aes(x = factor(gender), y = height,fill=gender)) +
   geom_dotplot(binaxis = "y", stackdir = "center") +
   xlab('Gender') +
   ylab('Height (cm)') +
@@ -314,7 +314,7 @@ ggplot(starwars_jac %>% filter(gender %in% c('male','female')), aes(x = factor(g
 ### Violin
 
 ``` r
-ggplot(starwars_jac %>% filter(gender %in% c('male','female')), aes(x = factor(gender), y = mass,fill=gender)) +
+ggplot(starwars_jac %>% filter(gender %in% c('Male','Female')), aes(x = factor(gender), y = mass,fill=gender)) +
   geom_violin() +
   xlab('Gender') +
   ylab('Weight (kg)') +
@@ -338,15 +338,7 @@ gapminder_continent_life <- gapminder %>% filter(year==2007) %>% group_by(contin
 ggplot(gapminder_continent_life, aes(x=continent, y=mean_life,color=continent)) + 
 #  geom_point(col="tomato2", size=3) +   # Draw points
 geom_pointrange(mapping=aes(ymin=min_life, ymax=max_life)) + 
-  theme(legend.position='none',
-        panel.grid.major.y=element_blank()) +
-#  scale_y_continuous(expand=c(.1,0,0.1,1)) +
-  # geom_segment(aes(x=continent,
-  #                  xend=continent,
-  #                  y=min(min_life),
-  #                  yend=max(max_life)),
-  #              linetype="dashed", color='black',
-  #              size=0.1) +   # Draw dashed lines
+  theme(legend.position='none') +
   labs(title="Life Expectancy Range by Continent",
        caption="Data: 2007. Minimum, Mean, and Maximum Life Expectancies Shown") +  
   coord_flip() +
@@ -478,7 +470,7 @@ geom_label_repel( # Labels
     show.legend = F # need this to fix legend
   ) +
 
-geom_smooth(method="lm",show.legend=F,size=0.25,alpha=0.25,color='black') + # Regression line
+geom_smooth(method="lm",show.legend=F,size=0.5,alpha=0.25) + # Regression line
 scale_color_manual(values=c(cbPalette[2:5])) +
 labs(title='Heights and Weights of Selected Star Wars Characters',
      subtitle = bquote(Slope == .(round(coeff,2)) ~ ' | ' ~ R^2  ==  .(round(r_square,2)) ),
@@ -501,7 +493,7 @@ theme( legend.margin=margin(0,0,0,0),
       legend.box.margin=margin(0,0,0,0),
       legend.pos='right') +
 scale_x_continuous(labels=scales::dollar) +
-geom_smooth(method="loess",show.legend=F,size=0.25,color='black',alpha=0.25) + # Regression line
+geom_smooth(method="loess",show.legend=F,size=0.5,alpha=0.25) + # Regression line
 #scale_color_manual(values=wes_palette('Royal2')) +
 labs(title='The Wealth of Nations - GDP v. Life Expectancy',
      caption='Data is for 2007. 95% confidence interval is shaded.') +
@@ -545,12 +537,12 @@ guides(colour = guide_legend(override.aes = list(size=2.5)))
 
 ``` r
 # Number of characters from each species 
-ggplot(data=starwars_gender_film %>% mutate(gender=capitalize(gender)),
+ggplot(data=starwars_gender_film,
           aes(x = episode, y=prop,color = gender)) +
 # show.legend=F prevents the geom (in this case a line) from being in the legend
 geom_line(show.legend=F) + geom_point() +
 geom_text_repel( # Labels
-    data = starwars_gender_film %>% mutate(gender=capitalize(gender)) %>%
+    data = starwars_gender_film %>% mutate(gender=str_to_title(gender)) %>%
       group_by(gender) %>% filter(episode==max(episode)), # only display label on last episode
     aes(label =gender),
     size = 3,
@@ -618,7 +610,7 @@ treemap(titanic, #Your data frame object
 ``` r
 # Treemap of star wars character mass
 ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')) %>%
-         mutate(gender=capitalize(gender)),
+         mutate(gender=str_to_title(gender)),
                 aes(area=mass,fill=gender,label=name)) + 
   labs(title='Relative Weights of Star Wars Characters') +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
