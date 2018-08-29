@@ -1,7 +1,7 @@
 Modeling Fundamentals - The Titanic
 ================
 Jesse Cambon
-22 August, 2018
+29 August, 2018
 
 -   [References](#references)
 -   [Setup](#setup)
@@ -26,19 +26,20 @@ library(MASS) # confint for glm
 library(wesanderson) # color palettes
 library(formattable) # percent format
 library(caret) # regression utilities
-library(Hmisc) # capitalize function
+#library(Hmisc) # capitalize function
 library(broom) # model display capabilities
 #library(xtable) # pretty table
-library(knitr)  
 library(kableExtra)
 library(tidyverse)
-library(rms)
+library(skimr) #summary stats
+library(knitr)  
+#library(rms)
 
-titanic <- titanic3 %>% as_tibble()
+titanic <- titanic3 %>% as_tibble() %>%
+  mutate(sex=str_to_title(sex))
 
 titanic_summ <- titanic %>%
   count(survived,pclass,sex) %>%
-  mutate(sex=capitalize(as.character(sex))) %>%
   group_by(pclass,sex) %>%
   mutate(perc_surv_num=n/sum(n),
     perc_surv_char=as.character(percent(n/sum(n),0))) %>%
@@ -56,13 +57,271 @@ Exploratory Analysis
 --------------------
 
 ``` r
+skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
+  select(-top_counts,-ordered,-n_unique,-hist,-complete,-empty) %>%
+  skimr::kable()
+```
+
+<table>
+<thead>
+<tr>
+<th>
+type
+</th>
+<th>
+variable
+</th>
+<th>
+missing
+</th>
+<th>
+n
+</th>
+<th>
+min
+</th>
+<th>
+max
+</th>
+<th>
+mean
+</th>
+<th>
+sd
+</th>
+<th>
+p0
+</th>
+<th>
+p25
+</th>
+<th>
+p50
+</th>
+<th>
+p75
+</th>
+<th>
+p100
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+character
+</td>
+<td>
+sex
+</td>
+<td>
+0
+</td>
+<td>
+1309
+</td>
+<td>
+4
+</td>
+<td>
+6
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+</tr>
+<tr>
+<td>
+factor
+</td>
+<td>
+pclass
+</td>
+<td>
+0
+</td>
+<td>
+1309
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+</tr>
+<tr>
+<td>
+integer
+</td>
+<td>
+survived
+</td>
+<td>
+0
+</td>
+<td>
+1309
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+0.38
+</td>
+<td>
+0.49
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td>
+numeric
+</td>
+<td>
+age
+</td>
+<td>
+263
+</td>
+<td>
+1309
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+29.88
+</td>
+<td>
+14.41
+</td>
+<td>
+0.17
+</td>
+<td>
+21
+</td>
+<td>
+28
+</td>
+<td>
+39
+</td>
+<td>
+80
+</td>
+</tr>
+<tr>
+<td>
+numeric
+</td>
+<td>
+fare
+</td>
+<td>
+1
+</td>
+<td>
+1309
+</td>
+<td>
+NA
+</td>
+<td>
+NA
+</td>
+<td>
+33.3
+</td>
+<td>
+51.76
+</td>
+<td>
+0
+</td>
+<td>
+7.9
+</td>
+<td>
+14.45
+</td>
+<td>
+31.27
+</td>
+<td>
+512.33
+</td>
+</tr>
+</tbody>
+</table>
+``` r
 titanic_summ_dot <- titanic_summ %>%
   filter(survived=="Survived") %>%
   mutate(group=str_c(sex,'-',pclass))
   
 # Analyze where age is missing
 titanic_miss <- titanic %>% select(pclass,sex,age,survived) %>%
-  mutate(sex=capitalize(as.character(sex)),missing_age=is.na(age)) %>%
+  mutate(missing_age=is.na(age)) %>%
   group_by(pclass,sex) %>%
   dplyr::summarize(perc_missing=mean(missing_age)) %>%
   mutate(group=str_c(sex,'-',pclass))
@@ -138,6 +397,8 @@ Discarding rows with missing age has the potential to bias our data so we will i
 library(mice)
 ```
 
+    ## Warning: package 'mice' was built under R version 3.5.1
+
     ## 
     ## Attaching package: 'mice'
 
@@ -154,7 +415,11 @@ library(mice)
 # Increasing maxit from the default gives better results
 # Making sure to not sure the outcome variable to impute.
 titanic_imputed <- mice(titanic %>% select(sex,pclass,age), method = 'pmm', maxit=80,seed = 3530,printFlag=F)
+```
 
+    ## Warning: Number of logged events: 1
+
+``` r
 #imp_with <- with(titanic_imputed, lm(age ~ pclass + sex + fare))
 #pooled <- pool(imp_with)
 
@@ -182,7 +447,7 @@ ggplot(data=titanic_imp) +
 ``` r
 ggplot(data=titanic_imp) +
  geom_density(aes(x=age,color=imputed), alpha=0.8) + 
-  facet_grid(vars(sex),vars(pclass)) +
+  facet_grid(sex ~ pclass) +
   theme(legend.position='top') +
     labs(title="Distributions of Original v. Imputed Age") +
   guides(color=guide_legend(title=''))
@@ -233,34 +498,34 @@ confusionMatrix(factor(predictions$prediction_binary), factor(predictions$surviv
     ## 
     ##           Reference
     ## Prediction   0   1
-    ##          0 686 157
-    ##          1 123 343
-    ##                                          
-    ##                Accuracy : 0.7861         
-    ##                  95% CI : (0.7629, 0.808)
-    ##     No Information Rate : 0.618          
-    ##     P-Value [Acc > NIR] : <2e-16         
-    ##                                          
-    ##                   Kappa : 0.541          
-    ##  Mcnemar's Test P-Value : 0.0486         
-    ##                                          
-    ##             Sensitivity : 0.8480         
-    ##             Specificity : 0.6860         
-    ##          Pos Pred Value : 0.8138         
-    ##          Neg Pred Value : 0.7361         
-    ##              Prevalence : 0.6180         
-    ##          Detection Rate : 0.5241         
-    ##    Detection Prevalence : 0.6440         
-    ##       Balanced Accuracy : 0.7670         
-    ##                                          
-    ##        'Positive' Class : 0              
+    ##          0 686 156
+    ##          1 123 344
+    ##                                           
+    ##                Accuracy : 0.7869          
+    ##                  95% CI : (0.7637, 0.8088)
+    ##     No Information Rate : 0.618           
+    ##     P-Value [Acc > NIR] : < 2e-16         
+    ##                                           
+    ##                   Kappa : 0.5428          
+    ##  Mcnemar's Test P-Value : 0.05539         
+    ##                                           
+    ##             Sensitivity : 0.8480          
+    ##             Specificity : 0.6880          
+    ##          Pos Pred Value : 0.8147          
+    ##          Neg Pred Value : 0.7366          
+    ##              Prevalence : 0.6180          
+    ##          Detection Rate : 0.5241          
+    ##    Detection Prevalence : 0.6432          
+    ##       Balanced Accuracy : 0.7680          
+    ##                                           
+    ##        'Positive' Class : 0               
     ## 
 
 ``` r
-ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=predictions,
           aes(x = age, y = prediction, color = pclass)) +
 geom_point() +
-facet_grid(~factor(sex)) +
+facet_grid(~sex) +
 scale_y_continuous(labels=scales::percent) +
 theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
@@ -281,8 +546,8 @@ ggplot(predictions, aes(prediction))+
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent,
                      limits=c(0,1),
-                     expand=c(0,0)) + # eliminate left/right margin
-    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
+                     expand=c(0,0,0,0)) + # eliminate left/right margin
+    scale_y_continuous(expand=expand_scale(mult = c(0, .1))) + 
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
 ylab('Count') +
@@ -294,7 +559,7 @@ guides(fill = guide_legend(title=''))
 ``` r
 # Same graph as prior but faceted on class
 
-ggplot(predictions %>% mutate(sex=capitalize(as.character(sex))), aes(prediction))+
+ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.05,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
   facet_wrap(~sex,scales='free_y') +
@@ -304,7 +569,7 @@ ggplot(predictions %>% mutate(sex=capitalize(as.character(sex))), aes(prediction
         ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent ) +
-    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top, none on bottom
+  scale_y_continuous(expand=expand_scale(mult = c(0, .1))) +
   labs(title="Logistic Regression Probability Distribution by Gender") +
 xlab('Survival Probability') +
 ylab('Count') +
@@ -321,7 +586,7 @@ ggplot(predictions, aes(brier_score)) +
     scale_fill_manual(values=wes_palette('Moonrise3')) +
   # Use expand to make sure right axis label isn't clipped
     scale_x_continuous(expand=c(0,0,0.01,0),limits=c(0,1)) +
-    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
+    scale_y_continuous(expand=expand_scale(mult = c(0, .1))) +
 xlab('Brier Score') +
 ylab('Count') +
 guides(fill = guide_legend(title='')) 
@@ -337,9 +602,9 @@ kable(log_info %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-|  meanBrierScore|  null.deviance|   logLik|      AIC|      BIC|
-|---------------:|--------------:|--------:|--------:|--------:|
-|             0.3|        1741.02|  -616.08|  1242.16|  1268.04|
+|  meanBrierScore|  null.deviance|  logLik|     AIC|      BIC|
+|---------------:|--------------:|-------:|-------:|--------:|
+|             0.3|        1741.02|  -615.9|  1241.8|  1267.68|
 
 ``` r
 kable(log_terms,format='markdown',digits = 2) %>%
@@ -348,11 +613,11 @@ kable(log_terms,format='markdown',digits = 2) %>%
 
 | Term        |  Coefficient|   LCLM|   UCLM|     OR|  LCLM\_OR|  UCLM\_OR|  std.error|  statistic|  p.value|
 |:------------|------------:|------:|------:|------:|---------:|---------:|----------:|----------:|--------:|
-| sexmale     |        -2.46|  -2.76|  -2.18|   0.09|      0.06|      0.11|       0.15|     -16.63|        0|
-| pclass3rd   |        -2.18|  -2.57|  -1.79|   0.11|      0.08|      0.17|       0.20|     -10.88|        0|
-| pclass2nd   |        -1.18|  -1.59|  -0.77|   0.31|      0.20|      0.46|       0.21|      -5.61|        0|
-| age         |        -0.03|  -0.04|  -0.02|   0.97|      0.96|      0.98|       0.01|      -4.91|        0|
-| (Intercept) |         3.18|   2.63|   3.76|  24.14|     13.88|     42.95|       0.29|      11.06|        0|
+| sexMale     |        -2.49|  -2.78|  -2.20|   0.08|      0.06|      0.11|       0.15|     -16.76|        0|
+| pclass3rd   |        -2.19|  -2.58|  -1.80|   0.11|      0.08|      0.17|       0.20|     -10.90|        0|
+| pclass2nd   |        -1.17|  -1.59|  -0.76|   0.31|      0.20|      0.47|       0.21|      -5.58|        0|
+| age         |        -0.03|  -0.04|  -0.02|   0.97|      0.96|      0.98|       0.01|      -4.94|        0|
+| (Intercept) |         3.19|   2.64|   3.77|  24.38|     14.00|     43.41|       0.29|      11.08|        0|
 
 Linear Regression Model
 -----------------------
@@ -399,7 +664,7 @@ ylab('Count')
 ![](Titanic_files/figure-markdown_github/linear-regression-1.png)
 
 ``` r
-ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=lm_predictions,
           aes(x = age, y = prediction, color = pclass,group=1)) +
 geom_point() +
 facet_grid(~factor(sex)) +
@@ -415,7 +680,7 @@ guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = lis
 ![](Titanic_files/figure-markdown_github/linear-regression-2.png)
 
 ``` r
-ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=lm_predictions,
           aes(x = prediction, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
@@ -436,7 +701,7 @@ guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.
 ![](Titanic_files/figure-markdown_github/linear-regression-3.png)
 
 ``` r
-ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=lm_predictions,
           aes(x = age, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass) +
@@ -474,7 +739,7 @@ kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdo
 
 |  r.squared|  adj.r.squared|  sigma|  statistic|  p.value|   df|       AIC|       BIC|
 |----------:|--------------:|------:|----------:|--------:|----:|---------:|---------:|
-|       0.38|           0.38|  40.79|     160.46|        0|    6|  13421.27|  13457.51|
+|       0.38|           0.38|  40.84|     159.46|        0|    6|  13424.38|  13460.62|
 
 ``` r
 kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
@@ -483,9 +748,9 @@ kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
 
 | Term        |  Coefficient|   LCLM|   UCLM|  std.error|  statistic|  p.value|
 |:------------|------------:|------:|------:|----------:|----------:|--------:|
-| pclass3rd   |        -75.9|  -82.2|  -69.5|       3.23|     -23.52|     0.00|
-| pclass2nd   |        -67.8|  -74.7|  -60.9|       3.50|     -19.36|     0.00|
-| sexmale     |        -11.6|  -17.1|   -6.2|       2.78|      -4.18|     0.00|
-| survived    |          0.5|   -5.1|    6.2|       2.89|       0.18|     0.85|
-| age         |         -0.2|   -0.4|   -0.1|       0.09|      -2.72|     0.01|
-| (Intercept) |        103.1|   93.0|  113.3|       5.17|      19.95|     0.00|
+| pclass3rd   |        -75.0|  -81.4|  -68.6|       3.24|     -23.12|     0.00|
+| pclass2nd   |        -67.2|  -74.0|  -60.3|       3.50|     -19.19|     0.00|
+| sexMale     |        -11.9|  -17.4|   -6.4|       2.78|      -4.27|     0.00|
+| survived    |          0.8|   -4.9|    6.4|       2.89|       0.27|     0.79|
+| age         |         -0.2|   -0.4|    0.0|       0.09|      -2.08|     0.04|
+| (Intercept) |        100.8|   90.6|  111.0|       5.18|      19.45|     0.00|
