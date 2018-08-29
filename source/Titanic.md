@@ -59,256 +59,256 @@ Exploratory Analysis
 ``` r
 skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
   select(-top_counts,-ordered,-n_unique,-hist,-complete,-empty) %>%
-  skimr::kable()
+  kable()
 ```
 
 <table>
 <thead>
 <tr>
-<th>
+<th style="text-align:left;">
 type
 </th>
-<th>
+<th style="text-align:left;">
 variable
 </th>
-<th>
+<th style="text-align:left;">
 missing
 </th>
-<th>
+<th style="text-align:left;">
 n
 </th>
-<th>
+<th style="text-align:left;">
 min
 </th>
-<th>
+<th style="text-align:left;">
 max
 </th>
-<th>
+<th style="text-align:left;">
 mean
 </th>
-<th>
+<th style="text-align:left;">
 sd
 </th>
-<th>
+<th style="text-align:left;">
 p0
 </th>
-<th>
+<th style="text-align:left;">
 p25
 </th>
-<th>
+<th style="text-align:left;">
 p50
 </th>
-<th>
+<th style="text-align:left;">
 p75
 </th>
-<th>
+<th style="text-align:left;">
 p100
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>
+<td style="text-align:left;">
 character
 </td>
-<td>
+<td style="text-align:left;">
 sex
 </td>
-<td>
+<td style="text-align:left;">
 0
 </td>
-<td>
+<td style="text-align:left;">
 1309
 </td>
-<td>
+<td style="text-align:left;">
 4
 </td>
-<td>
+<td style="text-align:left;">
 6
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
 </tr>
 <tr>
-<td>
+<td style="text-align:left;">
 factor
 </td>
-<td>
+<td style="text-align:left;">
 pclass
 </td>
-<td>
+<td style="text-align:left;">
 0
 </td>
-<td>
+<td style="text-align:left;">
 1309
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
 </tr>
 <tr>
-<td>
+<td style="text-align:left;">
 integer
 </td>
-<td>
+<td style="text-align:left;">
 survived
 </td>
-<td>
+<td style="text-align:left;">
 0
 </td>
-<td>
+<td style="text-align:left;">
 1309
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 0.38
 </td>
-<td>
+<td style="text-align:left;">
 0.49
 </td>
-<td>
+<td style="text-align:left;">
 0
 </td>
-<td>
+<td style="text-align:left;">
 0
 </td>
-<td>
+<td style="text-align:left;">
 0
 </td>
-<td>
+<td style="text-align:left;">
 1
 </td>
-<td>
+<td style="text-align:left;">
 1
 </td>
 </tr>
 <tr>
-<td>
+<td style="text-align:left;">
 numeric
 </td>
-<td>
+<td style="text-align:left;">
 age
 </td>
-<td>
+<td style="text-align:left;">
 263
 </td>
-<td>
+<td style="text-align:left;">
 1309
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 29.88
 </td>
-<td>
+<td style="text-align:left;">
 14.41
 </td>
-<td>
+<td style="text-align:left;">
 0.17
 </td>
-<td>
+<td style="text-align:left;">
 21
 </td>
-<td>
+<td style="text-align:left;">
 28
 </td>
-<td>
+<td style="text-align:left;">
 39
 </td>
-<td>
+<td style="text-align:left;">
 80
 </td>
 </tr>
 <tr>
-<td>
+<td style="text-align:left;">
 numeric
 </td>
-<td>
+<td style="text-align:left;">
 fare
 </td>
-<td>
+<td style="text-align:left;">
 1
 </td>
-<td>
+<td style="text-align:left;">
 1309
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 NA
 </td>
-<td>
+<td style="text-align:left;">
 33.3
 </td>
-<td>
+<td style="text-align:left;">
 51.76
 </td>
-<td>
+<td style="text-align:left;">
 0
 </td>
-<td>
+<td style="text-align:left;">
 7.9
 </td>
-<td>
+<td style="text-align:left;">
 14.45
 </td>
-<td>
+<td style="text-align:left;">
 31.27
 </td>
-<td>
+<td style="text-align:left;">
 512.33
 </td>
 </tr>

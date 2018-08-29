@@ -53,8 +53,9 @@ theme_set(theme_bw()+
 ```{r summstats, results='asis'}
 skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
   select(-top_counts,-ordered,-n_unique,-hist,-complete,-empty) %>%
-  skimr::kable()
+  kable()
 ```
+
 
 ```{r explore, warning=F}
 
