@@ -28,6 +28,7 @@ library(tidyverse)
 library(skimr) #summary stats
 library(knitr)  
 #library(rms)
+library(mice) # imputation
 
 titanic <- titanic3 %>% as_tibble() %>%
   mutate(sex=str_to_title(sex))
@@ -50,16 +51,49 @@ theme_set(theme_bw()+
 
 ## Exploratory Analysis 
 
-```{r summstats, results='asis'}
-skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
-  select(-top_counts,-ordered,-n_unique,-hist,-complete,-empty) %>%
-  kable()
+```{r summstats, results='asis',warning=F,message=F}
+# Generate summary statistics
+summ_stats <- skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
+  select(-top_counts,-ordered,-hist,-complete,-empty) 
+
+# Numeric vars
+summ_stats_numm <- summ_stats %>% filter(type %in% c('numeric','integer')) %>%
+  # drop na columns
+  discard(~all(is.na(.x))) %>%
+  map_df(~.x)
+
+# Other variables
+summ_stats_oth <- summ_stats %>% filter(!(type %in% c('numeric','integer'))) %>%
+  select(-min,-max) %>%
+  discard(~all(is.na(.x))) %>%
+  map_df(~.x)
+
+
+gender_summ <- titanic %>% count(sex)
+pclass_summ <- titanic %>% count(pclass)
+surv_summ <- titanic %>% count(survived)
+
+kable(summ_stats_numm,format='markdown',digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(summ_stats_oth,format='markdown',digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(gender_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(pclass_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(surv_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+
 ```
 
 
 ```{r explore, warning=F}
 
-  
 titanic_summ_dot <- titanic_summ %>%
   filter(survived=="Survived") %>%
   mutate(group=str_c(sex,'-',pclass))
@@ -132,9 +166,6 @@ https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing
 https://www.andrew.cmu.edu/user/aurorat/MIA_r.html
 http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html 
 ```{r imputation}
-
-library(mice)
-
 # Use mice to impute data - takes a few seconds on my laptop
 # Increasing maxit from the default gives better results
 # Making sure to not sure the outcome variable to impute.
@@ -310,7 +341,7 @@ lm_terms <- tidy(lm_fit) %>%
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
-geom_vline(xintercept=0,color='red',size=0.4) +
+geom_vline(xintercept=0,color='blue') +
 scale_x_continuous(labels=scales::dollar ,expand=c(0,0,0,0)
                    ) +
 scale_y_continuous(expand=c(0,0,0.07,0)) +  
@@ -334,7 +365,7 @@ ggplot(data=lm_predictions,
           aes(x = prediction, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
-geom_hline(yintercept=0) + # horizontal line at 0 residual
+geom_hline(yintercept=0,color='blue') + # horizontal line at 0 residual
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
@@ -349,7 +380,7 @@ ggplot(data=lm_predictions,
           aes(x = age, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass) +
-  geom_hline(yintercept=0) + # horizontal line at 0 residual
+  geom_hline(yintercept=0,color='blue') + # horizontal line at 0 residual
 scale_y_continuous(labels=scales::dollar) +
 theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +

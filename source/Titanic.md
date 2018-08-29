@@ -34,6 +34,7 @@ library(tidyverse)
 library(skimr) #summary stats
 library(knitr)  
 #library(rms)
+library(mice) # imputation
 
 titanic <- titanic3 %>% as_tibble() %>%
   mutate(sex=str_to_title(sex))
@@ -57,263 +58,78 @@ Exploratory Analysis
 --------------------
 
 ``` r
-skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
-  select(-top_counts,-ordered,-n_unique,-hist,-complete,-empty) %>%
-  kable()
+# Generate summary statistics
+summ_stats <- skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
+  select(-top_counts,-ordered,-hist,-complete,-empty) 
+
+# Numeric vars
+summ_stats_numm <- summ_stats %>% filter(type %in% c('numeric','integer')) %>%
+  # drop na columns
+  discard(~all(is.na(.x))) %>%
+  map_df(~.x)
+
+# Other variables
+summ_stats_oth <- summ_stats %>% filter(!(type %in% c('numeric','integer'))) %>%
+  select(-min,-max) %>%
+  discard(~all(is.na(.x))) %>%
+  map_df(~.x)
+
+
+gender_summ <- titanic %>% count(sex)
+pclass_summ <- titanic %>% count(pclass)
+surv_summ <- titanic %>% count(survived)
+
+kable(summ_stats_numm,format='markdown',digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-<table>
-<thead>
-<tr>
-<th style="text-align:left;">
-type
-</th>
-<th style="text-align:left;">
-variable
-</th>
-<th style="text-align:left;">
-missing
-</th>
-<th style="text-align:left;">
-n
-</th>
-<th style="text-align:left;">
-min
-</th>
-<th style="text-align:left;">
-max
-</th>
-<th style="text-align:left;">
-mean
-</th>
-<th style="text-align:left;">
-sd
-</th>
-<th style="text-align:left;">
-p0
-</th>
-<th style="text-align:left;">
-p25
-</th>
-<th style="text-align:left;">
-p50
-</th>
-<th style="text-align:left;">
-p75
-</th>
-<th style="text-align:left;">
-p100
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-character
-</td>
-<td style="text-align:left;">
-sex
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-1309
-</td>
-<td style="text-align:left;">
-4
-</td>
-<td style="text-align:left;">
-6
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-factor
-</td>
-<td style="text-align:left;">
-pclass
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-1309
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-integer
-</td>
-<td style="text-align:left;">
-survived
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-1309
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-0.38
-</td>
-<td style="text-align:left;">
-0.49
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-1
-</td>
-<td style="text-align:left;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-numeric
-</td>
-<td style="text-align:left;">
-age
-</td>
-<td style="text-align:left;">
-263
-</td>
-<td style="text-align:left;">
-1309
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-29.88
-</td>
-<td style="text-align:left;">
-14.41
-</td>
-<td style="text-align:left;">
-0.17
-</td>
-<td style="text-align:left;">
-21
-</td>
-<td style="text-align:left;">
-28
-</td>
-<td style="text-align:left;">
-39
-</td>
-<td style="text-align:left;">
-80
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-numeric
-</td>
-<td style="text-align:left;">
-fare
-</td>
-<td style="text-align:left;">
-1
-</td>
-<td style="text-align:left;">
-1309
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-33.3
-</td>
-<td style="text-align:left;">
-51.76
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-7.9
-</td>
-<td style="text-align:left;">
-14.45
-</td>
-<td style="text-align:left;">
-31.27
-</td>
-<td style="text-align:left;">
-512.33
-</td>
-</tr>
-</tbody>
-</table>
+| type    | variable | missing | n    | mean  | sd    | p0   | p25 | p50   | p75   | p100   |
+|:--------|:---------|:--------|:-----|:------|:------|:-----|:----|:------|:------|:-------|
+| integer | survived | 0       | 1309 | 0.38  | 0.49  | 0    | 0   | 0     | 1     | 1      |
+| numeric | age      | 263     | 1309 | 29.88 | 14.41 | 0.17 | 21  | 28    | 39    | 80     |
+| numeric | fare     | 1       | 1309 | 33.3  | 51.76 | 0    | 7.9 | 14.45 | 31.27 | 512.33 |
+
+``` r
+kable(summ_stats_oth,format='markdown',digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+```
+
+| type      | variable | missing | n    | n\_unique |
+|:----------|:---------|:--------|:-----|:----------|
+| character | sex      | 0       | 1309 | 2         |
+| factor    | pclass   | 0       | 1309 | 3         |
+
+``` r
+kable(gender_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+```
+
+| sex    |    n|
+|:-------|----:|
+| Female |  466|
+| Male   |  843|
+
+``` r
+kable(pclass_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+```
+
+| pclass |    n|
+|:-------|----:|
+| 1st    |  323|
+| 2nd    |  277|
+| 3rd    |  709|
+
+``` r
+kable(surv_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+```
+
+|  survived|    n|
+|---------:|----:|
+|         0|  809|
+|         1|  500|
+
 ``` r
 titanic_summ_dot <- titanic_summ %>%
   filter(survived=="Survived") %>%
@@ -394,23 +210,6 @@ Discarding rows with missing age has the potential to bias our data so we will i
 <https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/> <https://www.andrew.cmu.edu/user/aurorat/MIA_r.html> <http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html>
 
 ``` r
-library(mice)
-```
-
-    ## Warning: package 'mice' was built under R version 3.5.1
-
-    ## 
-    ## Attaching package: 'mice'
-
-    ## The following object is masked from 'package:tidyr':
-    ## 
-    ##     complete
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     cbind, rbind
-
-``` r
 # Use mice to impute data - takes a few seconds on my laptop
 # Increasing maxit from the default gives better results
 # Making sure to not sure the outcome variable to impute.
@@ -475,6 +274,9 @@ log_confint <- confint(log_fit) %>% tidy()
 ```
 
     ## Waiting for profiling to be done...
+
+    ## Warning: 'tidy.matrix' is deprecated.
+    ## See help("Deprecated")
 
 ``` r
 colnames(log_confint) <- c('Term','LCLM','UCLM')
@@ -629,6 +431,12 @@ lm_fit <- lm(fare ~ sex + pclass + age + survived,data=titanic_imp)
 
 # Calculate confidence limit
 lm_confint <- confint(lm_fit) %>% tidy()
+```
+
+    ## Warning: 'tidy.matrix' is deprecated.
+    ## See help("Deprecated")
+
+``` r
 colnames(lm_confint) <- c('Term','LCLM','UCLM')
 
 lm_predictions <- titanic_imp %>%
@@ -650,7 +458,7 @@ lm_terms <- tidy(lm_fit) %>%
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
-geom_vline(xintercept=0,color='red',size=0.4) +
+geom_vline(xintercept=0,color='blue') +
 scale_x_continuous(labels=scales::dollar ,expand=c(0,0,0,0)
                    ) +
 scale_y_continuous(expand=c(0,0,0.07,0)) +  
@@ -684,7 +492,7 @@ ggplot(data=lm_predictions,
           aes(x = prediction, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
-geom_hline(yintercept=0) + # horizontal line at 0 residual
+geom_hline(yintercept=0,color='blue') + # horizontal line at 0 residual
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
@@ -705,7 +513,7 @@ ggplot(data=lm_predictions,
           aes(x = age, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass) +
-  geom_hline(yintercept=0) + # horizontal line at 0 residual
+  geom_hline(yintercept=0,color='blue') + # horizontal line at 0 residual
 scale_y_continuous(labels=scales::dollar) +
 theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
@@ -737,9 +545,9 @@ kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdo
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-|  r.squared|  adj.r.squared|  sigma|  statistic|  p.value|   df|       AIC|       BIC|
-|----------:|--------------:|------:|----------:|--------:|----:|---------:|---------:|
-|       0.38|           0.38|  40.84|     159.46|        0|    6|  13424.38|  13460.62|
+|       |  r.squared|  adj.r.squared|  sigma|  statistic|  p.value|   df|       AIC|       BIC|
+|:------|----------:|--------------:|------:|----------:|--------:|----:|---------:|---------:|
+| value |       0.38|           0.38|  40.84|     159.46|        0|    6|  13424.38|  13460.62|
 
 ``` r
 kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
