@@ -2,14 +2,17 @@ A categorized list of data science resources.
 
 ## General
 * [RStudio Cheatsheets](https://www.rstudio.com/resources/cheatsheets/) 
+* [Bookdown Books](https://bookdown.org/) - A great collection of free R books.
+* [R For Data Science](http://r4ds.had.co.nz/index.html) - Classic text by Hadley Wickham, chief overlord of all things Tidyverse.
 * [R-Cookbook](http://www.cookbook-r.com) - Categorized useful R code. 
-* [R For Data Science](http://r4ds.had.co.nz/index.html) 
+* [R for Public Policy](http://www.lecy.info/r-for-public-policy/) - List of resources.
 * [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
 ## Datasets
 * [KDNuggets](https://www.kdnuggets.com/datasets/index.html)
+* [Microsoft's List of R Data Sources](https://mran.microsoft.com/documents/data)
 * [Kaggle](https://www.kaggle.com/datasets) - Datasets used for Kaggle competitions.
 * [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml)
 * [R Datasets](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/00Index.html) - Documentation on the inbuilt datasets in R.
@@ -62,13 +65,14 @@ A categorized list of data science resources.
 
 ## Creating Deliverables
 * [R Markdown](https://rmarkdown.rstudio.com/)
+* [R Markdown - The Definitive Guide](https://bookdown.org/yihui/rmarkdown/) - Free book on RMarkdown.
 * [Tables in R Markdown](https://haozhu233.github.io/kableExtra/awesome_table_in_html.html)
 * [RMarkdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 * [officer](https://davidgohel.github.io/officer/index.html) - Creating Microsoft Office deliverables in R.
 
 ## Colors
 * [R-Cookbook Color Tutorial](http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/) - Includes a good color blind palette
-* [Datawrawpper - Colorguide](https://blog.datawrapper.de/colorguide/)
+* [Datawrapper - Colorguide](https://blog.datawrapper.de/colorguide/)
 * [Color Brewer](http://colorbrewer2.org)
 * [Viz Palette](http://projects.susielu.com/viz-palette?colors=%5B%22#1DABE6%22,%22#1C366A%22,%22#C3CED0%22,%22#E43034%22,%22#FC4E51%22,%22#AF060F%22%5D&backgroundColor=%22white%22&fontColor=%22black%22)
 * [Viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#gallery)
