@@ -1,7 +1,7 @@
 Geospatial Analysis
 ================
 Jesse Cambon
-15 August, 2018
+31 August, 2018
 
 -   [References](#references)
 -   [Setup](#setup)
@@ -14,9 +14,6 @@ References
 ----------
 
 -   <https://github.com/mtennekes/tmap>
--   <https://ggplot2.tidyverse.org/reference/index.html>
--   <https://github.com/wmurphyrd/fiftystater>
--   <https://github.com/mtennekes/tmap/tree/master/demo/USChoropleth>
 -   <https://mran.revolutionanalytics.com/snapshot/2016-03-22/web/packages/tmap/vignettes/tmap-nutshell.html>
 
 Setup
@@ -26,14 +23,10 @@ Setup
 library(tidyverse)
 library(tidycensus) # census data
 library(ggplot2)
-library(sf) # geospatial methods
+#library(sf) # geospatial methods
 library(tmap) # thematic mapping
 library(viridis) # color scheme
-#library(albersusa) # US country map
-#library(ggthemes)
-#library(spData)
-library(wbstats) # world bank
-#library(maps)
+#library(wbstats) # world bank
 library(wesanderson) # colors
 library(fiftystater) # US state geometries
 
@@ -46,34 +39,23 @@ Geographies
 Locales
 -------
 
+Use the tidycensus package to pull Census data and display it on a map with the tmap package.
+
 ``` r
-# us_county_income <- get_acs(geography = "county", variables = "B19013_001", geometry = TRUE)
-# 
-# qtm(us_county_income, fill = "estimate")
-
-
-# us <- get_acs(geography = "county", 
-#               variables = 'B25064_001E', # median gross rent
-#               geometry = TRUE) 
-# 
-# qtm(us, fill = "estimate")
-
-
-# Rent in Boston
+# Pull Census Rent Data for Boston using tidycensus package
 bos <- get_acs(geography = "tract", 
               variables = "B25064_001E",  # median gross rent
               state = "MA", 
               county = c("Suffolk",'Middlesex'), 
               geometry = TRUE)
-```
 
-    ## Please note: `get_acs()` now defaults to a year or endyear of 2016.
-
-``` r
-qtm(bos, fill = "estimate",fill.title='Median Rent',
-    title='Boston Area Rent by Census Tract',
-    scale=0.75) +
-  tm_layout(inner.margins=c(0,0,.1,0),main.title.position='center',legend.position=c('left','bottom'))
+qtm(bos, fill = "estimate",fill.title='Median Rent') +
+   tm_style("classic") +
+  # margin format is c(bottom,left,top,right)
+  tm_layout(inner.margins = c(0.05, .05, .05, .05),main.title.position='center',legend.position=c('left','bottom'),
+            legend.text.size=0.8,legend.title.size=1.3,
+            main.title='Boston Area Rent by Census Tract',
+            main.title.size=1.5) 
 ```
 
 ![](Geospatial_Analysis_files/figure-markdown_github/locale-1.png)
@@ -90,12 +72,21 @@ United States
 ``` r
 data("fifty_states") # fiftystater package
 
-crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests) %>%
+  # Make a categorical variable for Murder rates with a predefined interval
+  mutate(Murder_cut = str_replace_all(cut_width(Murder,5,boundary=0),',',' - ')) %>%
+  # Delete all characters except for digits, whitespace, and '-'
+  mutate(Murder_cut = str_replace_all(Murder_cut,'[^\\d\\s-]',''))
+
+# make an ordered list of levels so our categorical variable is sorted properly
+Murder_cut_levels <- crimes %>% arrange(Murder) %>% pull(Murder_cut) %>%
+  unique()
+
 
 # map_id creates the aesthetic mapping to the state name column in your data
 ggplot(crimes, aes(map_id = state)) + 
   # map points to the fifty_states shape data
-  geom_map(aes(fill = Murder), 
+  geom_map(aes(fill = factor(Murder_cut,levels=Murder_cut_levels)), 
            map = fifty_states, color='white',size=0.2) +  # geometry from fiftystater package
   expand_limits(x = fifty_states$long, y = fifty_states$lat) +
   coord_map() +
@@ -108,14 +99,11 @@ ggplot(crimes, aes(map_id = state)) +
   theme(legend.position = "right", 
         panel.background = element_blank(),
         panel.border=element_blank())  +
-  scale_fill_viridis_c(direction=-1,option='inferno') 
+  scale_fill_viridis_d(direction=-1,option='inferno',end=0.9)  +
+  guides(fill = guide_legend(title='Murders Per\n100,000 Residents'))
 ```
 
 ![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-2-1.png)
-
-``` r
-#  guides(color = guide_legend(title='Murders Per 100,000 Residents'))
-```
 
 The World
 ---------
@@ -128,11 +116,15 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
               palette = "Greens",
               breaks = c(0, 1000, 5000, 10000, 25000, 50000, Inf),
               title = "GDP per capita") +
-  tm_style("grey",
-           earth.boundary = c(-180, -87, 180, 87))  +
+  tm_style("classic",frame=F,
+           earth.boundary = c(-180, -87, 180, 87),
+           legend.text.size=0.8,legend.title.size=1.3)   +
 #  tm_format("World", inner.margins = 0.02, frame = FALSE) 
-  tm_legend(position = "bottom", frame = TRUE, legend.outside=F) +
- tm_format("World",frame=F) 
+  tm_legend(frame = TRUE) 
 ```
 
 ![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+``` r
+# tm_format("World",frame=F) 
+```
