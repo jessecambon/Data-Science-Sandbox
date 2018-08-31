@@ -20,19 +20,21 @@ library(MASS) # confint for glm
 library(wesanderson) # color palettes
 library(formattable) # percent format
 library(caret) # regression utilities
-library(Hmisc) # capitalize function
+#library(Hmisc) # capitalize function
 library(broom) # model display capabilities
 #library(xtable) # pretty table
-library(knitr)  
 library(kableExtra)
 library(tidyverse)
-library(rms)
+library(skimr) #summary stats
+library(knitr)  
+#library(rms)
+library(mice) # imputation
 
-titanic <- titanic3 %>% as_tibble()
+titanic <- titanic3 %>% as_tibble() %>%
+  mutate(sex=str_to_title(sex))
 
 titanic_summ <- titanic %>%
   count(survived,pclass,sex) %>%
-  mutate(sex=capitalize(as.character(sex))) %>%
   group_by(pclass,sex) %>%
   mutate(perc_surv_num=n/sum(n),
     perc_surv_char=as.character(percent(n/sum(n),0))) %>%
@@ -49,6 +51,47 @@ theme_set(theme_bw()+
 
 ## Exploratory Analysis 
 
+```{r summstats, results='asis',warning=F,message=F}
+# Generate summary statistics
+summ_stats <- skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
+  select(-top_counts,-ordered,-hist,-complete,-empty) 
+
+# Numeric vars
+summ_stats_numm <- summ_stats %>% filter(type %in% c('numeric','integer')) %>%
+  # drop na columns
+  discard(~all(is.na(.x))) %>%
+  map_df(~.x)
+
+# Other variables
+summ_stats_oth <- summ_stats %>% filter(!(type %in% c('numeric','integer'))) %>%
+  select(-min,-max) %>%
+  discard(~all(is.na(.x))) %>%
+  map_df(~.x)
+
+
+gender_summ <- titanic %>% count(sex)
+pclass_summ <- titanic %>% count(pclass)
+surv_summ <- titanic %>% count(survived)
+
+kable(summ_stats_numm,format='markdown',digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(summ_stats_oth,format='markdown',digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(gender_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(pclass_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(surv_summ,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+
+```
+
+
 ```{r explore, warning=F}
 
 titanic_summ_dot <- titanic_summ %>%
@@ -57,7 +100,7 @@ titanic_summ_dot <- titanic_summ %>%
   
 # Analyze where age is missing
 titanic_miss <- titanic %>% select(pclass,sex,age,survived) %>%
-  mutate(sex=capitalize(as.character(sex)),missing_age=is.na(age)) %>%
+  mutate(missing_age=is.na(age)) %>%
   group_by(pclass,sex) %>%
   dplyr::summarize(perc_missing=mean(missing_age)) %>%
   mutate(group=str_c(sex,'-',pclass))
@@ -123,9 +166,6 @@ https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing
 https://www.andrew.cmu.edu/user/aurorat/MIA_r.html
 http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html 
 ```{r imputation}
-
-library(mice)
-
 # Use mice to impute data - takes a few seconds on my laptop
 # Increasing maxit from the default gives better results
 # Making sure to not sure the outcome variable to impute.
@@ -154,7 +194,7 @@ ggplot(data=titanic_imp) +
 
 ggplot(data=titanic_imp) +
  geom_density(aes(x=age,color=imputed), alpha=0.8) + 
-  facet_grid(vars(sex),vars(pclass)) +
+  facet_grid(sex ~ pclass) +
   theme(legend.position='top') +
     labs(title="Distributions of Original v. Imputed Age") +
   guides(color=guide_legend(title=''))
@@ -199,10 +239,10 @@ log_terms <- tidy(log_fit) %>% rename(Coefficient=estimate,Term=term) %>%
 confusionMatrix(factor(predictions$prediction_binary), factor(predictions$survived))
 
 
-ggplot(data=predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=predictions,
           aes(x = age, y = prediction, color = pclass)) +
 geom_point() +
-facet_grid(~factor(sex)) +
+facet_grid(~sex) +
 scale_y_continuous(labels=scales::percent) +
 theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
@@ -219,8 +259,8 @@ ggplot(predictions, aes(prediction))+
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent,
                      limits=c(0,1),
-                     expand=c(0,0)) + # eliminate left/right margin
-    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
+                     expand=c(0,0,0,0)) + # eliminate left/right margin
+    scale_y_continuous(expand=expand_scale(mult = c(0, .1))) + 
   labs(title="Logistic Regression Probability Distribution") +
 xlab('Survival Probability') +
 ylab('Count') +
@@ -228,7 +268,7 @@ guides(fill = guide_legend(title=''))
 
 # Same graph as prior but faceted on class
 
-ggplot(predictions %>% mutate(sex=capitalize(as.character(sex))), aes(prediction))+
+ggplot(predictions, aes(prediction))+
   geom_histogram(binwidth=0.05,aes(fill=factor(survived,labels=c('Died','Survived'))),
     col='black') + 
   facet_wrap(~sex,scales='free_y') +
@@ -238,7 +278,7 @@ ggplot(predictions %>% mutate(sex=capitalize(as.character(sex))), aes(prediction
         ) +
   scale_fill_manual(values=wes_palette('Moonrise3')) +
   scale_x_continuous(labels=scales::percent ) +
-    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top, none on bottom
+  scale_y_continuous(expand=expand_scale(mult = c(0, .1))) +
   labs(title="Logistic Regression Probability Distribution by Gender") +
 xlab('Survival Probability') +
 ylab('Count') +
@@ -251,7 +291,7 @@ ggplot(predictions, aes(brier_score)) +
     scale_fill_manual(values=wes_palette('Moonrise3')) +
   # Use expand to make sure right axis label isn't clipped
     scale_x_continuous(expand=c(0,0,0.01,0),limits=c(0,1)) +
-    scale_y_continuous(expand=c(0,0,0.07,0)) + # 7% margin on top
+    scale_y_continuous(expand=expand_scale(mult = c(0, .1))) +
 xlab('Brier Score') +
 ylab('Count') +
 guides(fill = guide_legend(title='')) 
@@ -301,7 +341,7 @@ lm_terms <- tidy(lm_fit) %>%
 ggplot(lm_predictions, aes(residual)) +
   geom_histogram(bins=30) +
 facet_grid(~pclass,scales='free_x') +
-geom_vline(xintercept=0,color='red',size=0.4) +
+geom_vline(xintercept=0,color='blue') +
 scale_x_continuous(labels=scales::dollar ,expand=c(0,0,0,0)
                    ) +
 scale_y_continuous(expand=c(0,0,0.07,0)) +  
@@ -309,7 +349,7 @@ scale_y_continuous(expand=c(0,0,0.07,0)) +
 xlab('Residual') +
 ylab('Count') 
 
-ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=lm_predictions,
           aes(x = age, y = prediction, color = pclass,group=1)) +
 geom_point() +
 facet_grid(~factor(sex)) +
@@ -321,11 +361,11 @@ xlab('Age') +
 ylab('Fare Cost') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 
-ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=lm_predictions,
           aes(x = prediction, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass,scales='free_x') +
-geom_hline(yintercept=0) + # horizontal line at 0 residual
+geom_hline(yintercept=0,color='blue') + # horizontal line at 0 residual
 #geom_smooth(method="lm",show.legend=F,size=0.5) +
 scale_x_continuous(labels=scales::dollar) +
 scale_y_continuous(labels=scales::dollar) +
@@ -336,11 +376,11 @@ xlab('Prediction') +
 ylab('Residual') + 
 guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.5))) 
 
-ggplot(data=lm_predictions %>% mutate(sex=capitalize(as.character(sex))),
+ggplot(data=lm_predictions,
           aes(x = age, y = residual, color = sex)) +
 geom_point() +
 facet_grid(~pclass) +
-  geom_hline(yintercept=0) + # horizontal line at 0 residual
+  geom_hline(yintercept=0,color='blue') + # horizontal line at 0 residual
 scale_y_continuous(labels=scales::dollar) +
 theme(legend.margin=margin(0,0,0,0)) +
 scale_color_manual(values=wes_palette('Moonrise3')) +
