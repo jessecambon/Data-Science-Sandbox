@@ -49,7 +49,10 @@ bos <- get_acs(geography = "tract",
               county = c("Suffolk",'Middlesex'), 
               geometry = TRUE)
 
-qtm(bos, fill = "estimate",fill.title='Median Rent') +
+tm_shape(bos) +
+  tm_fill('estimate',colorNA = "white",breaks=c(0,1000,1500,2000,3500),
+          fill.title='Median Rent') +
+  tm_borders() +
    tm_style("classic") +
   # margin format is c(bottom,left,top,right)
   tm_layout(inner.margins = c(0.05, .05, .05, .05),main.title.position='center',legend.position=c('left','bottom'),
