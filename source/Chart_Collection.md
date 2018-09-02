@@ -1,7 +1,7 @@
 Visualization Cookbook
 ================
 Jesse Cambon
-29 August, 2018
+02 September, 2018
 
 -   [Getting Started](#getting-started)
 -   [References](#references)
@@ -511,14 +511,15 @@ Evolution
 ### Line
 
 ``` r
-# Horizontal axis limits (Year)
-eu_plot_lims <- c(round(min(eu_stock$Year)),round(max(eu_stock$Year)))
+# Start and end for the breaks on the horizontal axis
+eu_plot_lims <- c(ceiling(min(eu_stock$Year)),floor(max(eu_stock$Year)))
 
 # Performance of EU Stock Indexes
 ggplot(eu_stock,
           aes(x=Year,y=Price,color = fct_rev(Index))) +
 geom_line() +
-scale_x_continuous(limits=eu_plot_lims,breaks=eu_plot_lims[1]:eu_plot_lims[2]) +
+scale_x_continuous(breaks=eu_plot_lims[1]:eu_plot_lims[2],
+                   expand=c(0,0,0.02,0)) +
 scale_y_continuous(labels=scales::comma) + 
 scale_color_manual(values=wes_palette('GrandBudapest2')) +
 labs(title='EU Stock Indexes',
@@ -553,7 +554,7 @@ geom_text_repel( # Labels
     segment.color = NA,
     show.legend = F # need this to fix legend
   ) +
-scale_x_continuous(breaks=c(1:7),expand=c(0.03,0,0.1,0)) +
+scale_x_continuous(breaks=c(1:7),expand=c(0.02,0,0.07,0)) +
 scale_y_continuous(labels=scales::percent) + 
 scale_color_manual(values=cbPalette) +
 labs(title='Percentage of Star Wars Characters in Each Film by Gender') +
