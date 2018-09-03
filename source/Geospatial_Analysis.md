@@ -112,7 +112,12 @@ The World
 ---------
 
 ``` r
+# Load world map geometry
 data(World)
+
+# Load coordinates of cities
+data(metro) 
+
 tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
          ) +
   tm_polygons("gdp_cap_est",
@@ -131,4 +136,33 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
 
 ``` r
 # tm_format("World",frame=F) 
+
+
+metro <- metro %>%
+  mutate(growth= 100*(pop2020 - pop2010) / pop2010)
+
+tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
+         ) +
+    tm_polygons("life_exp", palette = "Purples", 
+        breaks=c(50,65,80,Inf),
+    title = "Life Expectancy", contrast=0.7, border.col = "gray30", id = "name") +
+#  tm_borders() +
+  tm_shape(metro) +
+  tm_bubbles("pop2010", col = "growth", border.col = "black", 
+    border.alpha = 0.6,
+    breaks=c(0,25,50,75,Inf),
+    palette = "-RdYlGn",
+    title.size = "Metro population (2010)", 
+    title.col = "Projected Growth by 2020 (%)",
+    id = "name") +
+  # tm_style("classic",frame=F,
+  #          earth.boundary = c(-180, -87, 180, 87),
+  #          legend.text.size=0.8,legend.title.size=1.3)   +
+  tm_layout(bg.color='white') +
+#  tm_format("World", inner.margins = 0.02, frame = FALSE) 
+  tm_legend(frame = F) 
 ```
+
+    ## Variable "growth" contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full spectrum of the color palette.
+
+![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-3-2.png)
