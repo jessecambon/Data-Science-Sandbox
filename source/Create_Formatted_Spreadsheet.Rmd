@@ -8,7 +8,9 @@ output:
     toc: true
 ---
 
-We will use the classic gapminder dataset to create a formatted spreadsheet report using the openxlsx package. This code allows us to create the spreadsheet report directly from code instead of using manual copy and pasting and formatting.
+We will use the classic gapminder dataset to create a formatted spreadsheet report using the openxlsx package. This code allows us to create the spreadsheet report directly from code instead of using manual copy and pasting and formatting. This is especially conveniant for recurring reports.
+
+To view the resulting spreadsheet report, [click here](gapminder_summary_report.xlsx).
 
 ## Setup
 
