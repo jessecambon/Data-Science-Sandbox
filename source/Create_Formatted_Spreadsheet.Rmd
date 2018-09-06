@@ -64,14 +64,23 @@ kable(gap_combi %>% select(-header_level,-indent_level) %>% rename(`Continent/Co
 
 Now we will create the formatted spreadsheet
 
-Comma, rounded (decimal), and percent columns can be entered either as column position or as
-a column name. You can pass 'indent_level' and 'header_level' columns to the create_worksheet
+Comma, rounded, and percent columns can be entered either as column position or as
+a column name. Alternatively, you can pass a list of specific format strings to 'format_cols'.
+
+You can pass 'indent_level' and 'header_level' columns to the create_worksheet
 function for formatting purposes. These columns will not be shown in the resulting spreadsheet.
 
 ```{r}
 ## Define the function for creating a worksheet
-create_worksheet <- function(wb,sheet_name,data,title1_text="",comma_cols=NULL,percent_cols=NULL,
-                             round_cols=NULL,format_cols=NULL, caption=NULL,col_widths=NULL) {
+create_worksheet <- function(wb,sheet_name,data,
+         title1_text="", # Sheet title
+         comma_cols=NULL, # Column #s or names to be in comma format
+         percent_cols=NULL, # Column #s or names to be in percent format
+         round_cols=NULL, # Column #s or names to be rounded
+         format_cols=NULL, # Pass a list of formats for each column to this parameter
+         caption=NULL, # A description to be put below the main table in the spreadsheet
+         col_widths=NULL # Pass a list of column widths (1 per column)
+         ) {
   
   # Extract the indent values if they are provided 
   # and then remove from dataframe
