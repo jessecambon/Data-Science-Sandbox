@@ -1,7 +1,7 @@
 Visualization Cookbook
 ================
 Jesse Cambon
-02 September, 2018
+06 September, 2018
 
 -   [Getting Started](#getting-started)
 -   [References](#references)
@@ -79,6 +79,7 @@ library(treemapify) # ggplot treemap
 library(treemap) 
 library(viridis) # colors
 library(gapminder) # gdp life expectancy data
+library(gridExtra) 
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -395,7 +396,31 @@ ylab('')
 ![](Chart_Collection_files/figure-markdown_github/bar-1.png)
 
 ``` r
-# Take a look at number of each species from each homeworld
+## Side-by-Side Barchart
+
+p1 <- ggplot(mtcars, aes(x = reorder(row.names(mtcars),cyl), y=cyl)) +
+        geom_bar(stat = "identity") +
+        coord_flip() +
+        ggtitle("Cylinders") +
+        xlab('Car') +
+        ylab('')
+
+# order bars
+p2 <- ggplot(mtcars, aes(x = reorder(row.names(mtcars), mpg), y = mpg)) +
+        geom_bar(stat = "identity") +
+        coord_flip() +
+        ggtitle("MPG") + 
+        xlab('') +
+        ylab('')
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+![](Chart_Collection_files/figure-markdown_github/bar-2.png)
+
+``` r
+##  Take a look at number of each species from each Starwars homeworld
+
 ggplot(data=homeworld_summ,
           aes(x = species_collapsed, y=n,fill = species_collapsed)) +
 # The scales argument suppress the presense of an empty "Other" species
@@ -414,10 +439,10 @@ xlab('') +
 ylab('')
 ```
 
-![](Chart_Collection_files/figure-markdown_github/bar-2.png)
+![](Chart_Collection_files/figure-markdown_github/bar-3.png)
 
 ``` r
-# Stacked bar of Titanic dataset
+## Stacked bar of Titanic dataset
 
 ggplot(data=titanic_bar,
           aes(x = Sex, y=percent_num,fill = fct_rev(Class))) +
@@ -438,7 +463,7 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
     ## Warning: Removed 4 rows containing missing values (geom_text).
 
-![](Chart_Collection_files/figure-markdown_github/bar-3.png)
+![](Chart_Collection_files/figure-markdown_github/bar-4.png)
 
 Correlation
 -----------

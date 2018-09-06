@@ -52,6 +52,7 @@ library(treemapify) # ggplot treemap
 library(treemap) 
 library(viridis) # colors
 library(gapminder) # gdp life expectancy data
+library(gridExtra) 
 
 # Set default ggplot theme
 theme_set(theme_bw()+
@@ -349,7 +350,28 @@ labs(title='Average Height of Selected Star Wars Species (cm)') +
 xlab('Species') +
 ylab('')
 
-# Take a look at number of each species from each homeworld
+## Side-by-Side Barchart
+
+p1 <- ggplot(mtcars, aes(x = reorder(row.names(mtcars),cyl), y=cyl)) +
+        geom_bar(stat = "identity") +
+        coord_flip() +
+        ggtitle("Cylinders") +
+        xlab('Car') +
+        ylab('')
+
+# order bars
+p2 <- ggplot(mtcars, aes(x = reorder(row.names(mtcars), mpg), y = mpg)) +
+        geom_bar(stat = "identity") +
+        coord_flip() +
+        ggtitle("MPG") + 
+        xlab('') +
+        ylab('')
+
+grid.arrange(p1, p2, ncol = 2)
+
+
+##  Take a look at number of each species from each Starwars homeworld
+
 ggplot(data=homeworld_summ,
           aes(x = species_collapsed, y=n,fill = species_collapsed)) +
 # The scales argument suppress the presense of an empty "Other" species
@@ -367,7 +389,7 @@ labs(title='Number of Star Wars Characters of Each Species from Selected Homewor
 xlab('') +
 ylab('')
 
-# Stacked bar of Titanic dataset
+## Stacked bar of Titanic dataset
 
 ggplot(data=titanic_bar,
           aes(x = Sex, y=percent_num,fill = fct_rev(Class))) +
