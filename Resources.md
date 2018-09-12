@@ -11,6 +11,7 @@ A categorized list of data science resources.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
 ## Datasets
+* [Google Dataset Search](https://toolbox.google.com/datasetsearch)
 * [KDNuggets](https://www.kdnuggets.com/datasets/index.html)
 * [Microsoft's List of R Data Sources](https://mran.microsoft.com/documents/data)
 * [Kaggle](https://www.kaggle.com/datasets) - Datasets used for Kaggle competitions.
