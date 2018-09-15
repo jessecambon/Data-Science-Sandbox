@@ -1,0 +1,110 @@
+---
+title: "Modeling Workflow"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+Demonstrate model workflows with tidyverse, modelr, and broom.
+
+## References
+* http://r4ds.had.co.nz/many-models.html 
+
+## Setup
+
+```{r setup,warning=F,message=F}
+library(tidyverse)
+library(gapminder)
+library(broom)
+library(modelr)
+library(knitr)
+library(kableExtra)
+
+```
+
+## Grouped Models
+
+```{r models}
+
+# One model per continent
+models <- gapminder %>%
+  group_by(continent) %>%
+  do(fit=lm(lifeExp ~ (gdpPercap*log(pop)) + year, data=.))
+
+stats <- glance(models,fit) %>%
+  arrange(desc(r.squared))
+
+coefficients <- tidy(models,fit) %>%
+  filter(term != '(Intercept)') %>%
+  arrange(continent,desc(p.value))
+
+fit_check <- augment(models,fit)
+```
+
+```{r modeldisplay,results='asis',warning=F}
+kable(stats,format='markdown',digits=2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(coefficients,format='markdown',digits=4) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+```
+
+## Nested Models
+
+```{r}
+my_model <- function(df) {
+  lm(lifeExp ~ (gdpPercap*log(pop)) + year, data= df)
+}
+
+# Nest models by continent 
+
+by_continent <- gapminder %>% 
+  group_by(continent) %>% 
+  nest() %>%
+  # fit models
+  mutate(fit = map(data, my_model)) %>%
+  # calculate residuals
+  mutate(augment = map(fit, augment),
+    stats = map(fit,glance),
+    terms = map(fit,tidy)) %>%
+  ungroup()
+
+# Dataset with predictions and residuals
+model_fit <- by_continent %>% unnest(augment)
+
+nest_stats <- by_continent %>%
+  unnest(stats,.drop=TRUE) %>%
+  arrange(desc(r.squared)) 
+
+nest_coefficients <- by_continent %>%
+  unnest(terms,.drop=TRUE) %>%
+  filter(term != '(Intercept)') %>%
+  arrange(continent,desc(p.value))
+```
+
+```{r plot}
+
+ggplot(data=model_fit,
+          aes(x = .fitted, y = .resid, color = continent,group=1)) +
+geom_point(alpha=0.8) +
+facet_grid(~continent) +
+ggtitle('Fitted vs. Residual Check') +
+theme_bw() +
+geom_hline(yintercept=0,color='blue') + # horizontal line at 0 residual
+theme(legend.position='none',
+  plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) + 
+guides(color=guide_legend(override.aes = list(size=2.5))) +
+xlab('Fitted') +
+ylab('Residual')
+```
+
+```{r,results='asis',warning=F}
+kable(nest_stats,format='markdown',digits=2) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+
+kable(nest_coefficients,format='markdown',digits=4) %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
+```
+
