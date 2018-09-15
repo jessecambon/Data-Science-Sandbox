@@ -18,6 +18,7 @@ The purpose of this repository is to provide code and resources that can be quic
 ## Table of Contents 
 * [Visualization Cookbook](source/Chart_Collection.md) - A wide variety of data visualizations demonstrated.
 * [Modeling Fundamentals](source/Titanic.md) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
+* [Modeling Workflows](source/Modeling_Workflow.md) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
 * [Geospatial Data Analysis](source/Geospatial_Analysis.md) - A work-in-progress collection of maps. 
 * [Creating Formatted Spreadsheets](source/Create_Formatted_Spreadsheet.md) - How to create a custom formatted spreadsheet report with the openxlsx R package.
 * [Resources](Resources.md) - Websites and references that I find helpful for data science projects.
