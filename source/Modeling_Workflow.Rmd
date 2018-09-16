@@ -24,6 +24,35 @@ library(kableExtra)
 
 ```
 
+## Exploration
+
+
+These graphs show why log transforming GDP per Capita makes it correlate more linearly to our response variable, life expectancy. Log transformations are often useful for highly skewed variables in regression.
+
+```{r explore}
+ggplot(data=gapminder,
+          aes(x = gdpPercap, y = lifeExp, color = continent,group=1)) +
+geom_point(alpha=0.7) +
+theme_bw() +
+geom_smooth() +
+theme(legend.position='top',
+  plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) + 
+guides(color=guide_legend(override.aes = list(size=2.5))) 
+
+ggplot(data=gapminder,
+          aes(x = log(gdpPercap), y = lifeExp, color = continent,group=1)) +
+geom_point(alpha=0.7) +
+theme_bw() +
+geom_smooth() +
+theme(legend.position='top',
+  plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) + 
+guides(color=guide_legend(override.aes = list(size=2.5))) 
+
+
+```
+
+
+
 ## Grouped Models
 
 ```{r models}
@@ -31,7 +60,7 @@ library(kableExtra)
 # One model per continent
 models <- gapminder %>%
   group_by(continent) %>%
-  do(fit=lm(lifeExp ~ (gdpPercap*log(pop)) + year, data=.))
+  do(fit=lm(lifeExp ~ (log(gdpPercap)*log(pop)) + year, data=.)) 
 
 stats <- glance(models,fit) %>%
   arrange(desc(r.squared))
@@ -43,50 +72,10 @@ coefficients <- tidy(models,fit) %>%
 fit_check <- augment(models,fit)
 ```
 
-```{r modeldisplay,results='asis',warning=F}
-kable(stats,format='markdown',digits=2) %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
-
-kable(coefficients,format='markdown',digits=4) %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
-```
-
-## Nested Models
-
-```{r}
-my_model <- function(df) {
-  lm(lifeExp ~ (gdpPercap*log(pop)) + year, data= df)
-}
-
-# Nest models by continent 
-
-by_continent <- gapminder %>% 
-  group_by(continent) %>% 
-  nest() %>%
-  # fit models
-  mutate(fit = map(data, my_model)) %>%
-  # calculate residuals
-  mutate(augment = map(fit, augment),
-    stats = map(fit,glance),
-    terms = map(fit,tidy)) %>%
-  ungroup()
-
-# Dataset with predictions and residuals
-model_fit <- by_continent %>% unnest(augment)
-
-nest_stats <- by_continent %>%
-  unnest(stats,.drop=TRUE) %>%
-  arrange(desc(r.squared)) 
-
-nest_coefficients <- by_continent %>%
-  unnest(terms,.drop=TRUE) %>%
-  filter(term != '(Intercept)') %>%
-  arrange(continent,desc(p.value))
-```
 
 ```{r plot}
 
-ggplot(data=model_fit,
+ggplot(data=fit_check,
           aes(x = .fitted, y = .resid, color = continent,group=1)) +
 geom_point(alpha=0.8) +
 facet_grid(~continent) +
@@ -98,13 +87,75 @@ theme(legend.position='none',
 guides(color=guide_legend(override.aes = list(size=2.5))) +
 xlab('Fitted') +
 ylab('Residual')
+
+ggplot(data=fit_check,
+          aes(.resid)) +
+geom_histogram(aes(fill=continent)) +
+facet_grid(~continent) +
+ggtitle('Residual Distribution') +
+theme_bw() +
+scale_y_continuous(expand = c(0,0,0.05,0)) + 
+theme(legend.position='none',
+  plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) + 
+guides(color=guide_legend(override.aes = list(size=2.5))) +
+xlab('Residual') +
+ylab('Count')
 ```
 
-```{r,results='asis',warning=F}
-kable(nest_stats,format='markdown',digits=2) %>%
+
+
+```{r modeldisplay,results='asis',warning=F}
+kable(stats,format='markdown',digits=2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 
-kable(nest_coefficients,format='markdown',digits=4) %>%
+kable(coefficients,format='markdown',digits=4) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
+
+
+
+## Nested Models
+
+Now we create a similar model with nesting
+
+```{r}
+my_model <- function(df) {
+  lm(lifeExp ~ (log(gdpPercap)*log(pop)) + year, data= df)
+}
+
+# Nest models by continent 
+
+nested_models <- gapminder %>% 
+  group_by(continent,country) %>% 
+  nest() %>%
+  # fit models
+  mutate(fit = map(data, my_model)) %>%
+  # calculate residuals
+  mutate(augment = map(fit, augment),
+    stats = map(fit,glance),
+    terms = map(fit,tidy)) %>%
+  ungroup()
+
+# Dataset with predictions and residuals
+model_fit <- nested_models %>% unnest(augment)
+
+nest_stats <- nested_models %>%
+  unnest(stats,.drop=TRUE) %>%
+  arrange(desc(r.squared)) 
+
+nest_coefficients <- nested_models %>%
+  unnest(terms,.drop=TRUE) %>%
+  filter(term != '(Intercept)') %>%
+  arrange(continent,country,desc(p.value))
+
+most_important_vars <- nest_coefficients %>%
+  group_by(country) %>% 
+  slice(1)
+
+summ_imp_vars <- most_important_vars %>%
+  group_by(continent) %>%
+  count(term) %>%
+  arrange(continent,desc(n))
+```
+
 
