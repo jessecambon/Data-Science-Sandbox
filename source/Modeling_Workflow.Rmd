@@ -18,7 +18,7 @@ Demonstrate model workflows with tidyverse, modelr, and broom.
 library(tidyverse)
 library(gapminder)
 library(broom)
-library(modelr)
+#library(modelr)
 library(knitr)
 library(kableExtra)
 
@@ -40,13 +40,24 @@ theme(legend.position='top',
 guides(color=guide_legend(override.aes = list(size=2.5))) 
 
 ggplot(data=gapminder,
-          aes(x = log(gdpPercap), y = lifeExp, color = continent,group=1)) +
+          aes(x = log10(gdpPercap), y = lifeExp, color = continent,group=1)) +
 geom_point(alpha=0.7) +
 theme_bw() +
 geom_smooth() +
 theme(legend.position='top',
   plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) + 
 guides(color=guide_legend(override.aes = list(size=2.5))) 
+
+ggplot(data=gapminder,
+          aes(x = log10(pop), y = lifeExp, color = continent,group=1)) +
+geom_point(alpha=0.7) +
+#facet_grid(~continent) +
+theme_bw() +
+geom_smooth() +
+theme(legend.position='top',
+  plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) + 
+guides(color=guide_legend(override.aes = list(size=2.5))) 
+
 
 
 ```
@@ -60,14 +71,14 @@ guides(color=guide_legend(override.aes = list(size=2.5)))
 # One model per continent
 models <- gapminder %>%
   group_by(continent) %>%
-  do(fit=lm(lifeExp ~ (log(gdpPercap)*log(pop)) + year, data=.)) 
+  do(fit=lm(lifeExp ~ log10(gdpPercap)+log10(pop) + year, data=.)) 
 
 stats <- glance(models,fit) %>%
   arrange(desc(r.squared))
 
 coefficients <- tidy(models,fit) %>%
   filter(term != '(Intercept)') %>%
-  arrange(continent,desc(p.value))
+  arrange(continent,p.value)
 
 fit_check <- augment(models,fit)
 ```
@@ -120,7 +131,7 @@ Now we create a similar model with nesting
 
 ```{r}
 my_model <- function(df) {
-  lm(lifeExp ~ (log(gdpPercap)*log(pop)) + year, data= df)
+  lm(lifeExp ~ log10(gdpPercap)+log10(pop) + year, data= df)
 }
 
 # Nest models by continent 

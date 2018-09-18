@@ -1,0 +1,81 @@
+---
+title: "Machine Learning with Caret"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+Demonstrate a machine learning workflow with caret
+
+## References
+* https://topepo.github.io/caret/model-training-and-tuning.html
+
+## Setup
+
+```{r setup,warning=F,message=F}
+library(tidyverse)
+#library(broom)
+library(knitr)
+library(kableExtra)
+library(caret)
+library(skimr)
+
+```
+
+
+
+## Build Model
+
+```{r models,message=F,results=F}
+library(mlbench) # machine learning reference datasets
+data(BreastCancer)
+
+skim(BreastCancer)
+
+BC <- BreastCancer %>% as_tibble() %>%
+  dplyr::select(-Id) %>%
+  drop_na() # should really use imputation but we'll do this for now
+
+# Use k-fold cross-validation
+TC <- trainControl(method="cv", number=10)
+
+# Neural Network
+nnet <- train(Class ~ .,  # decide out outcome variable
+               BC, # our dataset
+               trControl=TC,
+               method='nnet')
+nnet
+
+# SVM Radial
+svmRad <- train(Class ~ .,  # decide out outcome variable
+               BC, # our dataset
+               trControl=TC,
+               method='svmRadial')
+
+svmRad
+
+# Bayesian Logistic Regression
+logistic <- train(Class ~ .,  # decide out outcome variable
+               BC, # our dataset
+               trControl=TC,
+               method='bayesglm')
+
+logistic
+
+
+```
+
+```{r results}
+resamps <- resamples(list(neuralnet=nnet,
+                          SVMRad=svmRad,
+                          logistic=logistic))
+#resamps
+
+#'svmLinear','nnet','svmRadial'
+
+dotplot(resamps, metric = "Accuracy")
+
+bwplot(diff(resamps))
+```
