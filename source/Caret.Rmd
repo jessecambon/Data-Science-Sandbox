@@ -11,17 +11,21 @@ Demonstrate a machine learning workflow with caret
 
 ## References
 * https://topepo.github.io/caret/model-training-and-tuning.html
+* https://cran.r-project.org/web/packages/caretEnsemble/vignettes/caretEnsemble-intro.html 
 
 ## Setup
 
 ```{r setup,warning=F,message=F}
+library(mlbench) # machine learning reference datasets
 library(tidyverse)
-#library(broom)
-library(knitr)
-library(kableExtra)
+library(broom)
 library(caret)
 library(skimr)
+library(knitr)
+library(kableExtra)
 
+# Set seed for reproducibility
+set.seed(45)
 ```
 
 
@@ -29,7 +33,6 @@ library(skimr)
 ## Build Model
 
 ```{r models,message=F,results=F}
-library(mlbench) # machine learning reference datasets
 data(BreastCancer)
 
 skim(BreastCancer)
@@ -39,19 +42,19 @@ BC <- BreastCancer %>% as_tibble() %>%
   drop_na() # should really use imputation but we'll do this for now
 
 # Use k-fold cross-validation
-TC <- trainControl(method="cv", number=10)
+control <- trainControl(method="cv", number=10)
 
 # Neural Network
 nnet <- train(Class ~ .,  # decide out outcome variable
                BC, # our dataset
-               trControl=TC,
+               trControl=control,
                method='nnet')
 nnet
 
 # SVM Radial
-svmRad <- train(Class ~ .,  # decide out outcome variable
-               BC, # our dataset
-               trControl=TC,
+svmRad <- train(Class ~ .,  
+               BC, 
+               trControl=control,
                method='svmRadial')
 
 svmRad
@@ -59,23 +62,70 @@ svmRad
 # Bayesian Logistic Regression
 logistic <- train(Class ~ .,  # decide out outcome variable
                BC, # our dataset
-               trControl=TC,
+               trControl=control,
                method='bayesglm')
 
 logistic
 
+glmnet <- train(Class ~ .,  
+               BC, 
+               trControl=control,
+               method='glmnet')
+
+glmnet
+
 
 ```
+
+
+```{r}
+
+# Look at results of Glmnet model
+
+glmOptLambda <- glmnet$finalModel$lambdaOpt
+
+# Extract coefficients from optimal model
+glm_coeff1 <- coef(glmnet$finalModel,glmOptLambda) %>% 
+  as.matrix() %>% as.data.frame() %>%
+  rownames_to_column('Variable') %>%
+  as_tibble() %>%
+  rename(Coefficient=2) %>%
+  arrange(desc(abs(Coefficient)))
+
+
+# glmterms <- tidy(glmnet$finalModel) %>%
+#   # Pick closest model to optimal lambda
+#   filter(abs(lambda - glmOptLambda) == min(abs(lambda-glmOptLambda))) %>%
+#   arrange(desc(estimate)) 
+
+# Combine variable importance data with coefficients
+varImportance <- varImp(glmnet)$importance %>% 
+  rownames_to_column('Variable') %>%
+  rename(Importance=2) %>%
+  arrange(desc(Importance)) %>%
+  full_join(glm_coeff1,by='Variable') %>%
+  filter(Coefficient != 0) 
+```
+
+
+
 
 ```{r results}
 resamps <- resamples(list(neuralnet=nnet,
                           SVMRad=svmRad,
-                          logistic=logistic))
-#resamps
+                          logistic=logistic,
+                          glmnet=glmnet))
 
-#'svmLinear','nnet','svmRadial'
-
+# Accuracy comparison
 dotplot(resamps, metric = "Accuracy")
 
+# Difference in accuracy
 bwplot(diff(resamps))
+```
+
+## Glmnet (Elastic Net) Model
+
+```{r,results='asis',warning=F,message=F}
+kable(varImportance,format='markdown') %>%
+  kable_styling(bootstrap_options = c("striped",'border'))
 ```
