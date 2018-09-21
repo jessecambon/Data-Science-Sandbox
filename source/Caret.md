@@ -1,7 +1,7 @@
 Machine Learning with Caret
 ================
 Jesse Cambon
-18 September, 2018
+21 September, 2018
 
 -   [References](#references)
 -   [Setup](#setup)
@@ -42,49 +42,35 @@ skim(BreastCancer)
 
 BC <- BreastCancer %>% as_tibble() %>%
   dplyr::select(-Id) %>%
-  drop_na() # should really use imputation but we'll do this for now
+  # should really use imputation but we'll just drop nas for now
+  drop_na() 
 
 # Use k-fold cross-validation
-control <- trainControl(method="cv", number=10)
+TC <- trainControl(method="cv", number=5)
 
-# Neural Network
-nnet <- train(Class ~ .,  # decide out outcome variable
-               BC, # our dataset
-               trControl=control,
-               method='nnet')
-nnet
+# Train some models
 
-# SVM Radial
-svmRad <- train(Class ~ .,  
-               BC, 
-               trControl=control,
-               method='svmRadial')
+# Neural Net
+nnet <- train(Class ~ . , BC,method='nnet',trControl=TC)
 
-svmRad
+# Gradient Boosted Machine
+gbm <- train(Class ~ . , BC,method='gbm',trControl=TC)
 
-# Bayesian Logistic Regression
-logistic <- train(Class ~ .,  # decide out outcome variable
-               BC, # our dataset
-               trControl=control,
-               method='bayesglm')
+# Radial SVM
+svmrad <- train(Class ~ . , BC,method='svmRadial',trControl=TC)
 
-logistic
+# Elastic-net
+glmnet <- train(Class ~ . , BC,method='glmnet',trControl=TC,tuneLength=5)
 
-glmnet <- train(Class ~ .,  
-               BC, 
-               trControl=control,
-               method='glmnet')
-
-glmnet
+# Logistic regression - did not converge
+glm <- train(Class ~ . , BC,method='glm',trControl=TC)
 ```
 
 ``` r
 # Look at results of Glmnet model
 
-glmOptLambda <- glmnet$finalModel$lambdaOpt
-
 # Extract coefficients from optimal model
-glm_coeff1 <- coef(glmnet$finalModel,glmOptLambda) %>% 
+glm_coeff <- coef(glmnet$finalModel,glmnet$finalModel$lambdaOpt) %>% 
   as.matrix() %>% as.data.frame() %>%
   rownames_to_column('Variable') %>%
   as_tibble() %>%
@@ -92,25 +78,21 @@ glm_coeff1 <- coef(glmnet$finalModel,glmOptLambda) %>%
   arrange(desc(abs(Coefficient)))
 
 
-# glmterms <- tidy(glmnet$finalModel) %>%
-#   # Pick closest model to optimal lambda
-#   filter(abs(lambda - glmOptLambda) == min(abs(lambda-glmOptLambda))) %>%
-#   arrange(desc(estimate)) 
-
 # Combine variable importance data with coefficients
 varImportance <- varImp(glmnet)$importance %>% 
   rownames_to_column('Variable') %>%
   rename(Importance=2) %>%
   arrange(desc(Importance)) %>%
-  full_join(glm_coeff1,by='Variable') %>%
+  full_join(glm_coeff,by='Variable') %>%
   filter(Coefficient != 0) 
 ```
 
 ``` r
-resamps <- resamples(list(neuralnet=nnet,
-                          SVMRad=svmRad,
-                          logistic=logistic,
-                          glmnet=glmnet))
+resamps <- resamples(list(nnet=nnet,
+                          glmnet=glmnet,
+                          svmrad=svmrad,
+                          gbm=gbm,
+                          glm=glm))
 
 # Accuracy comparison
 dotplot(resamps, metric = "Accuracy")
@@ -133,21 +115,43 @@ kable(varImportance,format='markdown') %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-| Variable        |   Importance|  Coefficient|
-|:----------------|------------:|------------:|
-| Cl.thickness.L  |  100.0000000|    1.4334465|
-| Cell.shape.L    |   98.9959241|    1.4190536|
-| Cell.size.L     |   96.0999432|    1.3775413|
-| Marg.adhesion.L |   59.9424497|    0.8592429|
-| Epith.c.size.L  |   58.7994816|    0.8428591|
-| Cell.shape.Q    |   53.8521328|   -0.7719415|
-| Bare.nuclei10   |   48.7846527|    0.6993019|
-| Cell.size.Q     |   45.8138944|   -0.6567177|
-| Cell.size.C     |   20.4244327|    0.2927733|
-| Epith.c.size^5  |   19.8534568|   -0.2845887|
-| Epith.c.size.Q  |   12.7810786|   -0.1832099|
-| Epith.c.size^4  |    6.4488341|    0.0924406|
-| Marg.adhesion.Q |    1.2788000|   -0.0183309|
-| Cell.shape.C    |    0.8378617|    0.0120103|
-| Bl.cromatin7    |    0.3533834|    0.0050656|
-| (Intercept)     |           NA|    0.7439187|
+| Variable          |   Importance|  Coefficient|
+|:------------------|------------:|------------:|
+| Cl.thickness.L    |  100.0000000|    3.4100769|
+| Cell.shape.L      |   57.9989495|    1.9778088|
+| Cell.size.L       |   56.7390611|    1.9348456|
+| Marg.adhesion.L   |   56.7390084|    1.9348438|
+| Bare.nuclei10     |   50.7586916|    1.7309104|
+| Bare.nuclei9      |   45.7678445|    1.5607187|
+| Bare.nuclei6      |   41.2990307|    1.4083287|
+| Normal.nucleoli10 |   37.7832016|    1.2884362|
+| Cell.shape.Q      |   36.2651756|   -1.2366704|
+| Bl.cromatin5      |   33.2490293|    1.1338175|
+| Marg.adhesion^9   |   31.7087950|    1.0812943|
+| Normal.nucleoli4  |   29.5420557|    1.0074068|
+| Normal.nucleoli9  |   24.0973080|    0.8217367|
+| Epith.c.size^4    |   22.5493010|    0.7689485|
+| Normal.nucleoli2  |   22.3438540|   -0.7619426|
+| Cell.size.C       |   17.1403971|    0.5845007|
+| Bl.cromatin7      |   16.0856470|    0.5485329|
+| Cl.thickness^8    |   15.3023494|   -0.5218219|
+| Cell.size^8       |   15.2188813|    0.5189756|
+| Bare.nuclei7      |   13.2596843|    0.4521654|
+| Bare.nuclei3      |   12.0190659|    0.4098594|
+| Bare.nuclei4      |   11.1653523|    0.3807471|
+| Cell.size^5       |    9.7304910|    0.3318172|
+| Cell.shape.C      |    9.2941514|    0.3169377|
+| Cell.size.Q       |    8.9781030|   -0.3061602|
+| Normal.nucleoli6  |    8.1225173|    0.2769841|
+| Epith.c.size^8    |    7.9630578|    0.2715464|
+| Epith.c.size.L    |    7.4422032|    0.2537849|
+| Bare.nuclei5      |    6.6248268|    0.2259117|
+| Cell.shape^8      |    6.5931106|    0.2248301|
+| Epith.c.size^7    |    5.8722778|   -0.2002492|
+| Cl.thickness^5    |    5.7674433|    0.1966743|
+| Bl.cromatin4      |    5.7288930|    0.1953597|
+| Cl.thickness.Q    |    4.8120311|    0.1640940|
+| Epith.c.size^5    |    1.9890777|   -0.0678291|
+| Bare.nuclei8      |    1.6499963|    0.0562661|
+| Normal.nucleoli7  |    0.0179295|   -0.0006114|
+| (Intercept)       |           NA|    0.6992724|

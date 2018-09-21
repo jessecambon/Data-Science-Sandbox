@@ -32,48 +32,35 @@ set.seed(45)
 
 ## Build Model
 
-```{r models,message=F,results=F}
+```{r models,message=F,results=F,warning=F}
 data(BreastCancer)
 
 skim(BreastCancer)
 
 BC <- BreastCancer %>% as_tibble() %>%
   dplyr::select(-Id) %>%
-  drop_na() # should really use imputation but we'll do this for now
+  # should really use imputation but we'll just drop nas for now
+  drop_na() 
 
 # Use k-fold cross-validation
-control <- trainControl(method="cv", number=10)
+TC <- trainControl(method="cv", number=5)
 
-# Neural Network
-nnet <- train(Class ~ .,  # decide out outcome variable
-               BC, # our dataset
-               trControl=control,
-               method='nnet')
-nnet
+# Train some models
 
-# SVM Radial
-svmRad <- train(Class ~ .,  
-               BC, 
-               trControl=control,
-               method='svmRadial')
+# Neural Net
+nnet <- train(Class ~ . , BC,method='nnet',trControl=TC)
 
-svmRad
+# Gradient Boosted Machine
+gbm <- train(Class ~ . , BC,method='gbm',trControl=TC)
 
-# Bayesian Logistic Regression
-logistic <- train(Class ~ .,  # decide out outcome variable
-               BC, # our dataset
-               trControl=control,
-               method='bayesglm')
+# Radial SVM
+svmrad <- train(Class ~ . , BC,method='svmRadial',trControl=TC)
 
-logistic
+# Elastic-net
+glmnet <- train(Class ~ . , BC,method='glmnet',trControl=TC,tuneLength=5)
 
-glmnet <- train(Class ~ .,  
-               BC, 
-               trControl=control,
-               method='glmnet')
-
-glmnet
-
+# Logistic regression - did not converge
+glm <- train(Class ~ . , BC,method='glm',trControl=TC)
 
 ```
 
@@ -82,10 +69,8 @@ glmnet
 
 # Look at results of Glmnet model
 
-glmOptLambda <- glmnet$finalModel$lambdaOpt
-
 # Extract coefficients from optimal model
-glm_coeff1 <- coef(glmnet$finalModel,glmOptLambda) %>% 
+glm_coeff <- coef(glmnet$finalModel,glmnet$finalModel$lambdaOpt) %>% 
   as.matrix() %>% as.data.frame() %>%
   rownames_to_column('Variable') %>%
   as_tibble() %>%
@@ -93,17 +78,12 @@ glm_coeff1 <- coef(glmnet$finalModel,glmOptLambda) %>%
   arrange(desc(abs(Coefficient)))
 
 
-# glmterms <- tidy(glmnet$finalModel) %>%
-#   # Pick closest model to optimal lambda
-#   filter(abs(lambda - glmOptLambda) == min(abs(lambda-glmOptLambda))) %>%
-#   arrange(desc(estimate)) 
-
 # Combine variable importance data with coefficients
 varImportance <- varImp(glmnet)$importance %>% 
   rownames_to_column('Variable') %>%
   rename(Importance=2) %>%
   arrange(desc(Importance)) %>%
-  full_join(glm_coeff1,by='Variable') %>%
+  full_join(glm_coeff,by='Variable') %>%
   filter(Coefficient != 0) 
 ```
 
@@ -111,10 +91,11 @@ varImportance <- varImp(glmnet)$importance %>%
 
 
 ```{r results}
-resamps <- resamples(list(neuralnet=nnet,
-                          SVMRad=svmRad,
-                          logistic=logistic,
-                          glmnet=glmnet))
+resamps <- resamples(list(nnet=nnet,
+                          glmnet=glmnet,
+                          svmrad=svmrad,
+                          gbm=gbm,
+                          glm=glm))
 
 # Accuracy comparison
 dotplot(resamps, metric = "Accuracy")
