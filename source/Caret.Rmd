@@ -48,7 +48,7 @@ TC <- trainControl(method="cv", number=5)
 # Train some models
 
 # Neural Net
-nnet <- train(Class ~ . , BC,method='nnet',trControl=TC)
+nnet <- train(Class ~ . , BC,method='nnet',trControl=TC,verbose=FALSE)
 
 # Gradient Boosted Machine
 gbm <- train(Class ~ . , BC,method='gbm',trControl=TC)

@@ -27,3 +27,4 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Modeling Fundamentals](source/Titanic.md) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
 * [Modeling Workflows](source/Modeling_Workflow.md) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
 * [Machine Learning with Caret](source/Caret.md) - Using the Caret library to do machine learning.
+* [Predicting Fuel Economy](source/Vehicles.md) - Predicting the fuel economy of cars.
