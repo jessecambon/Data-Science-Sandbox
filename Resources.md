@@ -6,11 +6,11 @@ A categorized list of data science resources.
 * [R For Data Science](http://r4ds.had.co.nz/index.html) - Classic text by Hadley Wickham, chief overlord of all things Tidyverse.
 * [R-Cookbook](http://www.cookbook-r.com) - Categorized useful R code. 
 * [R for Public Policy](http://www.lecy.info/r-for-public-policy/) - List of resources.
-* [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 
 ## Datasets
+* [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
 * [Google Dataset Search](https://toolbox.google.com/datasetsearch)
 * [KDNuggets](https://www.kdnuggets.com/datasets/index.html)
 * [Microsoft's List of R Data Sources](https://mran.microsoft.com/documents/data)
@@ -18,6 +18,7 @@ A categorized list of data science resources.
 * [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml)
 * [R Datasets](http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/00Index.html) - Documentation on the inbuilt datasets in R.
 * [Data.gov](https://www.data.gov/) - A good place to start for government data.
+* [R Packages for Importing Data](https://www.computerworld.com/article/3109890/data-analytics/these-r-packages-import-sports-weather-stock-data-and-more.html)
 
 ## Visualization General Resources
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
