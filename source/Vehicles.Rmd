@@ -42,25 +42,58 @@ lm_fit <- lm(log(cty) ~ drive + year + log(cyl) + log(displ),
 lm_stats <- glance(lm_fit)
 lm_terms <- tidy(lm_fit,conf.int=T)
 
+
 ```
+
+```{r}
+
+```
+
+
+
 
 # Train Models With Caret
 
 ```{r caret}
-formula <- log(cty) ~ drive + year + fuel +
+# Regression formula with no variable transformations
+alpha_formula <- cty ~ year + fuel +
+               cyl + displ
+
+# Regression formula with transformed variables
+log_formula <- log(cty) ~ drive + year + fuel +
                log(cyl) + log(displ)
+
+
 
 # Use k-fold cross-validation
 TC <- trainControl(method="cv", number=5)
 
-caret_lm <- train(formula , vehicles_clean,method='lm',trControl=TC)
-caret_glm <- train(formula , vehicles_clean,method='glm',trControl=TC)
-caret_glmnet <- train(formula , vehicles_clean,method='glmnet',trControl=TC,tuneLength=5)
-caret_knn <- train(formula , vehicles_clean,method='knn',trControl=TC)
+caret_lm <- train(alpha_formula , vehicles_clean,method='lm',trControl=TC)
+caret_gamSplines <- train(alpha_formula,vehicles_clean,method='gamSpline',trainControl=TC)
+
+
+caret_glm <- train(log_formula , vehicles_clean,method='glm',trControl=TC)
+#caret_nb <- train(alpha_formula,vehicles_clean,method='glm.nb',trainControl=TC)
+# gam with loess and splines from gam package
+#caret_gamLoess <- train(alpha_formula,vehicles_clean,method='gamLoess',trainControl=TC)
+
+caret_glmnet <- train(log_formula , vehicles_clean,method='glmnet',trControl=TC,tuneLength=5)
+caret_knn <- train(log_formula , vehicles_clean,method='knn',trControl=TC)
 
 ```
 
+## Compare LM to GAM
 
+```{r results}
+resamps <- resamples(list(lm=caret_lm,
+                          gamSplines=caret_gamSplines))
+
+# Accuracy comparison
+dotplot(resamps,metric='Rsquared')
+
+# Difference in accuracy
+bwplot(diff(resamps,metric='Rsquared'))
+```
 
 ## Compare Models
 
