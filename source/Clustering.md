@@ -25,6 +25,8 @@ library(tidyverse)
 library(knitr)
 library(kableExtra)
 library(broom)
+library(factoextra)
+library(wesanderson)
 ```
 
 Cluster Data
@@ -44,10 +46,10 @@ vehicles_sel <- my_vehicles %>%
 vehicles_sel_scaled <- vehicles_sel %>%
   mutate_all(scale)
 
-
+# Try different numbers of clusters
 clust3 <- kmeans(vehicles_sel_scaled, centers = 3)
 clust5 <- kmeans(vehicles_sel_scaled, centers = 5)
-clust7 <- kmeans(vehicles_sel_scaled, centers = 7) # chose this one
+clust7 <- kmeans(vehicles_sel_scaled, centers = 7) 
 clust10 <- kmeans(vehicles_sel_scaled, centers = 10)
 ```
 
@@ -74,22 +76,14 @@ kable(combine_summ,format='markdown',digits=2) %>%
 
 | .cluster |  num\_vehicles|  mean\_cty|  min\_cty|  max\_cty|  mean\_displ|  mean\_cyl|
 |:---------|--------------:|----------:|---------:|---------:|------------:|----------:|
-| 3        |             86|      25.05|        20|        33|         1.87|       4.05|
-| 1        |             55|      18.71|        16|        24|         3.12|       5.78|
-| 2        |             63|      15.19|        11|        20|         5.12|       8.29|
+| 1        |             86|      25.05|        20|        33|         1.87|       4.05|
+| 2        |             55|      18.71|        16|        24|         3.12|       5.78|
+| 3        |             63|      15.19|        11|        20|         5.12|       8.29|
 
 Visualize
 ---------
 
 ``` r
-library(factoextra)
-```
-
-    ## Welcome! Related Books: `Practical Guide To Cluster Analysis in R` at https://goo.gl/13EFCZ
-
-``` r
-library(wesanderson)
-
 fviz_cluster(clust3,data=vehicles_sel,repel=F,ggtheme=theme_bw())
 ```
 
