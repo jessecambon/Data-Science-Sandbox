@@ -55,6 +55,7 @@ A categorized list of data science resources.
 * [Survival analysis tutorial](http://rpubs.com/sinhrks/plot_surv)
 * [A very comprehensive article on regression](https://www.r-bloggers.com/15-types-of-regression-you-should-know/)
 * [Tidyverse style survey package](https://cran.r-project.org/web/packages/srvyr/vignettes/srvyr-vs-survey.html)
+* [Course on Generalized Linear Models](http://data.princeton.edu/wws509/notes/#) - Princeton course on GLMs including logistic and poisson regression.
 
 ## Maps
 * [Sample maps](https://bhaskarvk.github.io/user2017.geodataviz/notebooks/02-Static-Maps.nb.html)
