@@ -32,4 +32,4 @@ The purpose of this repository is to provide code and resources that can be quic
 
 ## NLP
 * [Hello NLP](source/Hello_NLP.ipynb) - Testing out some NLP techniques on Wall Street Journal sample data
-* [Topic Modeling](source/topic_modeling.ipynb) - Topic modeling of state of the union addresses using gensim
+* [Topic Modeling](source/topic_modeling.ipynb) - Text analysis of State of the Union addresses
