@@ -18,6 +18,7 @@ The purpose of this repository is to provide code and resources that can be quic
 ## General 
 * [Resources](Resources.md) - Websites and references that I find helpful for data science projects.
 * [Creating Formatted Spreadsheets](source/Create_Formatted_Spreadsheet.md) - How to create a custom formatted spreadsheet report with the openxlsx R package.
+* [Using Python and R Together](source/R-Python-Hybrid.ipynb) - How to use python and R code together in the same Jupyter notebook with the rpy2 python package.
 
 ## Data Visualization
 * [Visualization Cookbook](source/Chart_Collection.md) - A wide variety of data visualizations demonstrated.
