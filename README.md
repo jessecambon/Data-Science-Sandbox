@@ -34,3 +34,4 @@ The purpose of this repository is to provide code and resources that can be quic
 ## NLP
 * [Hello NLP](source/Hello_NLP.ipynb) - Testing out some NLP techniques on Wall Street Journal sample data
 * [State of the Union Analysis](source/state_of_union.ipynb) - Analysis of the language in historical State of the Union addresses
+* [State of the Union Analysis V2](source/state_of_union_v2.ipynb) - A more thorough analysis of state of the union address language
