@@ -20,20 +20,21 @@ A categorized list of data science resources.
 * [Data.gov](https://www.data.gov/) - A good place to start for government data.
 * [R Packages for Importing Data](https://www.computerworld.com/article/3109890/data-analytics/these-r-packages-import-sports-weather-stock-data-and-more.html)
 
-## Visualization General Resources
+## Visualization Cookbooks
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
+* [BBC R Cookbook](https://bbc.github.io/rcookbook) - R code to create plots in the style BBC 
+* [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
+* [My R Cookbook](https://github.com/jessecambon/Data-Science-Codex/blob/master/source/Chart_Collection.md) - My hodge-podge collection of visualizations with R code.
+* [D3 Blocks](https://bl.ocks.org/)
+* [D3.JS Gallery](https://github.com/d3/d3/wiki/Gallery)
+* [R-Shiny Gallery](https://shiny.rstudio.com/gallery/)
+* [Visual Capitalist](http://www.visualcapitalist.com/)
+
+## Visualization References
 * [Dataviz Project](http://datavizproject.com/) - Categorized data visualizations.
 * [Flowing Data](http://flowingdata.com/) - Good newsletter and site on data viz techniques.
 * [Stephen Few](http://www.perceptualedge.com/) - A data visualization expert.
 * [Edward Tufte](https://www.edwardtufte.com/tufte/) - Another data viz expert.
-
-## Visualization Galleries
-* [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
-* [R-Shiny Gallery](https://shiny.rstudio.com/gallery/)
-* [Visual Capitalist](http://www.visualcapitalist.com/)
-* [D3.JS Gallery](https://github.com/d3/d3/wiki/Gallery)
-* [D3 Blocks](https://bl.ocks.org/)
-* [R-Graph-Gallery](https://www.r-graph-gallery.com/) - R plots with code.
 
 ## Visualization Libraries
 * [ggplot](https://ggplot2.tidyverse.org/index.html)
