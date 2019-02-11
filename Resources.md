@@ -28,10 +28,10 @@ A categorized list of data science resources.
 * [D3 Blocks](https://bl.ocks.org/)
 * [D3.JS Gallery](https://github.com/d3/d3/wiki/Gallery)
 * [R-Shiny Gallery](https://shiny.rstudio.com/gallery/)
-* [Visual Capitalist](http://www.visualcapitalist.com/)
 
 ## Visualization References
 * [Dataviz Project](http://datavizproject.com/) - Categorized data visualizations.
+* [Visual Capitalist](http://www.visualcapitalist.com/)
 * [Flowing Data](http://flowingdata.com/) - Good newsletter and site on data viz techniques.
 * [Stephen Few](http://www.perceptualedge.com/) - A data visualization expert.
 * [Edward Tufte](https://www.edwardtufte.com/tufte/) - Another data viz expert.
