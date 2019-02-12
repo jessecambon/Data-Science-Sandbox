@@ -1,7 +1,7 @@
 Modeling Workflow
 ================
 Jesse Cambon
-18 September, 2018
+12 February, 2019
 
 -   [References](#references)
 -   [Setup](#setup)
@@ -9,7 +9,7 @@ Jesse Cambon
 -   [Grouped Models](#grouped-models)
 -   [Nested Models](#nested-models)
 
-Demonstrate model workflows with tidyverse, modelr, and broom.
+Demonstrate model workflows with tidyverse, modelr, and broom. This notebook includes both a group\_by and a nested approach which offer similar results. However, the nested model workflow embeds the data into the dataframe along with objects such as models.
 
 References
 ----------
@@ -95,11 +95,11 @@ coefficients <- tidy(models,fit) %>%
   filter(term != '(Intercept)') %>%
   arrange(continent,p.value)
 
-fit_check <- augment(models,fit)
+model_fit <- augment(models,fit)
 ```
 
 ``` r
-ggplot(data=fit_check,
+ggplot(data=model_fit,
           aes(x = .fitted, y = .resid, color = continent,group=1)) +
 geom_point(alpha=0.8) +
 facet_grid(~continent) +
@@ -116,7 +116,7 @@ ylab('Residual')
 ![](Modeling_Workflow_files/figure-markdown_github/plot-1.png)
 
 ``` r
-ggplot(data=fit_check,
+ggplot(data=model_fit,
           aes(.resid)) +
 geom_histogram(aes(fill=continent)) +
 facet_grid(~continent) +
@@ -291,7 +291,7 @@ nested_models <- gapminder %>%
   ungroup()
 
 # Dataset with predictions and residuals
-model_fit <- nested_models %>% unnest(augment)
+nest_fit <- nested_models %>% unnest(augment)
 
 nest_stats <- nested_models %>%
   unnest(stats,.drop=TRUE) %>%
