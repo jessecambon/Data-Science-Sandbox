@@ -8,8 +8,9 @@ A categorized list of data science resources.
 * [R for Public Policy](http://www.lecy.info/r-for-public-policy/) - List of resources.
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
+* [Data Science with Python](https://jakevdp.github.io/PythonDataScienceHandbook/) - Book by Jake VanderPlas
 
-## Datasets
+## Data
 * [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
 * [Google Dataset Search](https://toolbox.google.com/datasetsearch)
 * [KDNuggets](https://www.kdnuggets.com/datasets/index.html)
@@ -20,7 +21,7 @@ A categorized list of data science resources.
 * [Data.gov](https://www.data.gov/) - A good place to start for government data.
 * [R Packages for Importing Data](https://www.computerworld.com/article/3109890/data-analytics/these-r-packages-import-sports-weather-stock-data-and-more.html)
 
-## Cookbooks
+## Visualization Cookbooks
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
 * [BBC R Cookbook](https://bbc.github.io/rcookbook) - R code to create plots in the style BBC 
 * [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
