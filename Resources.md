@@ -20,7 +20,7 @@ A categorized list of data science resources.
 * [Data.gov](https://www.data.gov/) - A good place to start for government data.
 * [R Packages for Importing Data](https://www.computerworld.com/article/3109890/data-analytics/these-r-packages-import-sports-weather-stock-data-and-more.html)
 
-## Visualization Cookbooks
+## Cookbooks
 * [Data-To-Viz](https://www.data-to-viz.com) - A comprehensive data viz reference with lots of great code.
 * [BBC R Cookbook](https://bbc.github.io/rcookbook) - R code to create plots in the style BBC 
 * [Top 50 Ggplot Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
@@ -28,6 +28,8 @@ A categorized list of data science resources.
 * [D3 Blocks](https://bl.ocks.org/)
 * [D3.JS Gallery](https://github.com/d3/d3/wiki/Gallery)
 * [R-Shiny Gallery](https://shiny.rstudio.com/gallery/)
+* [Seaborn Gallery](https://seaborn.pydata.org/examples/index.html)
+* [Matplotlib Gallery](https://matplotlib.org/gallery.html)
 
 ## Visualization References
 * [Dataviz Project](http://datavizproject.com/) - Categorized data visualizations.
