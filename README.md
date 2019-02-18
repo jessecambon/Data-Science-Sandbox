@@ -19,6 +19,7 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Resources](Resources.md) - Websites and references that I find helpful for data science projects.
 * [Creating Formatted Spreadsheets](source/Create_Formatted_Spreadsheet.md) - How to create a custom formatted spreadsheet report with the openxlsx R package.
 * [Using Python and R Together](source/R-Python-Hybrid.ipynb) - How to use python and R code together in the same Jupyter notebook with the rpy2 python package.
+* [Pandas Codeblocks](source/Pandas Codeblocks.ipynb) - Code for using the Pandas library (Python) for data manipulation 
 
 ## Data Visualization
 * [Visualization Cookbook](source/Chart_Collection.md) - A wide variety of data visualizations demonstrated.
@@ -31,7 +32,7 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Machine Learning with Caret](source/Caret.md) - Using the Caret library to do machine learning.
 * [Predicting Fuel Economy](source/Vehicles.md) - Predicting the fuel economy of cars.
 
-## NLP
+## NLP 
 * [Hello NLP](source/Hello_NLP.ipynb) - Testing out some NLP techniques on Wall Street Journal sample data
 * [State of the Union Analysis](source/state_of_union.ipynb) - Analysis of the language in historical State of the Union addresses
 * [State of the Union Analysis V2](source/state_of_union_v2.ipynb) - A more thorough analysis of state of the union address language
