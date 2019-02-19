@@ -9,6 +9,7 @@ A categorized list of data science resources.
 * [R-Bloggers](https://www.r-bloggers.com) - Great resource for the latest developments in the R community. Subscribe to their emails.
 * [Tidyverse](https://www.tidyverse.org/index.html) - A well documented ecosystem of packages for elegant data manipulation and visualization. 
 * [Data Science with Python](https://jakevdp.github.io/PythonDataScienceHandbook/) - Book by Jake VanderPlas
+* [Pandas Cookbook](http://pandas.pydata.org/pandas-docs/stable/user_guide/cookbook.html) - Code for data manipulation in python
 
 ## Data
 * [An Increxibly Comprehensive List of APIs for R](https://github.com/ropensci/opendata/blob/master/README.md)
