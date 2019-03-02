@@ -4,7 +4,7 @@ author: "Jesse Cambon"
 
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  github_document:
+  md_document:
     toc: true
 ---
 
@@ -567,7 +567,7 @@ titanic_survival_rates <- titanic %>%
 
 ggplot(titanic_survival_rates, aes(Sex, Class)) + 
      geom_tile(aes(fill = survival_rate), colour = "grey") + 
-     scale_fill_gradient(labels=scales::percent, low = "white",high = "steelblue") +
+     scale_fill_gradient(limits=c(0,1),labels=scales::percent, low = "white",high = "steelblue") +
      geom_text(aes(label=formattable::percent(survival_rate,1))) +
      ggtitle('Survival Rates on the Titanic') +
      theme_minimal() +
