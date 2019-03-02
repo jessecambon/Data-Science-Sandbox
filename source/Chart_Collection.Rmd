@@ -551,6 +551,35 @@ ylab('')
 ```
 
 ## Composition
+
+### Heatmap
+
+```{r heatmap}
+
+titanic_survival_rates <- titanic %>%
+  group_by(Class,Sex,Survived) %>%
+  summarize(n=sum(n)) %>%
+  group_by(Class,Sex) %>% 
+  mutate(survival_rate = n/sum(n)) %>%
+  ungroup() %>%
+  filter(Survived == 'Yes') %>%
+  select(-Survived)
+
+ggplot(titanic_survival_rates, aes(Sex, Class)) + 
+     geom_tile(aes(fill = survival_rate), colour = "grey") + 
+     scale_fill_gradient(labels=scales::percent, low = "white",high = "steelblue") +
+     geom_text(aes(label=formattable::percent(survival_rate,1))) +
+     ggtitle('Survival Rates on the Titanic') +
+     theme_minimal() +
+     theme(panel.grid = element_blank(),
+           plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
+     scale_x_discrete(expand=c(0,0,0,0)) +
+     scale_y_discrete(expand=c(0,0,0,0)) +  
+     # quo_name() access the character name of a variable
+     guides(fill=guide_legend(title='Survival Rate')) #+
+  #   xlab(quo_name(axis1)) + ylab(quo_name(axis2))
+```
+
 ### Treemap
 
 ```{r treemap, warning=FALSE}
