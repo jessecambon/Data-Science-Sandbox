@@ -1,0 +1,66 @@
+---
+title: "Ordinal Regression"
+author: "Jesse Cambon"
+
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+GAM ordinal regression: https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/ocat.html
+Example using polr: https://stats.idre.ucla.edu/r/dae/ordinal-logistic-regression/
+Ordinal doc: https://cran.r-project.org/web/packages/ordinal/vignettes/clm_article.pdf
+
+```{r, warning=F}
+#library(Hmisc)
+library(MASS)
+library(ordinal)
+library(broom)
+library(tidyverse)
+
+wine <- wine # make wine show up in the R studio environment
+
+# train models
+clm_model <- clm(rating ~ temp + judge , data=wine)
+polr_model <- polr(rating ~ temp + judge, data=wine)
+
+# Evaluate model
+clm_stats <- glance(clm_model)
+clm_coef <- tidy(clm_model,exponentiate=T) 
+
+polr_stats <- glance(polr_model)
+polr_coef <- tidy(polr_model,exponentiate=T)
+
+
+clm_predictions <- unlist(predict(clm_model,type='class'))
+polr_predictions <- predict(polr_model,type='class')
+
+
+# Compare predictions of polr() and clm()
+compare_models <- wine %>% 
+  dplyr::select(rating) %>%
+  # clm predictions returned as list for some reason
+  # have to unlist it so we can put it in a column
+  mutate(clm_pred=unlist(predict(clm_model,type='class')),
+         polr_pred=predict(polr_model,type='class')) %>%
+  mutate_all(as.numeric) %>% # convert from factor to numeric
+  mutate(
+  clm_resid=rating-clm_pred,
+         polr_resid=rating-polr_pred)
+
+mean(abs(compare_models$clm_resid))
+mean(abs(compare_models$polr_resid))
+
+# Make frequency tables
+freq_preds <- compare_models %>% count(polr_pred,clm_pred)
+freq_predcheck <- compare_models %>% count(rating,clm_pred)
+
+# Chi square test
+chisq.test(freq_preds)
+chisq.test(freq_predcheck)
+
+#Spearman correlation
+cor(compare_models$rating,compare_models$clm_pred,method='spearman')
+
+```
