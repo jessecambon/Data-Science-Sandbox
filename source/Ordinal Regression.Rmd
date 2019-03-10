@@ -14,53 +14,114 @@ Ordinal doc: https://cran.r-project.org/web/packages/ordinal/vignettes/clm_artic
 
 ```{r, warning=F}
 #library(Hmisc)
-library(MASS)
-library(ordinal)
+library(MASS) # polr()
+library(mgcv) # gam model
+library(mgcViz) # gam visualization
+library(ordinal) # clm()
 library(broom)
 library(tidyverse)
 
-wine <- wine # make wine show up in the R studio environment
+Mydiamonds <- diamonds %>% 
+  # convert factor to numeric for gam model
+  mutate(cutN=as.numeric(cut))
 
-# train models
-clm_model <- clm(rating ~ temp + judge , data=wine)
-polr_model <- polr(rating ~ temp + judge, data=wine)
+    # make wine show up in the R studio environment
 
-# Evaluate model
+outcomeVar <- 'cut'
+predictors <- 'carat  + price + table'
+
+# Construct formula from strings
+lmformula <- as.formula(str_c(outcomeVar,' ~ ',predictors))
+
+# train ordinal logistic models
+clm_model <- clm(lmformula, data=diamonds)
+polr_model <- polr(lmformula, data=diamonds)
+# train ordinal GAM model (R is the number of outcome categories)
+gam_model <- gam(cutN ~ carat + s(price,k=9) + s(table,k=12),family=ocat(R=5),data=Mydiamonds) 
+
+gam.check(gam_model)
+
+# Evaluate models
 clm_stats <- glance(clm_model)
 clm_coef <- tidy(clm_model,exponentiate=T) 
 
 polr_stats <- glance(polr_model)
 polr_coef <- tidy(polr_model,exponentiate=T)
 
+gam_stats <- glance(gam_model)
+gam_Lcoef <-  tidy(gam_model,parametric=T) # get linear coefficients
+gam_Scoef <-  tidy(gam_model,parametric=F) # get smooth term coefficients
 
-clm_predictions <- unlist(predict(clm_model,type='class'))
-polr_predictions <- predict(polr_model,type='class')
+# Extract probability predictions from GAM
+gam_probs <- predict(gam_model,type='response') %>% 
+  # remove "V" from column names so we now have the class labels
+  as.data.frame() %>% rename_all(list(replace= ~str_replace_all(.,'V',''))) %>% 
+  mutate(obs_num=1:nrow(.)) %>%
+  gather(class,prob,-obs_num) %>%
+  mutate(class=as.numeric(class)) %>% arrange(obs_num,class)
 
+# Extract class predictions
+gam_pred <- gam_probs %>% group_by(obs_num) %>%
+  filter(prob==max(prob))
 
 # Compare predictions of polr() and clm()
-compare_models <- wine %>% 
-  dplyr::select(rating) %>%
+compare_models <- Mydiamonds %>% 
   # clm predictions returned as list for some reason
   # have to unlist it so we can put it in a column
   mutate(clm_pred=unlist(predict(clm_model,type='class')),
-         polr_pred=predict(polr_model,type='class')) %>%
-  mutate_all(as.numeric) %>% # convert from factor to numeric
-  mutate(
-  clm_resid=rating-clm_pred,
-         polr_resid=rating-polr_pred)
-
-mean(abs(compare_models$clm_resid))
-mean(abs(compare_models$polr_resid))
+         polr_pred=predict(polr_model,type='class'),
+         gam_pred=gam_pred %>% pull(class)) %>%
+  mutate_all(as.numeric)  # convert from factor to numeric
 
 # Make frequency tables
-freq_preds <- compare_models %>% count(polr_pred,clm_pred)
-freq_predcheck <- compare_models %>% count(rating,clm_pred)
+# freq_preds <- compare_models %>% count(polr_pred,clm_pred)
+# freq_predcheck <- compare_models %>% count(cut,clm_pred)
 
 # Chi square test
-chisq.test(freq_preds)
-chisq.test(freq_predcheck)
+# chisq.test(freq_preds)
+# chisq.test(freq_predcheck)
 
-#Spearman correlation
-cor(compare_models$rating,compare_models$clm_pred,method='spearman')
+#Spearman correlations
+cor(compare_models$cut,compare_models$clm_pred,method='spearman')
+cor(compare_models$cut,compare_models$polr_pred,method='spearman')
+cor(compare_models$cut,compare_models$gam_pred,method='spearman')
+
 
 ```
+
+
+```{r}
+# Confusion matrixes 
+
+check_gam <- compare_models %>% count(cut,gam_pred) %>%
+  spread(cut,n,fill=0)
+
+check_clm <- compare_models %>% count(cut,clm_pred) %>%
+  spread(cut,n,fill=0)
+
+```
+
+Plot Smooth Terms
+
+```{r}
+gam_viz <- getViz(gam_model)
+
+plot(sm(gam_viz, 1)) +
+  l_fitLine(colour = "red") + 
+#  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
+    l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
+ #   l_points(shape = 19, size = 1, alpha = 0.1) +
+  theme_classic()
+
+plot(sm(gam_viz, 2)) +
+  l_fitLine(colour = "red") + 
+  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
+  l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
+  l_points(shape = 19, size = 1, alpha = 0.1) +
+  theme_classic()
+```
+
+```{r}
+print(plot(gam_viz, allTerms = T), pages = 1)
+```
+
