@@ -1,14 +1,12 @@
 Ordinal Regression
 ================
 Jesse Cambon
-10 March, 2019
+13 March, 2019
 
-GAM ordinal regression:
-<https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/ocat.html>
-Example using polr:
-<https://stats.idre.ucla.edu/r/dae/ordinal-logistic-regression/> Ordinal
-doc:
-<https://cran.r-project.org/web/packages/ordinal/vignettes/clm_article.pdf>
+-   [Extract data from smooths and plot](#extract-data-from-smooths-and-plot)
+-   [Alternatively, Plot Smooth Terms with MgcViz](#alternatively-plot-smooth-terms-with-mgcviz)
+
+GAM ordinal regression: <https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/ocat.html> Example using polr: <https://stats.idre.ucla.edu/r/dae/ordinal-logistic-regression/> Ordinal doc: <https://cran.r-project.org/web/packages/ordinal/vignettes/clm_article.pdf>
 
 ``` r
 #library(Hmisc)
@@ -53,19 +51,19 @@ library(broom)
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## -- Attaching packages ------------------------------------------------------------------------------------------------------ tidyverse 1.2.1 --
 
-    ## ✔ tibble  2.0.1       ✔ purrr   0.3.0  
-    ## ✔ tidyr   0.8.3       ✔ dplyr   0.8.0.1
-    ## ✔ readr   1.3.1       ✔ stringr 1.4.0  
-    ## ✔ tibble  2.0.1       ✔ forcats 0.4.0
+    ## v tibble  2.0.1       v purrr   0.3.0  
+    ## v tidyr   0.8.2       v dplyr   0.8.0.1
+    ## v readr   1.3.1       v stringr 1.4.0  
+    ## v tibble  2.0.1       v forcats 0.4.0
 
-    ## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::collapse() masks nlme::collapse()
-    ## ✖ dplyr::filter()   masks stats::filter()
-    ## ✖ dplyr::lag()      masks stats::lag()
-    ## ✖ dplyr::select()   masks MASS::select()
-    ## ✖ dplyr::slice()    masks ordinal::slice()
+    ## -- Conflicts --------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+    ## x dplyr::collapse() masks nlme::collapse()
+    ## x dplyr::filter()   masks stats::filter()
+    ## x dplyr::lag()      masks stats::lag()
+    ## x dplyr::select()   masks MASS::select()
+    ## x dplyr::slice()    masks ordinal::slice()
 
 ``` r
 Mydiamonds <- diamonds %>% 
@@ -89,12 +87,12 @@ gam_model <- gam(cutN ~ carat + s(price,k=9) + s(table,k=12),family=ocat(R=5),da
 gam.check(gam_model)
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](Ordinal_Regression_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
     ## 
     ## Method: REML   Optimizer: outer newton
     ## full convergence after 7 iterations.
-    ## Gradient range [-0.0006234015,0.007978845]
+    ## Gradient range [-0.0006234016,0.007978845]
     ## (score 65689.64 & scale 1).
     ## Hessian positive definite, eigenvalue range [1.569822,16878.22].
     ## Model rank =  21 / 21 
@@ -102,9 +100,9 @@ gam.check(gam_model)
     ## Basis dimension (k) checking results. Low p-value (k-index<1) may
     ## indicate that k is too low, especially if edf is close to k'.
     ## 
-    ##             k'   edf k-index p-value  
-    ## s(price)  8.00  7.72    0.97   0.035 *
-    ## s(table) 11.00  8.97    0.99   0.285  
+    ##             k'   edf k-index p-value    
+    ## s(price)  8.00  7.72    0.96  <2e-16 ***
+    ## s(table) 11.00  8.97    0.98    0.07 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -177,7 +175,58 @@ check_clm <- compare_models %>% count(cut,clm_pred) %>%
   spread(cut,n,fill=0)
 ```
 
-Plot Smooth Terms
+Extract data from smooths and plot
+----------------------------------
+
+This method allows us some more direct control over how we plot the smooth terms since we extract the plot data. Alternatively, mgcViz (shown below) can be used.
+
+``` r
+# Returns the data to plot all smooth turns in a gam model object
+# 100 points per plot
+smooth_data <- function(gam_model) {
+  # select=0 prevents plots being shown on screen
+  gam_viz <- plot(gam_model, rug=FALSE,select=0)
+  
+  num_smooths <- length(gam_viz) # number of smooth terms
+  smooth_df <- tibble() # initialize a dataframe
+  
+  for (i in 1:num_smooths) {
+     print(gam_viz[[i]]$xlab)
+    
+    # extract and append data we want
+    smooth_df <- smooth_df %>%
+      bind_rows(tibble( xlab=gam_viz[[i]]$xlab,
+                        ylab=gam_viz[[i]]$ylab,
+                        x=gam_viz[[i]]$x,
+                        fit=gam_viz[[i]]$fit,
+                        se=gam_viz[[i]]$se
+                        ))
+  }
+  return(smooth_df)
+} 
+
+gam_smoothdata <- smooth_data(gam_model)
+```
+
+    ## [1] "price"
+    ## [1] "table"
+
+``` r
+ggplot(gam_smoothdata, 
+      aes(x, fit)) + 
+  facet_wrap(~xlab,scales='free') +
+  geom_line() +
+  theme_minimal() +
+ geom_line(aes(y=fit+(2*se)),linetype='dashed') +
+ geom_line(aes(y=fit-(2*se)),linetype='dashed') +
+  scale_y_continuous() +
+  scale_x_continuous(labels=scales::comma)
+```
+
+![](Ordinal_Regression_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+Alternatively, Plot Smooth Terms with MgcViz
+--------------------------------------------
 
 ``` r
 gam_viz <- getViz(gam_model)
@@ -190,7 +239,7 @@ plot(sm(gam_viz, 1)) +
   theme_classic()
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](Ordinal_Regression_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 ``` r
 plot(sm(gam_viz, 2)) +
@@ -201,10 +250,10 @@ plot(sm(gam_viz, 2)) +
   theme_classic()
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
+![](Ordinal_Regression_files/figure-markdown_github/unnamed-chunk-4-2.png)
 
 ``` r
 print(plot(gam_viz, allTerms = T), pages = 1)
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Ordinal_Regression_files/figure-markdown_github/unnamed-chunk-5-1.png)
