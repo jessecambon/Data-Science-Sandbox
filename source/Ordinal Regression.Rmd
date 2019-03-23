@@ -101,7 +101,54 @@ check_clm <- compare_models %>% count(cut,clm_pred) %>%
 
 ```
 
-Plot Smooth Terms
+## Extract data from smooths and plot
+
+This method allows us some more direct control over how we plot the smooth terms since we extract the plot data. Alternatively, mgcViz (shown below) can be used.
+
+```{r}
+
+# Returns the data to plot all smooth turns in a gam model object
+# 100 points per plot
+smooth_data <- function(gam_model) {
+  # select=0 prevents plots being shown on screen
+  gam_viz <- plot(gam_model, rug=FALSE,select=0)
+  
+  num_smooths <- length(gam_viz) # number of smooth terms
+  smooth_df <- tibble() # initialize a dataframe
+  
+  for (i in 1:num_smooths) {
+     print(gam_viz[[i]]$xlab)
+    
+    # extract and append data we want
+    smooth_df <- smooth_df %>%
+      bind_rows(tibble( xlab=gam_viz[[i]]$xlab,
+                        ylab=gam_viz[[i]]$ylab,
+                        x=gam_viz[[i]]$x,
+                        fit=gam_viz[[i]]$fit,
+                        se=gam_viz[[i]]$se
+                        ))
+  }
+  return(smooth_df)
+} 
+
+gam_smoothdata <- smooth_data(gam_model)
+
+ggplot(gam_smoothdata, 
+      aes(x, fit)) + 
+  facet_wrap(~xlab,scales='free') +
+  geom_line() +
+  theme_minimal() +
+ geom_line(aes(y=fit+(2*se)),linetype='dashed') +
+ geom_line(aes(y=fit-(2*se)),linetype='dashed') +
+  scale_y_continuous() +
+  scale_x_continuous(labels=scales::comma)
+
+
+```
+
+
+
+## Alternatively, Plot Smooth Terms with MgcViz
 
 ```{r}
 gam_viz <- getViz(gam_model)
