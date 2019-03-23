@@ -10,7 +10,7 @@ output:
 
 GAM ordinal regression: https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/ocat.html
 Example using polr: https://stats.idre.ucla.edu/r/dae/ordinal-logistic-regression/
-Ordinal doc: https://cran.r-project.org/web/packages/ordinal/vignettes/clm_article.pdf
+Explanation of GAM interpretation: https://stats.stackexchange.com/questions/226645/generalized-additive-model-interpretation-with-ordered-categorical-family-in-r
 
 ```{r, warning=F}
 #library(Hmisc)
