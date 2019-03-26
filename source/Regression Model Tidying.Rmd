@@ -62,7 +62,7 @@ add_termnames <- function(data,term_freqs,var_list) {
   # add in frequency counts and labels
   left_join(term_freqs,by=c('term_name'='term','level')) %>%
   mutate(label=case_when(is_categorical == 1 ~ str_c(term_name,': ', level,' (',scales::comma(n),')'),
-                TRUE ~ term))
+                TRUE ~ str_c(term_name)))
   )
 }
 ```
