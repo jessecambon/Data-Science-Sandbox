@@ -1,7 +1,7 @@
 R Quotation Methods
 ================
 Jesse Cambon
-02 March, 2019
+29 March, 2019
 
 Demonstrate the use of the quo\_name() and enquo() functions to pass
 variable names to functions and utilize both the variables and the
@@ -9,6 +9,7 @@ variable names
 
 ``` r
 library(tidyverse)
+library(knitr)
 
 # Create a heatmap with two axis variables
 # of the mean of a given metric variable
@@ -64,3 +65,42 @@ car_heatmap(mtcars,gear,carb,mpg)
     ## [1] "mpg"
 
 ![](R_Quotation_files/figure-gfm/unnamed-chunk-1-3.png)<!-- -->
+
+To quote a character list of variables, use rlang:syms() and the \!\!\!
+operator
+
+``` r
+# Find frequency counts for all variables in var list
+
+hp_calc <- function(data,variables) {
+  variables <- rlang::syms(variables)
+  return(data %>% group_by(!!!variables) %>%
+           summarize(n=n(),
+                     mean_hp=mean(hp),
+                     min_hp=min(hp),
+                     max_hp=max(hp))
+         )
+}
+ 
+gear_hp <- hp_calc(mtcars,c('gear')) 
+vs_am_hp <- hp_calc(mtcars,c('vs','am')) 
+
+kable(gear_hp)
+```
+
+| gear |  n | mean\_hp | min\_hp | max\_hp |
+| ---: | -: | -------: | ------: | ------: |
+|    3 | 15 | 176.1333 |      97 |     245 |
+|    4 | 12 |  89.5000 |      52 |     123 |
+|    5 |  5 | 195.6000 |      91 |     335 |
+
+``` r
+kable(vs_am_hp)
+```
+
+| vs | am |  n |  mean\_hp | min\_hp | max\_hp |
+| -: | -: | -: | --------: | ------: | ------: |
+|  0 |  0 | 12 | 194.16667 |     150 |     245 |
+|  0 |  1 |  6 | 180.83333 |      91 |     335 |
+|  1 |  0 |  7 | 102.14286 |      62 |     123 |
+|  1 |  1 |  7 |  80.57143 |      52 |     113 |

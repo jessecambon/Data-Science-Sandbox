@@ -14,6 +14,7 @@ and the variable names
 
 ```{r, warning=F,message=F}
 library(tidyverse)
+library(knitr)
 
 # Create a heatmap with two axis variables
 # of the mean of a given metric variable
@@ -51,3 +52,27 @@ car_heatmap(mtcars,cyl,gear,mpg)
 car_heatmap(mtcars,cyl,gear,hp)
 car_heatmap(mtcars,gear,carb,mpg)
 ```
+
+To quote a character list of variables, use rlang:syms() and the !!! operator
+
+```{r}
+# Find frequency counts for all variables in var list
+
+hp_calc <- function(data,variables) {
+  variables <- rlang::syms(variables)
+  return(data %>% group_by(!!!variables) %>%
+           summarize(n=n(),
+                     mean_hp=mean(hp),
+                     min_hp=min(hp),
+                     max_hp=max(hp))
+         )
+}
+ 
+gear_hp <- hp_calc(mtcars,c('gear')) 
+vs_am_hp <- hp_calc(mtcars,c('vs','am')) 
+
+kable(gear_hp)
+kable(vs_am_hp)
+```
+
+
