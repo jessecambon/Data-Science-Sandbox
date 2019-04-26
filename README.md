@@ -38,3 +38,4 @@ The purpose of this repository is to provide code and resources that can be quic
 ## NLP 
 * [Hello NLP](source/Hello_NLP.ipynb) - Testing out some NLP techniques on Wall Street Journal sample data
 * [State of the Union Analysis](source/state_of_union_v2.ipynb) - An exploration of state of the union addresses with NLP
+* [LSTM Demo](source/LSTM-Demo.ipynb) - An LSTM network for predicting if a company review from glassdoor is positive
