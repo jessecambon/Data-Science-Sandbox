@@ -62,6 +62,11 @@ A categorized list of data science resources.
 * [Tidyverse style survey package](https://cran.r-project.org/web/packages/srvyr/vignettes/srvyr-vs-survey.html)
 * [Course on Generalized Linear Models](http://data.princeton.edu/wws509/notes/#) - Princeton course on GLMs including logistic and poisson regression.
 
+## Code Reference
+* [Code for NLP Models](https://github.com/bicepjai/Deep-Survey-Text-Classification) - Code implementations for 14 NLP text classification papers
+* [Papers With Code (Github)](https://github.com/zziz/pwc)
+* [Papers With Code (Site)](https://paperswithcode.com/)
+
 ## Maps
 * [Sample maps](https://bhaskarvk.github.io/user2017.geodataviz/notebooks/02-Static-Maps.nb.html)
 * [Making Maps with R](http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html)
