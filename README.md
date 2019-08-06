@@ -12,7 +12,7 @@ A collection of code and resources to serve as a starting point for data science
 </span>
 
 
-The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. An emphasis is placed on having clear understandable code that can be easily replicated. I make use of inbuilt datasets in R so that there is no need to download external datasets.
+The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. An emphasis is placed on having clear understandable code that can be easily replicated. I make use of inbuilt datasets as much as possible so that there is no need to download external datasets.
 
 
 ## General 
@@ -20,7 +20,7 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Creating Formatted Spreadsheets](source/Create_Formatted_Spreadsheet.md) - How to create a custom formatted spreadsheet report with the openxlsx R package.
 * [Using Python and R Together](source/R-Python-Hybrid.ipynb) - How to use python and R code together in the same Jupyter notebook with the rpy2 python package.
 * [R Quotation](source/R_Quotation.md) - If you want to do certain things such as pass variable names as arguments to a function in R, you have to use quotation methods like quo() and enquo(). This notebook demonstrates how to do this.
-* [Pandas Counting](source/Pandas_TidyCount.ipynb) - A function for counting values or combinations of values in a pandas dataframe. This function does not exclude missing values.
+* [Tidy Pandas](source/Tidy_Pandas.ipynb) - Functions to incorporate some of the functionality from dplyr (R/Tidyverse) into Pandas. Includes a function for counting values or combinations of values in a pandas dataframe that doesn't exclude missing values.
 
 ## Data Visualization
 * [Visualization Cookbook](source/Chart_Collection.md) - A wide variety of data visualizations demonstrated.
