@@ -1,2 +1,5 @@
 source/.ipynb_checkpoints
 source/.ipynb_checkpoints/*
+source/.DS_Store
+.DS_Store
+.ipynb*
