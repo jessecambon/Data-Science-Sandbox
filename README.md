@@ -29,7 +29,7 @@ The purpose of this repository is to provide code and resources that can be quic
 ## Modeling and Machine Learning 
 * [Modeling Fundamentals](source/Titanic.md) (R) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
 * [Modeling Workflows](source/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
-* [Clustering](source/Clustering.md) - Using the k-means alogrithm to cluster data.
+* [Clustering](source/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
 * [Machine Learning with Caret](source/Caret.md) (R) - Using the Caret library to do machine learning.
 * [Predicting Fuel Economy](source/Vehicles.md) (R) - Predicting the fuel economy of cars.
 * [Ordinal Regression](source/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
