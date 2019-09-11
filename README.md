@@ -29,7 +29,7 @@ The purpose of this repository is to provide code and resources that can be quic
 ## Modeling and Machine Learning 
 * [Modeling Fundamentals](source/Titanic.md) (R) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
 * [Modeling Workflows](source/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
-* [Sklearn Modeling Workflows](source/Sklearn-Workflow.ipynb) (Python) - Modeling worflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves)
+* [Sklearn Modeling Workflows](source/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves)
 * [Clustering](source/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
 * [Machine Learning with Caret](source/Caret.md) (R) - Using the Caret library to do machine learning.
 * [Predicting Fuel Economy](source/Vehicles.md) (R) - Predicting the fuel economy of cars.
