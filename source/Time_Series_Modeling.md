@@ -5,12 +5,14 @@ Jesse Cambon
 
 ## References
 
-  - <https://feasts.tidyverts.org/>
+  - <https://github.com/christophsax/tsbox>
   - <https://github.com/tidyverts/tsibble>
   - <http://pkg.robjhyndman.com/forecast/>
   - <https://business-science.github.io/sweep/index.html>
   - <https://cran.rstudio.com/web/packages/sweep/vignettes/SW01_Forecasting_Time_Series_Groups.html>
   - <https://www.r-bloggers.com/climate-change-modeling-140-years-of-temperature-data-with-tsibble-and-fable/>
+  - <https://github.com/tidyverts/fable>
+  - <https://feasts.tidyverts.org/>
 
 ## Setup
 
@@ -23,7 +25,7 @@ library(tidyverse)
 
     ## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
-    ## ✔ ggplot2 3.2.0     ✔ purrr   0.3.2
+    ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.2
     ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
     ## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
     ## ✔ readr   1.3.1     ✔ forcats 0.4.0
@@ -78,6 +80,9 @@ library(forecast)
     ##   residuals.fracdiff fracdiff
 
 ``` r
+library(tsbox)
+
+
 # Set default ggplot theme
 theme_set(theme_bw() +
   theme(legend.position = "top",
@@ -114,6 +119,13 @@ nrow(ansett_fill)
     ## [1] 742
 
 ``` r
+# Aggregate all classes together , limit to 1990 onward
+ansett_summ <- ansett_fill %>% group_by %>%
+  summarize(Passengers=sum(Passengers,na.rm=TRUE)) %>%
+  filter_index("1990-01" ~ .) %>% as_tsibble(index = Week)
+```
+
+``` r
 ggplot(ansett_fill,
           aes(x=Week,y=Passengers)) +
   geom_area(aes(fill = Class), alpha = 0.8) +
@@ -146,14 +158,15 @@ AirPassengers %>%
 
 ![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
 
-Test feasts package
+``` r
+# Have to convert this dataset to time series format with tsbox::ts_ts()
+ansett_summ %>% ts_ts(.) %>%
+  stlf(lambda=0) %>%
+  autoplot()
+```
+
+    ## [time]: 'Week' [value]: 'Passengers'
+
+![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 Feasts package unfortunately breaks the forecast package
-
-``` r
-# 
-# aus_production %>% gg_subseries(Beer)+ theme(
-#       legend.position='right') 
-# 
-# aus_production %>% STL(Beer ~ season(window = Inf)) %>% autoplot()
-```
