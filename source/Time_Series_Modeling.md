@@ -1,7 +1,7 @@
 Time Series Modeling
 ================
 Jesse Cambon
-11 September, 2019
+12 September, 2019
 
 ## References
 
@@ -81,8 +81,23 @@ library(forecast)
 
 ``` r
 library(tsbox)
+library(prophet)
+```
 
+    ## Loading required package: Rcpp
 
+    ## Loading required package: rlang
+
+    ## 
+    ## Attaching package: 'rlang'
+
+    ## The following objects are masked from 'package:purrr':
+    ## 
+    ##     %@%, as_function, flatten, flatten_chr, flatten_dbl,
+    ##     flatten_int, flatten_lgl, flatten_raw, invoke, list_along,
+    ##     modify, prepend, splice
+
+``` r
 # Set default ggplot theme
 theme_set(theme_bw() +
   theme(legend.position = "top",
@@ -90,7 +105,7 @@ theme_set(theme_bw() +
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
-Import Data and Convert to Tsibble format
+\#Importing Data Import Data and Convert to Tsibble format
 
 ``` r
 weather <- nycflights13::weather %>% 
@@ -99,7 +114,38 @@ weather <- nycflights13::weather %>%
 weather_tsbl <- as_tsibble(weather, key = origin, index = time_hour)
 ```
 
-Fill Missing Gaps
+# Forecasting with Prophet
+
+<https://facebook.github.io/prophet>
+
+``` r
+# convert to format needed by prophet (needs specific column names)
+weather_ts <- weather_tsbl %>% filter(origin == 'EWR') %>% select(time_hour,temp) %>% 
+  rename(ds=time_hour,y=temp)
+
+# create prophet model
+m <- prophet(weather_ts,yearly.seasonality=TRUE)
+
+future <- make_future_dataframe(m, periods = 400)
+
+# Create forecast
+prophet_forecast <- predict(m, future)
+
+# Plot
+plot(m, prophet_forecast)
+```
+
+![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+``` r
+prophet_plot_components(m, prophet_forecast)
+```
+
+![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
+
+## Data Cleaning
+
+Fill Missing Gaps in Data
 
 ``` r
 nrow(ansett)
@@ -128,7 +174,7 @@ ansett_summ <- ansett_fill %>% group_by %>%
 ``` r
 ggplot(ansett_fill,
           aes(x=Week,y=Passengers)) +
-  geom_area(aes(fill = Class), alpha = 0.8) +
+  geom_area(aes(fill = Class), alpha = 1.0) +
 scale_fill_manual(values=wes_palette('Moonrise2')) +
 scale_y_continuous(labels=scales::comma) +
 labs(title='',
@@ -137,7 +183,7 @@ theme(legend.title = element_blank(),
       legend.position='right') 
 ```
 
-![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 Test forecast package
 
@@ -148,7 +194,7 @@ USAccDeaths %>%
   autoplot()
 ```
 
-![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 AirPassengers %>%
@@ -156,7 +202,7 @@ AirPassengers %>%
   autoplot()
 ```
 
-![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->
+![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->
 
 ``` r
 # Have to convert this dataset to time series format with tsbox::ts_ts()
@@ -167,6 +213,6 @@ ansett_summ %>% ts_ts(.) %>%
 
     ## [time]: 'Week' [value]: 'Passengers'
 
-![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
+![](Time_Series_Modeling_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->
 
 Feasts package unfortunately breaks the forecast package

@@ -7,8 +7,6 @@ output:
     toc: true
 ---
 
-
-
 ## References
 * https://github.com/christophsax/tsbox
 * https://github.com/tidyverts/tsibble
@@ -32,6 +30,7 @@ library(tsibble)
 library(lubridate)
 library(forecast)
 library(tsbox)
+library(prophet)
 
 
 # Set default ggplot theme
@@ -42,6 +41,7 @@ theme_set(theme_bw() +
 
 ```
 
+#Importing Data
 Import Data and Convert to Tsibble format
 
 ```{r}
@@ -51,7 +51,38 @@ weather <- nycflights13::weather %>%
 weather_tsbl <- as_tsibble(weather, key = origin, index = time_hour)
 ```
 
-Fill Missing Gaps
+
+# Forecasting with Prophet
+https://facebook.github.io/prophet
+
+```{r}
+# convert to format needed by prophet (needs specific column names)
+weather_ts <- weather_tsbl %>% filter(origin == 'EWR') %>% select(time_hour,temp) %>% 
+  rename(ds=time_hour,y=temp)
+
+# create prophet model
+m <- prophet(weather_ts,yearly.seasonality=TRUE)
+
+future <- make_future_dataframe(m, periods = 400)
+
+# Create forecast
+prophet_forecast <- predict(m, future)
+
+# Plot
+plot(m, prophet_forecast)
+
+prophet_plot_components(m, prophet_forecast)
+
+
+
+```
+
+
+
+
+## Data Cleaning
+
+Fill Missing Gaps in Data
 
 
 ```{r}
@@ -73,7 +104,7 @@ ansett_summ <- ansett_fill %>% group_by %>%
 ```{r}
 ggplot(ansett_fill,
           aes(x=Week,y=Passengers)) +
-  geom_area(aes(fill = Class), alpha = 0.8) +
+  geom_area(aes(fill = Class), alpha = 1.0) +
 scale_fill_manual(values=wes_palette('Moonrise2')) +
 scale_y_continuous(labels=scales::comma) +
 labs(title='',
@@ -81,7 +112,6 @@ labs(title='',
 theme(legend.title = element_blank(),
       legend.position='right') 
 ```
-
 
 
 Test forecast package
