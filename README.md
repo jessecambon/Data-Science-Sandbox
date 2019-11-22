@@ -3,10 +3,10 @@
 A collection of code and resources to serve as a starting point for data science projects. 
 
 <span>
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Visualization_Cookbook.md#lollipop"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/rmd_images/Visualization_Cookbook/Visualization_Cookbook_files/figure-markdown_github/lollipop-1.png" height="200px"/></a>
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Visualization_Cookbook.md#bubbleplot"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/rmd_images/Visualization_Cookbook/figure-markdown_github/bubbleplot-1.png" height="200px"/></a>
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Visualization_Cookbook.md#lollipop"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/rmd_images/Visualization_Cookbook/lollipop-1.png" height="200px"/></a>
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Visualization_Cookbook.md#bubbleplot"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/rmd_images/Visualization_Cookbook/bubbleplot-1.png" height="200px"/></a>
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Geospatial_Analysis.md"><img src="https://github.com/jessecambon/Data-Science-Codex/blob/master/R/Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-2-1.png" height="200px"/></a> 
-<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Visualization_Cookbook/Visualization_Cookbook.md#ridgeplot"><img src="https://raw.githubusercontent.com/jessecambon/Data-Science-Codex/master/rmd_images/Visualization_Cookbook/figure-markdown_github/ridge-1.png" height="200px"/></a> 
+<a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Visualization_Cookbook/Visualization_Cookbook.md#ridgeplot"><img src="https://raw.githubusercontent.com/jessecambon/Data-Science-Codex/master/rmd_images/Visualization_Cookbook/ridge-1.png" height="200px"/></a> 
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Titanic.md#logistic-regression-model"><img src="https://github.com/jessecambon/Data-Science-Codex/blob/master/R/Titanic_files/figure-markdown_github/logistic-regression-2.png" height="200px"/></a> 
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Titanic.md#logistic-regression-model"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Titanic_files/figure-markdown_github/logistic-regression-1.png" height="200px"/></a> 
 </span>
