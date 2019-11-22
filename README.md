@@ -16,7 +16,8 @@ The purpose of this repository is to provide code and resources that can be quic
 
 
 ## General 
-* [Resources](Resources.md) - Websites and references that I find helpful for data science projects.
+* [Resources](Resources.md) - Websites and references that I find helpful for data science projects
+* [R-Quickstart](R/R-Quickstart.md) (R) - Minimal data analysis and visualization workflow.
 * [Creating Formatted Spreadsheets](R/Create_Formatted_Spreadsheet.md) (R) - How to create a custom formatted spreadsheet report with the openxlsx R package.
 * [Using Python and R Together](R/R-Python-Hybrid.ipynb) - How to use python and R code together in the same Jupyter notebook with the rpy2 python package.
 * [R Quotation](R/R_Quotation.md) (R) - If you want to do certain things such as pass variable names as arguments to a function in R, you have to use quotation methods like quo() and enquo(). This notebook demonstrates how to do this.
