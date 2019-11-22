@@ -1,18 +1,36 @@
-K-means Clustering
-================
-Jesse Cambon
-21 November, 2019
+---
+title: "K-means Clustering"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "../R") })
+output:
+  github_document:
+    toc: true
+    toc_depth: 2
+---
 
-Demonstrate K-means clustering
+Demonstrate K-means clustering 
 
 ## References
+* https://uc-r.github.io/kmeans_clustering
+* https://cran.r-project.org/web/packages/broom/vignettes/kmeans.html 
 
-  - <https://uc-r.github.io/kmeans_clustering>
-  - <https://cran.r-project.org/web/packages/broom/vignettes/kmeans.html>
+```{r knit-settings, include=FALSE}
+library(knitr)
+library(stringr)
+library(here)
+
+# get name of file during knitting and strip file extension
+rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
+print(rmd_filename)
+knitr::opts_knit$set(base.dir = here::here()) # project root folder
+knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+```
 
 ## Setup
 
-``` r
+```{r setup,warning=F,message=F}
 library(tidyverse)
 library(knitr)
 library(kableExtra)
@@ -23,7 +41,7 @@ library(wesanderson)
 
 ## Cluster Data
 
-``` r
+```{r}
 library(fueleconomy)
 my_vehicles <- vehicles %>% filter(year == 2015) %>%
   drop_na(cyl,displ,cty)
@@ -42,9 +60,10 @@ clust7 <- kmeans(vehicles_sel_scaled, centers = 7)
 clust10 <- kmeans(vehicles_sel_scaled, centers = 10)
 ```
 
+
 ## View Results
 
-``` r
+```{r}
 combine_results <- augment(clust3, my_vehicles)  
 
 combine_summ <- combine_results %>% group_by(.cluster) %>% 
@@ -57,26 +76,17 @@ combine_summ <- combine_results %>% group_by(.cluster) %>%
   arrange(desc(mean_cty))
 ```
 
-``` r
+
+```{r clusterresults,results='asis',warning=F}
 kable(combine_summ,format='markdown',digits=2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-| .cluster | num\_vehicles | mean\_cty | min\_cty | max\_cty | mean\_displ | mean\_cyl |
-| :------- | ------------: | --------: | -------: | -------: | ----------: | --------: |
-| 3        |            86 |     25.05 |       20 |       33 |        1.87 |      4.05 |
-| 2        |            55 |     18.71 |       16 |       24 |        3.12 |      5.78 |
-| 1        |            63 |     15.19 |       11 |       20 |        5.12 |      8.29 |
+## Visualize 
 
-## Visualize
-
-``` r
+```{r}
 fviz_cluster(clust3,data=vehicles_sel,repel=F,ggtheme=theme_bw())
-```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Clustering/unnamed-chunk-3-1.png)<!-- -->
-
-``` r
 ggplot(aes(x=cyl,y=cty,color=.cluster),data=combine_results) + 
   geom_jitter() +
   theme_bw() +
@@ -86,5 +96,3 @@ ggplot(aes(x=cyl,y=cty,color=.cluster),data=combine_results) +
   xlab('Cylinders (cyl)') +
   ylab('City Fuel Economy (cty)')
 ```
-
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Clustering/unnamed-chunk-3-2.png)<!-- -->
