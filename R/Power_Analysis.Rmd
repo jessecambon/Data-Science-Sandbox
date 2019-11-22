@@ -1,9 +1,23 @@
 ---
 title: "Power Analysis"
-output: html_vignette
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
 ---
 
-Check with https://www.stat.ubc.ca/~rollin/stats/ssize/b2.html
+```{r knit-settings, include=FALSE}
+library(knitr)
+library(stringr)
+library(here)
+# get name of file during knitting and strip file extension
+rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
+print(rmd_filename)
+knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+```
+
+
 
 ```{r}
 library(pwr)
@@ -28,4 +42,12 @@ power.prop.test(n = NULL,
                 ) 
 ```
 
+
+### Additional References 
+
+* [Biostat Handbook – Power Analysis](http://www.biostathandbook.com/power.html)
+* [Biostat Handbook - Hypothesis Testing](http://www.biostathandbook.com/hypothesistesting.html)
+* [UCLA Intro to Power Analysis](https://stats.idre.ucla.edu/other/mult-pkg/seminars/intro-power/)
+* [An online power calculator for proportions](https://www.stat.ubc.ca/~rollin/stats/ssize/b2.html)
+* [The pwr R package](https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html) – a popular R package used for power analysis
 
