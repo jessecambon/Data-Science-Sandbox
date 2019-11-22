@@ -1,23 +1,17 @@
 Geospatial Analysis
 ================
 Jesse Cambon
-02 September, 2018
+22 November, 2019
 
--   [References](#references)
--   [Setup](#setup)
--   [Geographies](#geographies)
-    -   [Locales](#locales)
-    -   [United States](#united-states)
-    -   [The World](#the-world)
+Install fifystater package from:
+<https://github.com/wmurphyrd/fiftystater>
 
-References
-----------
+## References
 
--   <https://github.com/mtennekes/tmap>
--   <https://mran.revolutionanalytics.com/snapshot/2016-03-22/web/packages/tmap/vignettes/tmap-nutshell.html>
+  - <https://github.com/mtennekes/tmap>
+  - <https://mran.revolutionanalytics.com/snapshot/2016-03-22/web/packages/tmap/vignettes/tmap-nutshell.html>
 
-Setup
------
+## Setup
 
 ``` r
 library(tidyverse)
@@ -33,13 +27,12 @@ library(fiftystater) # US state geometries
 options(tigris_use_cache = TRUE)
 ```
 
-Geographies
-===========
+# Geographies
 
-Locales
--------
+## Locales
 
-Use the tidycensus package to pull Census data and display it on a map with the tmap package.
+Use the tidycensus package to pull Census data and display it on a map
+with the tmap package.
 
 ``` r
 # Pull Census Rent Data for Boston using tidycensus package
@@ -61,16 +54,16 @@ tm_shape(bos) +
             main.title.size=1.5) 
 ```
 
-![](Geospatial_Analysis_files/figure-markdown_github/locale-1.png)
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/locale-1.png)<!-- -->
 
 ``` r
 #vars <- load_variables(2016,'acs1') # view census variables
 ```
 
-<http://www.robinlovelace.net/presentations/spatial-tidyverse.html#11> <https://cran.r-project.org/web/packages/wbstats/vignettes/Using_the_wbstats_package.html>
+<http://www.robinlovelace.net/presentations/spatial-tidyverse.html#11>
+<https://cran.r-project.org/web/packages/wbstats/vignettes/Using_the_wbstats_package.html>
 
-United States
--------------
+## United States
 
 ``` r
 data("fifty_states") # fiftystater package
@@ -106,10 +99,9 @@ ggplot(crimes, aes(map_id = state)) +
   guides(fill = guide_legend(title='Murders Per\n100,000 Residents'))
 ```
 
-![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/unnamed-chunk-2-1.png)<!-- -->
 
-The World
----------
+## The World
 
 ``` r
 # Load world map geometry
@@ -132,7 +124,7 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
   tm_legend(frame = TRUE) 
 ```
 
-![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
 # tm_format("World",frame=F) 
@@ -163,6 +155,10 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
   tm_legend(frame = F) 
 ```
 
+    ## Warning: Values have found that are less than the lowest break
+    
+    ## Warning: Values have found that are less than the lowest break
+
     ## Variable "growth" contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full spectrum of the color palette.
 
-![](Geospatial_Analysis_files/figure-markdown_github/unnamed-chunk-3-2.png)
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/unnamed-chunk-3-2.png)<!-- -->
