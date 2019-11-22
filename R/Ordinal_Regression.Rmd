@@ -1,7 +1,6 @@
 ---
 title: "Ordinal Regression"
 author: "Jesse Cambon"
-
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   github_document:
@@ -21,7 +20,6 @@ rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
 print(rmd_filename)
 knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
 ```
-
 
 ```{r, warning=F}
 #library(Hmisc)

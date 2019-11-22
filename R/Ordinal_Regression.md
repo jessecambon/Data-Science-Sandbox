@@ -1,7 +1,7 @@
 Ordinal Regression
 ================
 Jesse Cambon
-22 March, 2019
+22 November, 2019
 
 GAM ordinal regression:
 <https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/ocat.html>
@@ -24,7 +24,7 @@ library(mgcv) # gam model
 
     ## Loading required package: nlme
 
-    ## This is mgcv 1.8-27. For overview type 'help("mgcv-package")'.
+    ## This is mgcv 1.8-31. For overview type 'help("mgcv-package")'.
 
 ``` r
 library(mgcViz) # gam visualization
@@ -35,6 +35,21 @@ library(mgcViz) # gam visualization
     ## Loading required package: ggplot2
 
     ## Loading required package: rgl
+
+    ## Registered S3 method overwritten by 'GGally':
+    ##   method from   
+    ##   +.gg   ggplot2
+
+    ## Registered S3 methods overwritten by 'lme4':
+    ##   method                          from
+    ##   cooks.distance.influence.merMod car 
+    ##   influence.merMod                car 
+    ##   dfbeta.influence.merMod         car 
+    ##   dfbetas.influence.merMod        car
+
+    ## Registered S3 method overwritten by 'mgcViz':
+    ##   method from  
+    ##   +.gg   GGally
 
     ## 
     ## Attaching package: 'mgcViz'
@@ -59,14 +74,13 @@ library(broom)
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ──────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ─────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
 
-    ## ✔ tibble  2.0.1       ✔ purrr   0.3.0  
-    ## ✔ tidyr   0.8.3       ✔ dplyr   0.8.0.1
-    ## ✔ readr   1.3.1       ✔ stringr 1.4.0  
-    ## ✔ tibble  2.0.1       ✔ forcats 0.4.0
+    ## ✔ tibble  2.1.3     ✔ purrr   0.3.3
+    ## ✔ tidyr   1.0.0     ✔ dplyr   0.8.3
+    ## ✔ readr   1.3.1     ✔ forcats 0.4.0
 
-    ## ── Conflicts ─────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::collapse() masks nlme::collapse()
     ## ✖ dplyr::filter()   masks stats::filter()
     ## ✖ dplyr::lag()      masks stats::lag()
@@ -86,8 +100,7 @@ var_freq <- function(data,var) {
   return(data %>% count(!!var) %>% mutate(term=quo_name(var)) %>%
           rename(level=!!var) %>%
           mutate(level=as.character(level), # convert to char
-                 is_categorical=1) %>%
-           select(term,everything()))
+                 is_categorical=1))
   } else {
     return(tibble())
   }
@@ -157,12 +170,12 @@ gam_model <- gam(cutN ~ s(carat) + color + clarity,family=ocat(R=5),data=Mydiamo
 gam.check(gam_model)
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](/Users/jessecambon/Documents/MyGitHub/Data-Science-Codex/rmd_images/Ordinal_Regression/unnamed-chunk-2-1.png)<!-- -->
 
     ## 
     ## Method: REML   Optimizer: outer newton
     ## full convergence after 5 iterations.
-    ## Gradient range [0.0009785298,0.008466754]
+    ## Gradient range [0.0009785299,0.008466754]
     ## (score 72378.84 & scale 1).
     ## Hessian positive definite, eigenvalue range [3.780712,17487.96].
     ## Model rank =  23 / 23 
@@ -171,7 +184,7 @@ gam.check(gam_model)
     ## indicate that k is too low, especially if edf is close to k'.
     ## 
     ##            k'  edf k-index p-value    
-    ## s(carat) 9.00 8.78    0.93  <2e-16 ***
+    ## s(carat) 9.00 8.78    0.94  <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -222,10 +235,10 @@ gam_Lcoef <-  tidy(gam_model,parametric=T) %>% # get parametric coefficients
   add_termnames(gam_varfreqs,gam_varlist)
 gam_Scoef <-  tidy(gam_model,parametric=F) # get smooth term coefficients
 
-gam_allpvalues <- gam_Lcoef %>%
-  select(term,p.value) %>%
-  bind_rows(gam_Scoef %>% select(term,p.value)) %>%
-  arrange(p.value)
+# gam_allpvalues <- gam_Lcoef %>%
+#   dplyr::select(term,p.value) %>%
+#   bind_rows(gam_Scoef %>% select(term,p.value)) %>%
+#   arrange(p.value)
 
 # Extract probability predictions from GAM
 gam_probs <- predict(gam_model,type='response') %>% 
@@ -288,7 +301,7 @@ labs(title='Odds Ratios of Parametric Terms',
 xlab('Term') + ylab('Odds Ratio')
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](/Users/jessecambon/Documents/MyGitHub/Data-Science-Codex/rmd_images/Ordinal_Regression/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 # Confusion matrixes 
@@ -347,7 +360,7 @@ ggplot(gam_smoothdata,
   scale_x_continuous(labels=scales::comma)
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](/Users/jessecambon/Documents/MyGitHub/Data-Science-Codex/rmd_images/Ordinal_Regression/unnamed-chunk-6-1.png)<!-- -->
 
 ## Alternatively, Plot Smooth Terms with MgcViz
 
@@ -362,10 +375,10 @@ plot(sm(gam_viz, 1)) +
   theme_classic()
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](/Users/jessecambon/Documents/MyGitHub/Data-Science-Codex/rmd_images/Ordinal_Regression/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
 print(plot(gam_viz, allTerms = T), pages = 1)
 ```
 
-![](Ordinal_Regression_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](/Users/jessecambon/Documents/MyGitHub/Data-Science-Codex/rmd_images/Ordinal_Regression/unnamed-chunk-8-1.png)<!-- -->

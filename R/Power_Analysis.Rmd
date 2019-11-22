@@ -1,0 +1,31 @@
+---
+title: "Power Analysis"
+output: html_vignette
+---
+
+Check with https://www.stat.ubc.ca/~rollin/stats/ssize/b2.html
+
+```{r}
+library(pwr)
+pwr.2p.test(
+       h=ES.h(0.6,0.8),
+       n=NULL,
+       sig.level=0.05,
+       power=0.80,
+       alternative="two.sided")
+
+```
+
+
+```{r}
+library(pwr)
+power.prop.test(n = NULL, 
+                p1 = .6, 
+                p2 = .8,
+                power=0.8,
+                sig.level=0.05,
+                alternative="two.sided"
+                ) 
+```
+
+
