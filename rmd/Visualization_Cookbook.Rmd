@@ -2,10 +2,12 @@
 title: "Visualization Cookbook"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "../R") })
 output:
   github_document:
     toc: true
-    toc_depth: 3
+    toc_depth: 2
 ---
 
 ```{r knit-settings, include=FALSE}
