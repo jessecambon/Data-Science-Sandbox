@@ -1,0 +1,277 @@
+---
+title: "Ordinal Regression"
+author: "Jesse Cambon"
+
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+GAM ordinal regression: https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/ocat.html
+Example using polr: https://stats.idre.ucla.edu/r/dae/ordinal-logistic-regression/
+Explanation of GAM interpretation: https://stats.stackexchange.com/questions/226645/generalized-additive-model-interpretation-with-ordered-categorical-family-in-r
+
+```{r knit-settings, include=FALSE}
+library(knitr)
+library(stringr)
+library(here)
+# get name of file during knitting and strip file extension
+rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
+print(rmd_filename)
+knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+```
+
+
+```{r, warning=F}
+#library(Hmisc)
+library(MASS) # polr()
+library(car)
+library(mgcv) # gam model
+library(mgcViz) # gam visualization
+library(ordinal) # clm()
+library(broom)
+library(tidyverse)
+
+# Find frequency counts for all variables in var list
+
+var_freq <- function(data,var) {
+  var <- rlang::sym(var)
+  print(var)
+#  print(quo_name(var))
+  if (is.factor(data %>% pull(!!var)) | is.character(data %>% pull(!!var))) {
+  return(data %>% count(!!var) %>% mutate(term=quo_name(var)) %>%
+          rename(level=!!var) %>%
+          mutate(level=as.character(level), # convert to char
+                 is_categorical=1))
+  } else {
+    return(tibble())
+  }
+}
+
+# Iterate through an entire dataset and return a dataset with all
+# frequencies
+find_all_freqs <- function(data,var_list) {
+  all_freqs <- tibble()
+  for (var in var_list) {
+    all_freqs <- all_freqs %>%
+      bind_rows(var_freq(data,var))
+  }
+  return(all_freqs)
+}
+
+# obtain list of variables in a model. Remove smooth terms (s())
+obtain_model_varlist <- function(model_obj) {
+    var_list_raw <- unlist(strsplit(as.character(model_obj$formula[3]),split=' \\+ '))
+    # Remove smooth terms (s())
+    return(var_list_raw[!str_detect(var_list_raw,'^s\\(')])
+}
+
+# adds term_name field to a tidy dataframe which includes frequency count
+add_termnames <- function(data,term_freqs,var_list) {
+  # Regexs to match the varname (when it begins a string)
+  varregex <- paste(str_replace(var_list,'^','\\^'), collapse = "|")
+
+  return(
+  data %>%
+  mutate(term_name = str_extract(term,varregex),
+         level = case_when(!is.na(term_name) ~ str_replace(term,varregex,""))) %>%
+  # add in frequency counts and labels
+  left_join(term_freqs,by=c('term_name'='term','level')) %>%
+  mutate(label=case_when(is.na(n) ~ term, # if not categorical than use original label
+        is_categorical == 1 ~ str_c(term_name,': ', level,' (',scales::comma(n),')'),
+                TRUE ~ str_c(level,' (',scales::comma(n),')')))
+
+  )
+
+}
+
+
+```
+
+
+```{r}
+
+Mydiamonds <- diamonds %>% 
+  # convert factor to numeric for gam model
+  mutate(cutN=as.numeric(cut),
+          # convert to non-ordered factors
+         color=factor(color,ordered=F),
+         clarity=factor(clarity,ordered=F)
+         )
+
+    # make wine show up in the R studio environment
+
+outcomeVar <- 'cut'
+predictors <- 'carat + color + clarity'
+
+# Construct formula from strings
+lmformula <- as.formula(str_c(outcomeVar,' ~ ',predictors))
+
+# train ordinal logistic models
+clm_model <- clm(lmformula, data=Mydiamonds)
+polr_model <- polr(lmformula, data=Mydiamonds)
+# train ordinal GAM model (R is the number of outcome categories)
+gam_model <- gam(cutN ~ s(carat) + color + clarity,family=ocat(R=5),data=Mydiamonds) 
+
+gam.check(gam_model)
+
+# Check for collinearity
+concurvity(gam_model)
+vif(polr_model)
+
+```
+
+
+```{r}
+
+# Find categorical variables and the
+# frequency counts of their levels
+gam_varlist <- obtain_model_varlist(gam_model)
+gam_varfreqs <- find_all_freqs(Mydiamonds,gam_varlist)
+
+# Evaluate models
+clm_stats <- glance(clm_model)
+clm_coef <- tidy(clm_model,exponentiate=T) 
+
+polr_stats <- glance(polr_model)
+polr_coef <- tidy(polr_model,exponentiate=T)
+
+gam_stats <- glance(gam_model)
+gam_Lcoef <-  tidy(gam_model,parametric=T) %>% # get parametric coefficients
+  add_termnames(gam_varfreqs,gam_varlist)
+gam_Scoef <-  tidy(gam_model,parametric=F) # get smooth term coefficients
+
+# gam_allpvalues <- gam_Lcoef %>%
+#   dplyr::select(term,p.value) %>%
+#   bind_rows(gam_Scoef %>% select(term,p.value)) %>%
+#   arrange(p.value)
+
+# Extract probability predictions from GAM
+gam_probs <- predict(gam_model,type='response') %>% 
+  # remove "V" from column names so we now have the class labels
+  as.data.frame() %>% rename_all(list(replace= ~str_replace_all(.,'V',''))) %>% 
+  mutate(obs_num=1:nrow(.)) %>%
+  gather(class,prob,-obs_num) %>%
+  mutate(class=as.numeric(class)) %>% arrange(obs_num,class)
+
+# Extract class predictions
+gam_pred <- gam_probs %>% group_by(obs_num) %>%
+  filter(prob==max(prob))
+
+# Compare predictions of polr() and clm()
+compare_models <- Mydiamonds %>% 
+  # clm predictions returned as list for some reason
+  # have to unlist it so we can put it in a column
+  mutate(clm_pred=unlist(predict(clm_model,type='class')),
+         polr_pred=predict(polr_model,type='class'),
+         gam_pred=gam_pred %>% pull(class)) %>%
+  mutate_all(as.numeric)  # convert from factor to numeric
+
+# Make frequency tables
+# freq_preds <- compare_models %>% count(polr_pred,clm_pred)
+# freq_predcheck <- compare_models %>% count(cut,clm_pred)
+
+# Chi square test
+# chisq.test(freq_preds)
+# chisq.test(freq_predcheck)
+
+#Spearman correlations
+cor(compare_models$cut,compare_models$clm_pred,method='spearman')
+cor(compare_models$cut,compare_models$polr_pred,method='spearman')
+cor(compare_models$cut,compare_models$gam_pred,method='spearman')
+
+
+```
+
+```{r,results='asis'}
+ggplot(data=gam_Lcoef %>% filter(label != '(Intercept)'),
+          aes(x = reorder(label,-estimate), y = exp(estimate))) +
+geom_point() +
+  scale_y_continuous(breaks=seq(0,10,2),limits=c(0,10)) +
+geom_hline(yintercept=1,color='grey') +
+coord_flip() +
+  theme_classic() +
+#geom_pointrange(mapping=aes(ymin=LCLM, ymax=UCLM)) + 
+labs(title='Odds Ratios of Parametric Terms',
+     caption='Sample sizes shown in ()') +
+xlab('Term') + ylab('Odds Ratio')
+```
+
+
+
+
+```{r}
+# Confusion matrixes 
+
+check_gam <- compare_models %>% count(cut,gam_pred) %>%
+  spread(cut,n,fill=0)
+
+check_clm <- compare_models %>% count(cut,clm_pred) %>%
+  spread(cut,n,fill=0)
+
+```
+
+## Extract data from smooths and plot
+
+This method allows us some more direct control over how we plot the smooth terms since we extract the plot data. Alternatively, mgcViz (shown below) can be used.
+
+```{r}
+
+# Returns the data to plot all smooth turns in a gam model object
+# 100 points per plot
+smooth_data <- function(gam_model) {
+  # select=0 prevents plots being shown on screen
+  gam_viz <- plot(gam_model, rug=FALSE,select=0)
+  
+  num_smooths <- length(gam_viz) # number of smooth terms
+  smooth_df <- tibble() # initialize a dataframe
+  
+  for (i in 1:num_smooths) {
+     print(gam_viz[[i]]$xlab)
+    # extract and append data we want
+    smooth_df <- smooth_df %>%
+      bind_rows(tibble( xlab=gam_viz[[i]]$xlab,
+                        ylab=gam_viz[[i]]$ylab,
+                        x=gam_viz[[i]]$x,
+                        fit=gam_viz[[i]]$fit,
+                        se=gam_viz[[i]]$se
+                        ))
+  }
+  return(smooth_df)
+} 
+
+gam_smoothdata <- smooth_data(gam_model)
+
+ggplot(gam_smoothdata, 
+      aes(x, fit)) + 
+  facet_wrap(~xlab,scales='free') +
+  geom_line() +
+  theme_minimal() +
+ geom_line(aes(y=fit+(2*se)),linetype='dashed') +
+ geom_line(aes(y=fit-(2*se)),linetype='dashed') +
+  scale_y_continuous() +
+  scale_x_continuous(labels=scales::comma)
+
+
+```
+
+
+
+## Alternatively, Plot Smooth Terms with MgcViz
+
+```{r}
+gam_viz <- getViz(gam_model)
+
+plot(sm(gam_viz, 1)) +
+  l_fitLine(colour = "red") + 
+#  l_rug(mapping = aes(x=x, y=y), alpha = 0.8) +
+    l_ciLine(mul = 5, colour = "blue", linetype = 2) + 
+ #   l_points(shape = 19, size = 1, alpha = 0.1) +
+  theme_classic()
+```
+
+```{r}
+print(plot(gam_viz, allTerms = T), pages = 1)
+```
+

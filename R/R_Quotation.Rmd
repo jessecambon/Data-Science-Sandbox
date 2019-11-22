@@ -1,0 +1,91 @@
+---
+title: "R Quotation Methods"
+author: "Jesse Cambon"
+
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+Demonstrate the use of the quo_name() and enquo() functions
+to pass variable names to functions and utilize both the variables
+and the variable names 
+
+```{r knit-settings, include=FALSE}
+library(knitr)
+library(stringr)
+library(here)
+
+# get name of file during knitting and strip file extension
+rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
+print(rmd_filename)
+#, base.url = "/"
+knitr::opts_knit$set(base.dir = here::here()) # project root folder
+knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+```
+
+```{r, warning=F,message=F}
+library(tidyverse)
+library(knitr)
+
+# Create a heatmap with two axis variables
+# of the mean of a given metric variable
+car_heatmap <- function(data,axis1,axis2,metric) {
+  # handle quotations
+  
+  # The dataset can be passed easily as a function argument
+  # but we need to use enquo() and the !! operator (below) 
+  # for variable names
+  # If you were doing this outside of function you would use quo() instead of enquo()
+  axis1 <- enquo(axis1)
+  axis2 <- enquo(axis2)
+  metric <- enquo(metric)
+  
+  
+  print(quo_name(metric))
+
+  cars_agg <- data %>%
+    group_by(!!axis1,!!axis2) %>%
+    summarize(fill_metric = mean(!!metric),n=n())
+  
+   ggplot(cars_agg, aes(factor(!!axis1), factor(!!axis2))) + 
+     geom_tile(aes(fill = fill_metric), colour = "grey") + 
+     scale_fill_gradient(low = "white",high = "steelblue") +
+     geom_text(aes(label=round(fill_metric,1))) +
+     theme_minimal() +
+     theme(panel.grid = element_blank()) +
+     scale_x_discrete(expand=c(0,0,0,0)) +
+     # quo_name() access the character name of a variable
+     guides(fill=guide_legend(title=str_c('mean ',quo_name(metric)))) +
+     xlab(quo_name(axis1)) + ylab(quo_name(axis2))
+}
+
+car_heatmap(mtcars,cyl,gear,mpg)
+car_heatmap(mtcars,cyl,gear,hp)
+car_heatmap(mtcars,gear,carb,mpg)
+```
+
+To quote a character list of variables, use rlang:syms() and the !!! operator
+
+```{r}
+# Find frequency counts for all variables in var list
+
+hp_calc <- function(data,variables) {
+  variables <- rlang::syms(variables)
+  return(data %>% group_by(!!!variables) %>%
+           summarize(n=n(),
+                     mean_hp=mean(hp),
+                     min_hp=min(hp),
+                     max_hp=max(hp))
+         )
+}
+ 
+gear_hp <- hp_calc(mtcars,c('gear')) 
+vs_am_hp <- hp_calc(mtcars,c('vs','am')) 
+
+kable(gear_hp)
+kable(vs_am_hp)
+```
+
+

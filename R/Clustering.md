@@ -1,9 +1,10 @@
 K-means Clustering
 ================
 Jesse Cambon
-21 November, 2019
+22 November, 2019
 
-Demonstrate K-means clustering
+Demonstrate K-means
+    clustering
 
 ## References
 
@@ -64,9 +65,9 @@ kable(combine_summ,format='markdown',digits=2) %>%
 
 | .cluster | num\_vehicles | mean\_cty | min\_cty | max\_cty | mean\_displ | mean\_cyl |
 | :------- | ------------: | --------: | -------: | -------: | ----------: | --------: |
-| 3        |            86 |     25.05 |       20 |       33 |        1.87 |      4.05 |
+| 1        |            86 |     25.05 |       20 |       33 |        1.87 |      4.05 |
 | 2        |            55 |     18.71 |       16 |       24 |        3.12 |      5.78 |
-| 1        |            63 |     15.19 |       11 |       20 |        5.12 |      8.29 |
+| 3        |            63 |     15.19 |       11 |       20 |        5.12 |      8.29 |
 
 ## Visualize
 
@@ -74,7 +75,7 @@ kable(combine_summ,format='markdown',digits=2) %>%
 fviz_cluster(clust3,data=vehicles_sel,repel=F,ggtheme=theme_bw())
 ```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Clustering/unnamed-chunk-3-1.png)<!-- -->
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Clustering/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
 ggplot(aes(x=cyl,y=cty,color=.cluster),data=combine_results) + 
@@ -87,4 +88,4 @@ ggplot(aes(x=cyl,y=cty,color=.cluster),data=combine_results) +
   ylab('City Fuel Economy (cty)')
 ```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Clustering/unnamed-chunk-3-2.png)<!-- -->
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Clustering/unnamed-chunk-3-2.png)<!-- -->

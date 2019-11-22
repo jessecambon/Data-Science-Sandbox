@@ -1,7 +1,7 @@
 R Quickstart
 ================
 Jesse Cambon
-21 November, 2019
+22 November, 2019
 
 ## Todo
 
@@ -12,6 +12,7 @@ Jesse Cambon
       - etc.
   - tidyr pivot wide, pivot long
   - basic minimal ggplot (histogram,point, bar, line)
+  - basic modeling - caret, lm, glm
 
 ## Setup
 
@@ -80,7 +81,7 @@ guides(fill = guide_legend(title='Gender'))
 
     ## Warning: Removed 6 rows containing non-finite values (stat_bin).
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/R-Quickstart/histogram-1.png)<!-- -->
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/R-Quickstart/histogram-1.png)<!-- -->
 
 ## Lollipop
 
@@ -105,7 +106,7 @@ guides(fill = guide_legend(title='Gender'))
     ylab('Murders Per 100,000 Residents')
 ```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/R-Quickstart/lollipop-1.png)<!-- -->
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/R-Quickstart/lollipop-1.png)<!-- -->
 
 ## Line
 
@@ -133,4 +134,4 @@ ylab('Value') +
 guides(colour = guide_legend(override.aes = list(size=2.5))) 
 ```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/R-Quickstart/line-1.png)<!-- -->
+![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/R-Quickstart/line-1.png)<!-- -->
