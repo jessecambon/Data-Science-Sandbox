@@ -8,13 +8,8 @@ output:
 ---
 
 ```{r knit-settings, include=FALSE}
-library(knitr)
-library(stringr)
 library(here)
-# get name of file during knitting and strip file extension
-rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
-print(rmd_filename)
-knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+source(here("rmd_config.R"))
 ```
 
 This page is meant to serve as a primer for modeling in R. A linear and logistic regression are demonstrated on the Titanic dataset to model fare prices and survival rates using gender, age, and passenger class as covariates. Data imputation is performed on age in order to avoid biasing results. The broom package is used to display the results of the models and graphical methods are used throughout to explore the dataset and evaluate the fit of each model.

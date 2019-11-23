@@ -2,39 +2,23 @@
 title: "R Quickstart"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-knit: (function(inputFile, encoding) {
-  rmarkdown::render(inputFile, encoding = encoding, output_dir = "../R") })
 output:
   github_document:
     toc: true
     toc_depth: 2
 ---
 
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
 Goal: Simple, minimal code for getting started with R.
 
 ## Todo 
-* Simplify dplyr workflows (diamonds dataset?)
-  - summarize
-  - arrange
-  - filter
-  - etc.
-* tidyr pivot wide, pivot long
-* basic minimal ggplot (histogram,point, bar, line)
+* Clearly label before and after datasets to illustrate data transformations
+* basic minimal ggplots (histogram, point, bar, line)
 * basic modeling - caret, lm, glm
-
-
-```{r knit-settings, include=FALSE}
-library(knitr)
-library(stringr)
-library(here)
-
-# get name of file during knitting and strip file extension
-rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
-print(rmd_filename)
-#, base.url = "/"
-knitr::opts_knit$set(base.dir = here::here()) # project root folder
-knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
-```
 
 ## Setup
 
@@ -49,19 +33,92 @@ theme_set(theme_bw()+
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
-## Data Preparation
+## Data Manipulation
 
-```{r dataprep}
-# Average height and weight by species
-starwars_jac <- starwars %>% group_by(name) %>%
-  mutate(num_films=length(unlist(films)),
-         height_to_mass_ratio = height / mass,
-           # bucket species variable
-  species_collapsed=case_when(!(species %in% c('Human','Droid')) ~ 'Other',
-    TRUE ~ species)) %>%
+### Long to Wide
+Initial Data:
+```{r,echo=F}
+kable(head(us_rent_income,4))
+```
+
+* pivot_wider
+  * names_from: column containing values that we will use for our new column names
+  
+```{r}
+col_ratio <- us_rent_income %>%
+  select(-GEOID,-moe) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>% 
+  drop_na() %>%   # drop missing values
+  mutate(income_rent_ratio = income / (12*rent))
+```
+
+Income and Rent are now in separate columns:
+
+```{r,echo=F}
+kable(head(col_ratio,4))
+```
+
+### Wide to Long 
+Initial Data:
+```{r,echo=F}
+kable(head(world_bank_pop,3))
+```
+
+* pivot_longer
+  * cols (1st arg): what columns do we want to pivot? (ie. subtract ones we don't want to)
+  * names_to : the name of new column holding the column names as values
+  * values_to : name of new column containing values
+* seq(start, stop, increment)  ->  generates sequence
+
+```{r} 
+wb_pop <- world_bank_pop %>%
+  pivot_longer(c(-country,-indicator), names_to = "year", values_to = "value") %>%
+  filter(year %in% seq(2000,2015,5))
+```
+
+After:
+```{r,echo=F} 
+kable(head(wb_pop,3))
+```
+
+Initial 'mpg' Dataset:
+```{r,echo=F} 
+kable(head(mpg,3))
+```
+
+## Counting
+```{r}
+count_cyl <- mpg %>%
+  count(cyl)
+```
+
+```{r,echo=F}
+kable(count_cyl)
+```
+
+## Calculate Summary Stats
+```{r}
+mpg_stats <- mpg %>% select(class,hwy) %>%
+  mutate(class_c=case_when(class %in% c("2seater","compact") ~ "compact",
+                               TRUE ~ class)) %>%
+  group_by(class_c) %>%
+  summarize(count=n(),
+            max_hwy=max(hwy),
+            min_hwy=min(hwy),
+            median_hwy=median(hwy),
+            mean_hwy=mean(hwy)) %>%
   ungroup() %>%
-  mutate(gender=str_to_title(gender)) # capitalize gender
+  arrange(desc(count)) # sort dataset
+```
 
+A new class variable that combines '2seater' and 'compact' is created
+
+```{r,echo=F}
+kable(mpg_stats)
+```
+
+
+```{r,eval=FALSE}
 ## Drop missing height and weight values for scatter plot
 # Also drop Jabba and Yoda because they are outliers
 starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
@@ -85,8 +142,7 @@ eu_stock <- EuStockMarkets %>%
   mutate(Year=rep(time(EuStockMarkets),4)) 
 ```
 
-
-```{r histogram}
+```{r histogram, eval=FALSE}
 # Histogram with autobinning based on gender
 ggplot(starwars_jac %>% replace_na(list(gender='None')), aes(height)) + #scale_fill_manual(values = wes_palette('Moonrise2')) +
   geom_histogram(aes(fill=gender), 
@@ -106,7 +162,7 @@ guides(fill = guide_legend(title='Gender'))
 
 ## Lollipop
 
-```{r lollipop}
+```{r lollipop,eval=FALSE}
   ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
     geom_segment( aes(x=State ,xend=State, y=0, yend=Murder), color="grey") +
     geom_point(size=3, color="navy") +
@@ -129,7 +185,7 @@ guides(fill = guide_legend(title='Gender'))
 
 ## Line
 
-```{r line}
+```{r line,eval=FALSE}
 
 # Start and end for the breaks on the horizontal axis
 eu_plot_lims <- c(ceiling(min(eu_stock$Year)),floor(max(eu_stock$Year)))

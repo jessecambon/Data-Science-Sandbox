@@ -1,12 +1,16 @@
 ---
 title: "Formatted Spreadsheet Generator"
 author: "Jesse Cambon"
-
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   github_document:
     toc: true
 ---
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
 
 We will use the classic gapminder dataset to create a formatted spreadsheet report using the openxlsx package. This code allows us to create the spreadsheet report directly from code instead of using manual copy and pasting and formatting. This is especially conveniant for recurring reports.
 

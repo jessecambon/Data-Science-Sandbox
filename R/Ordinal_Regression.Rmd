@@ -12,13 +12,8 @@ Example using polr: https://stats.idre.ucla.edu/r/dae/ordinal-logistic-regressio
 Explanation of GAM interpretation: https://stats.stackexchange.com/questions/226645/generalized-additive-model-interpretation-with-ordered-categorical-family-in-r
 
 ```{r knit-settings, include=FALSE}
-library(knitr)
-library(stringr)
 library(here)
-# get name of file during knitting and strip file extension
-rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
-print(rmd_filename)
-knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+source(here("rmd_config.R"))
 ```
 
 ```{r, warning=F}

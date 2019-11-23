@@ -15,13 +15,8 @@ Demonstrate K-means clustering
 * https://cran.r-project.org/web/packages/broom/vignettes/kmeans.html 
 
 ```{r knit-settings, include=FALSE}
-library(knitr)
-library(stringr)
 library(here)
-# get name of file during knitting and strip file extension
-rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
-print(rmd_filename)
-knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+source(here("rmd_config.R"))
 ```
 
 ## Setup

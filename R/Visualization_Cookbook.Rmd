@@ -9,16 +9,8 @@ output:
 ---
 
 ```{r knit-settings, include=FALSE}
-library(knitr)
-library(stringr)
 library(here)
-
-# get name of file during knitting and strip file extension
-rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
-print(rmd_filename)
-#, base.url = "/"
-knitr::opts_knit$set(base.dir = here::here()) # project root folder
-knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
+source(here("rmd_config.R"))
 ```
 
 The purpose of this document is to provide code that can be easily copied and adapted for use in data science projects to generate a wide variety of data visualizations. Because of this, I have opted to use inbuilt datasets in R so that you should not have to download any datasets external to R packages.

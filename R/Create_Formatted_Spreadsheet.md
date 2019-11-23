@@ -1,21 +1,21 @@
 Formatted Spreadsheet Generator
 ================
 Jesse Cambon
-05 September, 2018
+23 November, 2019
 
--   [Setup](#setup)
--   [Create Spreadsheet](#create-spreadsheet)
+We will use the classic gapminder dataset to create a formatted
+spreadsheet report using the openxlsx package. This code allows us to
+create the spreadsheet report directly from code instead of using manual
+copy and pasting and formatting. This is especially conveniant for
+recurring reports.
 
-We will use the classic gapminder dataset to create a formatted spreadsheet report using the openxlsx package. This code allows us to create the spreadsheet report directly from code instead of using manual copy and pasting and formatting. This is especially conveniant for recurring reports.
+To view the resulting spreadsheet report, [click
+here](gapminder_summary_report.xlsx).
 
-To view the resulting spreadsheet report, [click here](gapminder_summary_report.xlsx).
-
-Setup
------
+## Setup
 
 ``` r
 output_file <- 'gapminder_summary_report.xlsx'
-
 
 library(gapminder)
 library(tidyverse)
@@ -57,48 +57,51 @@ kable(gap_combi %>% select(-header_level,-indent_level) %>% rename(`Continent/Co
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-    ## Warning in kable_styling(., bootstrap_options = c("striped", "border")):
-    ## Please specify format in kable. kableExtra can customize either HTML or
-    ## LaTeX outputs. See https://haozhu233.github.io/kableExtra/ for details.
+    ## Warning in kable_styling(., bootstrap_options = c("striped", "border")): Please
+    ## specify format in kable. kableExtra can customize either HTML or LaTeX outputs.
+    ## See https://haozhu233.github.io/kableExtra/ for details.
 
-| Continent/Country |  Life Expectancy|  GDP Per Capita|  Population (Millions)|
-|:------------------|----------------:|---------------:|----------------------:|
-| Africa            |             54.6|           2,561|                    930|
-| Nigeria           |             46.9|           2,014|                    135|
-| Egypt             |             71.3|           5,581|                     80|
-| Ethiopia          |             52.9|             691|                     77|
-| Congo, Dem. Rep.  |             46.5|             278|                     65|
-| South Africa      |             49.3|           9,270|                     44|
-| Americas          |             75.4|          21,603|                    899|
-| United States     |             78.2|          42,952|                    301|
-| Brazil            |             72.4|           9,066|                    190|
-| Mexico            |             76.2|          11,978|                    109|
-| Colombia          |             72.9|           7,007|                     44|
-| Argentina         |             75.3|          12,779|                     40|
-| Asia              |             69.4|           5,432|                  3,812|
-| China             |             73.0|           4,959|                  1,319|
-| India             |             64.7|           2,452|                  1,110|
-| Indonesia         |             70.7|           3,541|                    224|
-| Pakistan          |             65.5|           2,606|                    169|
-| Bangladesh        |             64.1|           1,391|                    150|
-| Europe            |             77.9|          25,244|                    586|
-| Germany           |             79.4|          32,170|                     82|
-| Turkey            |             71.8|           8,458|                     71|
-| France            |             80.7|          30,470|                     61|
-| United Kingdom    |             79.4|          33,203|                     61|
-| Italy             |             80.5|          28,570|                     58|
-| Oceania           |             81.1|          32,885|                     25|
-| Australia         |             81.2|          34,435|                     20|
-| New Zealand       |             80.2|          25,185|                      4|
+| Continent/Country | Life Expectancy | GDP Per Capita | Population (Millions) |
+| :---------------- | --------------: | -------------: | --------------------: |
+| Africa            |            54.6 |          2,561 |                   930 |
+| Nigeria           |            46.9 |          2,014 |                   135 |
+| Egypt             |            71.3 |          5,581 |                    80 |
+| Ethiopia          |            52.9 |            691 |                    77 |
+| Congo, Dem. Rep.  |            46.5 |            278 |                    65 |
+| South Africa      |            49.3 |          9,270 |                    44 |
+| Americas          |            75.4 |         21,603 |                   899 |
+| United States     |            78.2 |         42,952 |                   301 |
+| Brazil            |            72.4 |          9,066 |                   190 |
+| Mexico            |            76.2 |         11,978 |                   109 |
+| Colombia          |            72.9 |          7,007 |                    44 |
+| Argentina         |            75.3 |         12,779 |                    40 |
+| Asia              |            69.4 |          5,432 |                 3,812 |
+| China             |            73.0 |          4,959 |                 1,319 |
+| India             |            64.7 |          2,452 |                 1,110 |
+| Indonesia         |            70.7 |          3,541 |                   224 |
+| Pakistan          |            65.5 |          2,606 |                   169 |
+| Bangladesh        |            64.1 |          1,391 |                   150 |
+| Europe            |            77.9 |         25,244 |                   586 |
+| Germany           |            79.4 |         32,170 |                    82 |
+| Turkey            |            71.8 |          8,458 |                    71 |
+| France            |            80.7 |         30,470 |                    61 |
+| United Kingdom    |            79.4 |         33,203 |                    61 |
+| Italy             |            80.5 |         28,570 |                    58 |
+| Oceania           |            81.1 |         32,885 |                    25 |
+| Australia         |            81.2 |         34,435 |                    20 |
+| New Zealand       |            80.2 |         25,185 |                     4 |
 
-Create Spreadsheet
-------------------
+## Create Spreadsheet
 
 Now we will create the formatted spreadsheet
 
-Comma, rounded, and percent columns can be entered either as column position or as a column name. Alternatively, you can pass a list of specific format strings to 'format\_cols'.
+Comma, rounded, and percent columns can be entered either as column
+position or as a column name. Alternatively, you can pass a list of
+specific format strings to ‘format\_cols’.
 
-You can pass 'indent\_level' and 'header\_level' columns to the create\_worksheet function for formatting purposes. These columns will not be shown in the resulting spreadsheet.
+You can pass ‘indent\_level’ and ‘header\_level’ columns to the
+create\_worksheet function for formatting purposes. These columns will
+not be shown in the resulting spreadsheet.
 
 ``` r
 ## Define the function for creating a worksheet
@@ -290,3 +293,5 @@ create_worksheet(wb,"All Countries",gapminder %>% filter(year==2007) %>% select(
                 )
 saveWorkbook(wb, file = output_file, overwrite = T)
 ```
+
+    ## Note: zip::zip() is deprecated, please use zip::zipr() instead

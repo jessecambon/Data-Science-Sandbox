@@ -14,6 +14,11 @@ Demonstrate model workflows with tidyverse, modelr, and broom. This notebook inc
 
 ## Setup
 
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
 ```{r setup,warning=F,message=F}
 library(tidyverse)
 library(gapminder)
