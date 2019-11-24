@@ -19,7 +19,7 @@ Goal: Simple, minimal code for getting started with R.
 * Clearly label before and after datasets to illustrate data transformations
 * basic minimal ggplots (histogram, point, bar, line)
 * basic modeling - caret, lm, glm
-* bind_rows, bind_cols for stacing data
+* bind_rows, bind_cols for stacking data (vertically or horizontally)
 * left_join, inner_join 
 
 ## Setup
@@ -88,7 +88,7 @@ Initial 'mpg' Dataset:
 kable(head(mpg,3))
 ```
 
-## Counting
+### Counting
 ```{r}
 count_cyl <- mpg %>%
   count(cyl)
@@ -98,10 +98,10 @@ count_cyl <- mpg %>%
 kable(count_cyl)
 ```
 
-## Calculate Summary Stats
+### Calculate Summary Stats
 ```{r}
 mpg_stats <- mpg %>% select(class,hwy) %>%
-  mutate(class_c=case_when(class %in% c("2seater","compact") ~ "compact",
+  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
                                TRUE ~ class)) %>%
   group_by(class_c) %>%
   summarize(count=n(),
@@ -113,11 +113,34 @@ mpg_stats <- mpg %>% select(class,hwy) %>%
   arrange(desc(count)) # sort dataset
 ```
 
-A new class variable that combines '2seater' and 'compact' is created
+Note that '2seater' is reclassified as 'subcompact'
 
 ```{r,echo=F}
 kable(mpg_stats)
 ```
+
+## Visualizations
+
+### Bar Chart
+
+* use fill argument in ggplot() to set bar color based on a variable
+* reorder() orders the bars
+```{r}
+# A simple bar chart - average heights of the species
+# the reorder command orders our bars in order of descending height
+ggplot(data=mpg_stats,
+    aes(x = reorder(class_c,-mean_hwy), y=mean_hwy)) +
+geom_bar(stat='identity',position='dodge',color='black') +
+scale_y_continuous(expand = c(0,0,0.08,0)) +    # plot margins
+geom_text(aes(label=round(mean_hwy)), vjust=-0.5) +  # labelling
+theme(legend.position="none", # no legend (in case we want to use fill)
+      panel.grid = element_blank()) + # turn off grid
+labs(title='') +
+xlab('') +
+ylab('')
+```
+
+
 
 
 ```{r,eval=FALSE}

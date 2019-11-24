@@ -1,7 +1,7 @@
 R Quickstart
 ================
 Jesse Cambon
-23 November, 2019
+24 November, 2019
 
 Goal: Simple, minimal code for getting started with R.
 
@@ -11,6 +11,9 @@ Goal: Simple, minimal code for getting started with R.
     transformations
   - basic minimal ggplots (histogram, point, bar, line)
   - basic modeling - caret, lm, glm
+  - bind\_rows, bind\_cols for stacking data (vertically or
+    horizontally)
+  - left\_join, inner\_join
 
 ## Setup
 
@@ -103,7 +106,7 @@ Initial ‘mpg’ Dataset:
 | audi         | a4    |   1.8 | 1999 |   4 | manual(m5) | f   |  21 |  29 | p  | compact |
 | audi         | a4    |   2.0 | 2008 |   4 | manual(m6) | f   |  20 |  31 | p  | compact |
 
-## Counting
+### Counting
 
 ``` r
 count_cyl <- mpg %>%
@@ -117,11 +120,11 @@ count_cyl <- mpg %>%
 |   6 | 79 |
 |   8 | 70 |
 
-## Calculate Summary Stats
+### Calculate Summary Stats
 
 ``` r
 mpg_stats <- mpg %>% select(class,hwy) %>%
-  mutate(class_c=case_when(class %in% c("2seater","compact") ~ "compact",
+  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
                                TRUE ~ class)) %>%
   group_by(class_c) %>%
   summarize(count=n(),
@@ -133,16 +136,42 @@ mpg_stats <- mpg %>% select(class,hwy) %>%
   arrange(desc(count)) # sort dataset
 ```
 
-A new class variable that combines ‘2seater’ and ‘compact’ is created
+Note that ‘2seater’ is reclassified as ‘subcompact’
 
 | class\_c   | count | max\_hwy | min\_hwy | median\_hwy | mean\_hwy |
 | :--------- | ----: | -------: | -------: | ----------: | --------: |
 | suv        |    62 |       27 |       12 |        17.5 |  18.12903 |
-| compact    |    52 |       44 |       23 |        27.0 |  27.96154 |
+| compact    |    47 |       44 |       23 |        27.0 |  28.29787 |
 | midsize    |    41 |       32 |       23 |        27.0 |  27.29268 |
-| subcompact |    35 |       44 |       20 |        26.0 |  28.14286 |
+| subcompact |    40 |       44 |       20 |        26.0 |  27.72500 |
 | pickup     |    33 |       22 |       12 |        17.0 |  16.87879 |
 | minivan    |    11 |       24 |       17 |        23.0 |  22.36364 |
+
+## Visualizations
+
+### Bar Chart
+
+  - use fill argument in ggplot() to set bar color based on a variable
+  - reorder() orders the bars
+
+<!-- end list -->
+
+``` r
+# A simple bar chart - average heights of the species
+# the reorder command orders our bars in order of descending height
+ggplot(data=mpg_stats,
+    aes(x = reorder(class_c,-mean_hwy), y=mean_hwy)) +
+geom_bar(stat='identity',position='dodge',color='black') +
+scale_y_continuous(expand = c(0,0,0.08,0)) +    # plot margins
+geom_text(aes(label=round(mean_hwy)), vjust=-0.5) +  # labelling
+theme(legend.position="none", # no legend (in case we want to use fill)
+      panel.grid = element_blank()) + # turn off grid
+labs(title='') +
+xlab('') +
+ylab('')
+```
+
+![](../rmd_images/R-Quickstart/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 ## Drop missing height and weight values for scatter plot
