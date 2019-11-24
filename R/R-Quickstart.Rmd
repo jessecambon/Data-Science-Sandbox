@@ -19,6 +19,8 @@ Goal: Simple, minimal code for getting started with R.
 * Clearly label before and after datasets to illustrate data transformations
 * basic minimal ggplots (histogram, point, bar, line)
 * basic modeling - caret, lm, glm
+* bind_rows, bind_cols for stacing data
+* left_join, inner_join 
 
 ## Setup
 

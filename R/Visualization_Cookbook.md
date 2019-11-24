@@ -1,7 +1,7 @@
 Visualization Cookbook
 ================
 Jesse Cambon
-22 November, 2019
+23 November, 2019
 
 The purpose of this document is to provide code that can be easily
 copied and adapted for use in data science projects to generate a wide
@@ -40,8 +40,7 @@ datasets external to R packages.
   - Make use of ordering as a visual cue. For example, a bar chart that
     has the bars ordered by size is much easier to read.
   - Experiment with variations of a graph. For example, changing the bin
-    width for histograms can yield different
-results.
+    width for histograms can yield different results.
 
 # Setup
 
@@ -196,7 +195,7 @@ guides(fill = guide_legend(title='Gender'))
 
     ## Warning: Removed 6 rows containing non-finite values (stat_bin).
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/histogram-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/histogram-1.png)<!-- -->
 
 ### Ridgeplot
 
@@ -226,7 +225,7 @@ ggplot(lincoln_weather , aes(x = `Mean Wind Speed[MPH]`, y = `Month`, fill = ..x
 
     ## Picking joint bandwidth of 1.32
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/ridge-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/ridge-1.png)<!-- -->
 
 ### Population Pyramid
 
@@ -262,7 +261,7 @@ geom_bar(stat='identity',color='black',size=0.25) +
   guides(fill = guide_legend(title='')) # remove legend title
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/pyramid-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/pyramid-1.png)<!-- -->
 
 ### Boxplot
 
@@ -290,7 +289,7 @@ called”outlying" points and are plotted individually."
   scale_fill_manual(values = wes_palette('Zissou1'))
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/boxplot-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/boxplot-1.png)<!-- -->
 
 ### Dotplot
 
@@ -307,7 +306,7 @@ ggplot(starwars_jac %>% filter(gender %in% c('Male','Female')), aes(x = factor(g
 
     ## Warning: Removed 5 rows containing non-finite values (stat_bindot).
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/dotplot-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/dotplot-1.png)<!-- -->
 
 ### Violin
 
@@ -322,7 +321,7 @@ ggplot(starwars_jac %>% filter(gender %in% c('Male','Female')), aes(x = factor(g
 
     ## Warning: Removed 27 rows containing non-finite values (stat_ydensity).
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/violin-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/violin-1.png)<!-- -->
 
 ## Ranking
 
@@ -343,7 +342,7 @@ geom_pointrange(mapping=aes(ymin=min_life, ymax=max_life)) +
   ylab('Life Expectancy at Birth') 
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/dotplot-rank-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/dotplot-rank-1.png)<!-- -->
 
 ### Lollipop
 
@@ -368,7 +367,7 @@ geom_pointrange(mapping=aes(ymin=min_life, ymax=max_life)) +
     ylab('Murders Per 100,000 Residents')
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/lollipop-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/lollipop-1.png)<!-- -->
 
 ### Bar
 
@@ -389,7 +388,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-1.png)<!-- -->
 
 ``` r
 ## Side-by-Side Barchart
@@ -412,7 +411,7 @@ p2 <- ggplot(mtcars, aes(x = reorder(row.names(mtcars), mpg), y = mpg)) +
 grid.arrange(p1, p2, ncol = 2)
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-2.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-2.png)<!-- -->
 
 ``` r
 ##  Take a look at number of each species from each Starwars homeworld
@@ -434,7 +433,7 @@ xlab('') +
 ylab('')
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-3.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-3.png)<!-- -->
 
 ``` r
 ## Stacked bar of Titanic dataset
@@ -458,7 +457,7 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
     ## Warning: Removed 4 rows containing missing values (geom_text).
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-4.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/bar-4.png)<!-- -->
 
 ## Correlation
 
@@ -499,7 +498,7 @@ ylab('Height (cm)') +
 guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/scatter-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/scatter-1.png)<!-- -->
 
 ### Bubbleplot
 
@@ -522,7 +521,7 @@ guides(color=guide_legend(title='Continent',override.aes = list(size=2.5)),
        size=guide_legend(title='Population'))
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/bubbleplot-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/bubbleplot-1.png)<!-- -->
 
 ## Evolution
 
@@ -552,7 +551,7 @@ ylab('Value') +
 guides(colour = guide_legend(override.aes = list(size=2.5))) 
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/line-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/line-1.png)<!-- -->
 
 ``` r
 # Number of characters from each species 
@@ -584,7 +583,7 @@ ylab('') +
   guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/line-2.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/line-2.png)<!-- -->
 
 ### Stacked Area
 
@@ -604,7 +603,7 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/stackedarea-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/stackedarea-1.png)<!-- -->
 
 ## Composition
 
@@ -634,7 +633,7 @@ ggplot(titanic_survival_rates, aes(Sex, Class)) +
      guides(fill=guide_legend(title='Survival Rate')) #+
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/heatmap-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/heatmap-1.png)<!-- -->
 
 ``` r
   #   xlab(quo_name(axis1)) + ylab(quo_name(axis2))
@@ -656,7 +655,7 @@ treemap(titanic, #Your data frame object
         )
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/treemap-1.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/treemap-1.png)<!-- -->
 
 ``` r
 library(treemapify)
@@ -671,12 +670,11 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')) %>%
   guides(fill=guide_legend(title="Gender"))
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Visualization_Cookbook/treemap-2.png)<!-- -->
+![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Visualization_Cookbook/treemap-2.png)<!-- -->
 
 ### Waffle
 
-The code currently doesn’t run.
-(eval=FALSE)
+The code currently doesn’t run. (eval=FALSE)
 
 ``` r
 library(waffle) # waffle charts, make sure to install the github version with devtools::install_github("hrbrmstr/waffle")

@@ -5,7 +5,6 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   github_document:
     toc: true
-    toc_depth: 2
 ---
 
 ```{r knit-settings, include=FALSE}
