@@ -1,7 +1,7 @@
 Regression Model Tidying
 ================
 Jesse Cambon
-23 November, 2019
+24 November, 2019
 
 Example of labeling categorical variables in a regression model
 
@@ -118,7 +118,7 @@ labs(title='MPG Linear Model - Default Labels',
 xlab('Term') + ylab('Coefficient')
 ```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Regression-Model-Tidying/unnamed-chunk-3-1.png)<!-- -->
+![](../rmd_images/Regression-Model-Tidying/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
 ggplot(data=tidy_car %>% filter(label != '(Intercept)'),
@@ -135,4 +135,4 @@ labs(title='MPG Linear Model - With Improved Labels',
 xlab('Term') + ylab('Coefficient')
 ```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Regression-Model-Tidying/unnamed-chunk-3-2.png)<!-- -->
+![](../rmd_images/Regression-Model-Tidying/unnamed-chunk-3-2.png)<!-- -->
