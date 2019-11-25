@@ -1,7 +1,7 @@
 R Quickstart
 ================
 Jesse Cambon
-24 November, 2019
+25 November, 2019
 
 Goal: Simple, minimal code for getting started with R.
 
@@ -29,6 +29,34 @@ theme_set(theme_bw()+
 ```
 
 ## Data Manipulation
+
+### Stacking Data
+
+``` r
+mpg1 <- mpg %>% slice(1:2) %>% 
+  select(manufacturer,model,hwy,cty) %>%
+  mutate(dataset=1)
+
+mpg2 <- mpg %>% slice(44:45) %>%
+  select(manufacturer,model,hwy,cty) %>%
+  mutate(dataset=2)
+
+mpg_stack_vert <- mpg1 %>% 
+  bind_rows(mpg2)
+
+mpg3 <- mpg %>% slice(1:2,5:6) %>%
+  select(displ,year)
+
+mpg_stack_horz <- mpg_stack_vert %>%
+  bind_cols(mpg3)
+
+car_type <- mpg %>% select(manufacturer,model,class) %>%
+  distinct() # distinct rows only
+
+joined <- mpg_stack_horz %>%
+  left_join(car_type,by=c('manufacturer','model')) %>% 
+  select(-dataset,everything())
+```
 
 ### Long to Wide
 
@@ -171,7 +199,7 @@ xlab('') +
 ylab('')
 ```
 
-![](../rmd_images/R-Quickstart/unnamed-chunk-12-1.png)<!-- -->
+![](../rmd_images/R-Quickstart/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 ## Drop missing height and weight values for scatter plot
