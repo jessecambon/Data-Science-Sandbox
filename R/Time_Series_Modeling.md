@@ -1,7 +1,7 @@
 Time Series Modeling
 ================
 Jesse Cambon
-22 November, 2019
+24 November, 2019
 
 ## References
 
@@ -23,14 +23,14 @@ library(wesanderson) # color palettes
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ───────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ───────────────────────────── tidyverse 1.3.0 ──
 
-    ## ✔ ggplot2 3.2.1     ✔ readr   1.3.1
-    ## ✔ tibble  2.1.3     ✔ purrr   0.3.3
-    ## ✔ tidyr   1.0.0     ✔ dplyr   0.8.3
-    ## ✔ ggplot2 3.2.1     ✔ forcats 0.4.0
+    ## ✔ ggplot2 3.2.1     ✔ purrr   0.3.3
+    ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
+    ## ✔ tidyr   1.0.0     ✔ forcats 0.4.0
+    ## ✔ readr   1.3.1
 
-    ## ── Conflicts ──────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ──────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -97,9 +97,9 @@ library(prophet)
 
     ## The following objects are masked from 'package:purrr':
     ## 
-    ##     %@%, as_function, flatten, flatten_chr, flatten_dbl,
-    ##     flatten_int, flatten_lgl, flatten_raw, invoke, list_along,
-    ##     modify, prepend, splice
+    ##     %@%, as_function, flatten, flatten_chr, flatten_dbl, flatten_int,
+    ##     flatten_lgl, flatten_raw, invoke, list_along, modify, prepend,
+    ##     splice
 
 ``` r
 # Set default ggplot theme
@@ -139,13 +139,13 @@ prophet_forecast <- predict(m, future)
 plot(m, prophet_forecast)
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Time_Series_Modeling/unnamed-chunk-2-1.png)<!-- -->
+![](../rmd_images/Time_Series_Modeling/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
 prophet_plot_components(m, prophet_forecast)
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Time_Series_Modeling/unnamed-chunk-2-2.png)<!-- -->
+![](../rmd_images/Time_Series_Modeling/unnamed-chunk-2-2.png)<!-- -->
 
 ## Data Cleaning
 
@@ -187,7 +187,7 @@ theme(legend.title = element_blank(),
       legend.position='right') 
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Time_Series_Modeling/unnamed-chunk-4-1.png)<!-- -->
+![](../rmd_images/Time_Series_Modeling/unnamed-chunk-4-1.png)<!-- -->
 
 Test forecast package
 
@@ -198,7 +198,7 @@ USAccDeaths %>%
   autoplot()
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Time_Series_Modeling/unnamed-chunk-5-1.png)<!-- -->
+![](../rmd_images/Time_Series_Modeling/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 AirPassengers %>%
@@ -206,7 +206,7 @@ AirPassengers %>%
   autoplot()
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Time_Series_Modeling/unnamed-chunk-5-2.png)<!-- -->
+![](../rmd_images/Time_Series_Modeling/unnamed-chunk-5-2.png)<!-- -->
 
 ``` r
 # Have to convert this dataset to time series format with tsbox::ts_ts()
@@ -217,6 +217,6 @@ ansett_summ %>% ts_ts(.) %>%
 
     ## [time]: 'Week' [value]: 'Passengers'
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Time_Series_Modeling/unnamed-chunk-5-3.png)<!-- -->
+![](../rmd_images/Time_Series_Modeling/unnamed-chunk-5-3.png)<!-- -->
 
 Feasts package unfortunately breaks the forecast package

@@ -1,7 +1,7 @@
 R Quotation Methods
 ================
 Jesse Cambon
-22 November, 2019
+24 November, 2019
 
 Demonstrate the use of the quo\_name() and enquo() functions to pass
 variable names to functions and utilize both the variables and the
@@ -48,7 +48,7 @@ car_heatmap(mtcars,cyl,gear,mpg)
 
     ## [1] "mpg"
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/R_Quotation/unnamed-chunk-1-1.png)<!-- -->
+![](../rmd_images/R_Quotation/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
 car_heatmap(mtcars,cyl,gear,hp)
@@ -56,7 +56,7 @@ car_heatmap(mtcars,cyl,gear,hp)
 
     ## [1] "hp"
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/R_Quotation/unnamed-chunk-1-2.png)<!-- -->
+![](../rmd_images/R_Quotation/unnamed-chunk-1-2.png)<!-- -->
 
 ``` r
 car_heatmap(mtcars,gear,carb,mpg)
@@ -64,7 +64,7 @@ car_heatmap(mtcars,gear,carb,mpg)
 
     ## [1] "mpg"
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/R_Quotation/unnamed-chunk-1-3.png)<!-- -->
+![](../rmd_images/R_Quotation/unnamed-chunk-1-3.png)<!-- -->
 
 To quote a character list of variables, use rlang:syms() and the \!\!\!
 operator

@@ -7,16 +7,16 @@ output:
     toc: true
 ---
 
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
 Install fifystater package from: https://github.com/wmurphyrd/fiftystater
 
 ## References
 * https://github.com/mtennekes/tmap
 * https://mran.revolutionanalytics.com/snapshot/2016-03-22/web/packages/tmap/vignettes/tmap-nutshell.html
-
-```{r knit-settings, include=FALSE}
-library(here)
-source(here("rmd_config.R"))
-```
 
 ## Setup
 
@@ -126,7 +126,6 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
   tm_legend(frame = TRUE) 
 # tm_format("World",frame=F) 
 
-
 metro <- metro %>%
   mutate(growth= 100*(pop2020 - pop2010) / pop2010)
 
@@ -155,8 +154,6 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
 
 
 ```{r,include=F,eval=F}
-
-
 View(worldbank_df)
 
 qtm(world)

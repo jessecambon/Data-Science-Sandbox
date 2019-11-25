@@ -1,7 +1,7 @@
 Geospatial Analysis
 ================
 Jesse Cambon
-22 November, 2019
+24 November, 2019
 
 Install fifystater package from:
 <https://github.com/wmurphyrd/fiftystater>
@@ -54,7 +54,7 @@ tm_shape(bos) +
             main.title.size=1.5) 
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/locale-1.png)<!-- -->
+![](../rmd_images/Geospatial_Analysis/locale-1.png)<!-- -->
 
 ``` r
 #vars <- load_variables(2016,'acs1') # view census variables
@@ -99,7 +99,7 @@ ggplot(crimes, aes(map_id = state)) +
   guides(fill = guide_legend(title='Murders Per\n100,000 Residents'))
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/unnamed-chunk-2-1.png)<!-- -->
+![](../rmd_images/Geospatial_Analysis/unnamed-chunk-2-1.png)<!-- -->
 
 ## The World
 
@@ -124,11 +124,10 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
   tm_legend(frame = TRUE) 
 ```
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/unnamed-chunk-3-1.png)<!-- -->
+![](../rmd_images/Geospatial_Analysis/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
 # tm_format("World",frame=F) 
-
 
 metro <- metro %>%
   mutate(growth= 100*(pop2020 - pop2010) / pop2010)
@@ -161,4 +160,4 @@ tm_shape(World, projection = "eck4" # Eckert IV 1906 project (preserves area)
 
     ## Variable "growth" contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full spectrum of the color palette.
 
-![](/Users/jessecambon/Documents/Data-Science-Codex/rmd_images/Geospatial_Analysis/unnamed-chunk-3-2.png)<!-- -->
+![](../rmd_images/Geospatial_Analysis/unnamed-chunk-3-2.png)<!-- -->

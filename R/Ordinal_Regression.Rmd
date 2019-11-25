@@ -245,8 +245,6 @@ ggplot(gam_smoothdata,
  geom_line(aes(y=fit-(2*se)),linetype='dashed') +
   scale_y_continuous() +
   scale_x_continuous(labels=scales::comma)
-
-
 ```
 
 

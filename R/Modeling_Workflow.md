@@ -1,7 +1,7 @@
 Modeling Workflow
 ================
 Jesse Cambon
-23 November, 2019
+24 November, 2019
 
 Demonstrate model workflows with tidyverse, modelr, and broom. This
 notebook includes both a group\_by and a nested approach which offer
@@ -43,7 +43,7 @@ guides(color=guide_legend(override.aes = list(size=2.5)))
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Modeling_Workflow/explore-1.png)<!-- -->
+![](../rmd_images/Modeling_Workflow/explore-1.png)<!-- -->
 
 ``` r
 ggplot(data=gapminder,
@@ -58,7 +58,7 @@ guides(color=guide_legend(override.aes = list(size=2.5)))
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Modeling_Workflow/explore-2.png)<!-- -->
+![](../rmd_images/Modeling_Workflow/explore-2.png)<!-- -->
 
 ``` r
 ggplot(data=gapminder,
@@ -74,7 +74,7 @@ guides(color=guide_legend(override.aes = list(size=2.5)))
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Modeling_Workflow/explore-3.png)<!-- -->
+![](../rmd_images/Modeling_Workflow/explore-3.png)<!-- -->
 
 ## Grouped Models
 
@@ -109,7 +109,7 @@ xlab('Fitted') +
 ylab('Residual')
 ```
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Modeling_Workflow/plot-1.png)<!-- -->
+![](../rmd_images/Modeling_Workflow/plot-1.png)<!-- -->
 
 ``` r
 ggplot(data=model_fit,
@@ -128,7 +128,7 @@ ylab('Count')
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](/home/cambonator/Programming/Data-Science-Codex/rmd_images/Modeling_Workflow/plot-2.png)<!-- -->
+![](../rmd_images/Modeling_Workflow/plot-2.png)<!-- -->
 
 ``` r
 kable(stats,format='markdown',digits=2) %>%

@@ -7,10 +7,6 @@ output:
     toc: true
 ---
 
-```{r knit-settings, include=FALSE}
-library(here)
-source(here("rmd_config.R"))
-```
 
 This page is meant to serve as a primer for modeling in R. A linear and logistic regression are demonstrated on the Titanic dataset to model fare prices and survival rates using gender, age, and passenger class as covariates. Data imputation is performed on age in order to avoid biasing results. The broom package is used to display the results of the models and graphical methods are used throughout to explore the dataset and evaluate the fit of each model.
 
@@ -57,22 +53,7 @@ theme_set(theme_bw()+
 ## Exploratory Analysis 
 
 ```{r summstats, results='asis',warning=F,message=F}
-# Generate summary statistics
-summ_stats <- skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
-  select(-top_counts,-ordered,-hist,-complete,-empty) 
-
-# Numeric vars
-summ_stats_numm <- summ_stats %>% filter(type %in% c('numeric','integer')) %>%
-  # drop na columns
-  discard(~all(is.na(.x))) %>%
-  map_df(~.x)
-
-# Other variables
-summ_stats_oth <- summ_stats %>% filter(!(type %in% c('numeric','integer'))) %>%
-  select(-min,-max) %>%
-  discard(~all(is.na(.x))) %>%
-  map_df(~.x)
-
+skim(titanic)
 
 gender_summ <- titanic %>% count(sex)
 pclass_summ <- titanic %>% count(pclass)
@@ -82,11 +63,6 @@ surv_summ <- titanic %>% count(survived)
 ```
 
 ```{r}
-kable(summ_stats_numm,digits = 2) %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
-
-kable(summ_stats_oth,digits = 2)
-
 kable(gender_summ)
 
 kable(pclass_summ)

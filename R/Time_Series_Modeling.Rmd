@@ -7,6 +7,11 @@ output:
     toc: true
 ---
 
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
 ## References
 * https://github.com/christophsax/tsbox
 * https://github.com/tidyverts/tsibble
@@ -17,18 +22,6 @@ output:
 * https://github.com/tidyverts/fable
 * https://feasts.tidyverts.org/
 
-```{r knit-settings, include=FALSE}
-library(knitr)
-library(stringr)
-library(here)
-
-# get name of file during knitting and strip file extension
-rmd_filename <- str_remove(knitr::current_input(),"\\.Rmd")
-print(rmd_filename)
-#, base.url = "/"
-knitr::opts_knit$set(base.dir = here::here()) # project root folder
-knitr::opts_chunk$set(fig.path = str_c(here::here("rmd_images",rmd_filename),'/'),echo=TRUE) # image path
-```
 
 ## Setup
 
@@ -85,18 +78,11 @@ prophet_forecast <- predict(m, future)
 plot(m, prophet_forecast)
 
 prophet_plot_components(m, prophet_forecast)
-
-
-
 ```
-
-
-
 
 ## Data Cleaning
 
 Fill Missing Gaps in Data
-
 
 ```{r}
 nrow(ansett)
@@ -126,7 +112,6 @@ theme(legend.title = element_blank(),
       legend.position='right') 
 ```
 
-
 Test forecast package
 
 ```{r}
@@ -145,7 +130,6 @@ ansett_summ %>% ts_ts(.) %>%
   autoplot()
 
 ```
-
 
 Feasts package unfortunately breaks the forecast package
 

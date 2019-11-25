@@ -1,24 +1,23 @@
 Modeling Fundamentals - The Titanic
 ================
 Jesse Cambon
-07 September, 2018
+24 November, 2019
 
--   [References](#references)
--   [Setup](#setup)
--   [Exploratory Analysis](#exploratory-analysis)
--   [Imputation](#imputation)
--   [Logistic Regression Model](#logistic-regression-model)
--   [Linear Regression Model](#linear-regression-model)
-
-This page is meant to serve as a primer for modeling in R. A linear and logistic regression are demonstrated on the Titanic dataset to model fare prices and survival rates using gender, age, and passenger class as covariates. Data imputation is performed on age in order to avoid biasing results. The broom package is used to display the results of the models and graphical methods are used throughout to explore the dataset and evaluate the fit of each model.
+This page is meant to serve as a primer for modeling in R. A linear and
+logistic regression are demonstrated on the Titanic dataset to model
+fare prices and survival rates using gender, age, and passenger class as
+covariates. Data imputation is performed on age in order to avoid
+biasing results. The broom package is used to display the results of the
+models and graphical methods are used throughout to explore the dataset
+and evaluate the fit of each model.
 
 ### References
 
--   Intro to Statistical Learning: <http://www-bcf.usc.edu/~gareth/ISL/>
--   Logistic Regression: <https://stats.idre.ucla.edu/r/dae/logit-regression/>
+  - Intro to Statistical Learning: <http://www-bcf.usc.edu/~gareth/ISL/>
+  - Logistic Regression:
+    <https://stats.idre.ucla.edu/r/dae/logit-regression/>
 
-Setup
------
+## Setup
 
 ``` r
 library(PASWR) #titanic3 dataset
@@ -54,81 +53,1366 @@ theme_set(theme_bw()+
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
 ```
 
-Exploratory Analysis
---------------------
+## Exploratory Analysis
 
 ``` r
-# Generate summary statistics
-summ_stats <- skim_to_wide(titanic %>% select(survived,sex,pclass,age,fare)) %>%
-  select(-top_counts,-ordered,-hist,-complete,-empty) 
+skim(titanic)
+```
 
-# Numeric vars
-summ_stats_numm <- summ_stats %>% filter(type %in% c('numeric','integer')) %>%
-  # drop na columns
-  discard(~all(is.na(.x))) %>%
-  map_df(~.x)
+<table style='width: auto;'
+        class='table table-condensed'>
 
-# Other variables
-summ_stats_oth <- summ_stats %>% filter(!(type %in% c('numeric','integer'))) %>%
-  select(-min,-max) %>%
-  discard(~all(is.na(.x))) %>%
-  map_df(~.x)
+<caption>
 
+Data summary
 
+</caption>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+</th>
+
+<th style="text-align:left;">
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+Name
+
+</td>
+
+<td style="text-align:left;">
+
+titanic
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Number of rows
+
+</td>
+
+<td style="text-align:left;">
+
+1309
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Number of columns
+
+</td>
+
+<td style="text-align:left;">
+
+14
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Column type frequency:
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+character
+
+</td>
+
+<td style="text-align:left;">
+
+1
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+factor
+
+</td>
+
+<td style="text-align:left;">
+
+7
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+numeric
+
+</td>
+
+<td style="text-align:left;">
+
+6
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+
+</td>
+
+<td style="text-align:left;">
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Group variables
+
+</td>
+
+<td style="text-align:left;">
+
+None
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+**Variable type: character**
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+skim\_variable
+
+</th>
+
+<th style="text-align:right;">
+
+n\_missing
+
+</th>
+
+<th style="text-align:right;">
+
+complete\_rate
+
+</th>
+
+<th style="text-align:right;">
+
+min
+
+</th>
+
+<th style="text-align:right;">
+
+max
+
+</th>
+
+<th style="text-align:right;">
+
+empty
+
+</th>
+
+<th style="text-align:right;">
+
+n\_unique
+
+</th>
+
+<th style="text-align:right;">
+
+whitespace
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+sex
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+<td style="text-align:right;">
+
+6
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+2
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+**Variable type: factor**
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+skim\_variable
+
+</th>
+
+<th style="text-align:right;">
+
+n\_missing
+
+</th>
+
+<th style="text-align:right;">
+
+complete\_rate
+
+</th>
+
+<th style="text-align:left;">
+
+ordered
+
+</th>
+
+<th style="text-align:right;">
+
+n\_unique
+
+</th>
+
+<th style="text-align:left;">
+
+top\_counts
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+pclass
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FALSE
+
+</td>
+
+<td style="text-align:right;">
+
+3
+
+</td>
+
+<td style="text-align:left;">
+
+3rd: 709, 1st: 323, 2nd: 277
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+name
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FALSE
+
+</td>
+
+<td style="text-align:right;">
+
+1307
+
+</td>
+
+<td style="text-align:left;">
+
+Con: 2, Kel: 2, Abb: 1, Abb: 1
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+ticket
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FALSE
+
+</td>
+
+<td style="text-align:right;">
+
+929
+
+</td>
+
+<td style="text-align:left;">
+
+CA.: 11, 160: 8, CA : 8, 310: 7
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+cabin
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FALSE
+
+</td>
+
+<td style="text-align:right;">
+
+187
+
+</td>
+
+<td style="text-align:left;">
+
+emp: 1014, B57: 5, C23: 5, G6: 5
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+embarked
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FALSE
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+<td style="text-align:left;">
+
+Sou: 914, Che: 270, Que: 123, emp: 2
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+boat
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FALSE
+
+</td>
+
+<td style="text-align:right;">
+
+28
+
+</td>
+
+<td style="text-align:left;">
+
+emp: 823, 13: 39, C: 38, 15: 37
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+home.dest
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+FALSE
+
+</td>
+
+<td style="text-align:right;">
+
+369
+
+</td>
+
+<td style="text-align:left;">
+
+emp: 564, New: 64, Lon: 14, Mon: 10
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+**Variable type: numeric**
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+skim\_variable
+
+</th>
+
+<th style="text-align:right;">
+
+n\_missing
+
+</th>
+
+<th style="text-align:right;">
+
+complete\_rate
+
+</th>
+
+<th style="text-align:right;">
+
+mean
+
+</th>
+
+<th style="text-align:right;">
+
+sd
+
+</th>
+
+<th style="text-align:right;">
+
+p0
+
+</th>
+
+<th style="text-align:right;">
+
+p25
+
+</th>
+
+<th style="text-align:right;">
+
+p50
+
+</th>
+
+<th style="text-align:right;">
+
+p75
+
+</th>
+
+<th style="text-align:right;">
+
+p100
+
+</th>
+
+<th style="text-align:left;">
+
+hist
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+survived
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:right;">
+
+0.38
+
+</td>
+
+<td style="text-align:right;">
+
+0.49
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+0.0
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:left;">
+
+▇▁▁▁▅
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+age
+
+</td>
+
+<td style="text-align:right;">
+
+263
+
+</td>
+
+<td style="text-align:right;">
+
+0.80
+
+</td>
+
+<td style="text-align:right;">
+
+29.88
+
+</td>
+
+<td style="text-align:right;">
+
+14.41
+
+</td>
+
+<td style="text-align:right;">
+
+0.17
+
+</td>
+
+<td style="text-align:right;">
+
+21.0
+
+</td>
+
+<td style="text-align:right;">
+
+28.00
+
+</td>
+
+<td style="text-align:right;">
+
+39.00
+
+</td>
+
+<td style="text-align:right;">
+
+80.00
+
+</td>
+
+<td style="text-align:left;">
+
+▂▇▅▂▁
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+sibsp
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:right;">
+
+0.50
+
+</td>
+
+<td style="text-align:right;">
+
+1.04
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+0.0
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:right;">
+
+8.00
+
+</td>
+
+<td style="text-align:left;">
+
+▇▁▁▁▁
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+parch
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:right;">
+
+0.39
+
+</td>
+
+<td style="text-align:right;">
+
+0.87
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+0.0
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+9.00
+
+</td>
+
+<td style="text-align:left;">
+
+▇▁▁▁▁
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+fare
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:right;">
+
+33.30
+
+</td>
+
+<td style="text-align:right;">
+
+51.76
+
+</td>
+
+<td style="text-align:right;">
+
+0.00
+
+</td>
+
+<td style="text-align:right;">
+
+7.9
+
+</td>
+
+<td style="text-align:right;">
+
+14.45
+
+</td>
+
+<td style="text-align:right;">
+
+31.27
+
+</td>
+
+<td style="text-align:right;">
+
+512.33
+
+</td>
+
+<td style="text-align:left;">
+
+▇▁▁▁▁
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+body
+
+</td>
+
+<td style="text-align:right;">
+
+1188
+
+</td>
+
+<td style="text-align:right;">
+
+0.09
+
+</td>
+
+<td style="text-align:right;">
+
+160.81
+
+</td>
+
+<td style="text-align:right;">
+
+97.70
+
+</td>
+
+<td style="text-align:right;">
+
+1.00
+
+</td>
+
+<td style="text-align:right;">
+
+72.0
+
+</td>
+
+<td style="text-align:right;">
+
+155.00
+
+</td>
+
+<td style="text-align:right;">
+
+256.00
+
+</td>
+
+<td style="text-align:right;">
+
+328.00
+
+</td>
+
+<td style="text-align:left;">
+
+▇▇▇▅▇
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+``` r
 gender_summ <- titanic %>% count(sex)
 pclass_summ <- titanic %>% count(pclass)
 surv_summ <- titanic %>% count(survived)
-
-kable(summ_stats_numm,format='markdown',digits = 2) %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
 ```
-
-| type    | variable | missing | n    | mean  | sd    | p0   | p25 | p50   | p75   | p100   |
-|:--------|:---------|:--------|:-----|:------|:------|:-----|:----|:------|:------|:-------|
-| integer | survived | 0       | 1309 | 0.38  | 0.49  | 0    | 0   | 0     | 1     | 1      |
-| numeric | age      | 263     | 1309 | 29.88 | 14.41 | 0.17 | 21  | 28    | 39    | 80     |
-| numeric | fare     | 1       | 1309 | 33.3  | 51.76 | 0    | 7.9 | 14.45 | 31.27 | 512.33 |
 
 ``` r
-kable(summ_stats_oth,format='markdown',digits = 2) %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
+kable(gender_summ)
 ```
 
-| type      | variable | missing | n    | n\_unique |
-|:----------|:---------|:--------|:-----|:----------|
-| character | sex      | 0       | 1309 | 2         |
-| factor    | pclass   | 0       | 1309 | 3         |
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+sex
+
+</th>
+
+<th style="text-align:right;">
+
+n
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+Female
+
+</td>
+
+<td style="text-align:right;">
+
+466
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:right;">
+
+843
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 ``` r
-kable(gender_summ,format='markdown') %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
+kable(pclass_summ)
 ```
 
-| sex    |    n|
-|:-------|----:|
-| Female |  466|
-| Male   |  843|
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+pclass
+
+</th>
+
+<th style="text-align:right;">
+
+n
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+1st
+
+</td>
+
+<td style="text-align:right;">
+
+323
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+2nd
+
+</td>
+
+<td style="text-align:right;">
+
+277
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+3rd
+
+</td>
+
+<td style="text-align:right;">
+
+709
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 ``` r
-kable(pclass_summ,format='markdown') %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
+kable(surv_summ)
 ```
 
-| pclass |    n|
-|:-------|----:|
-| 1st    |  323|
-| 2nd    |  277|
-| 3rd    |  709|
+<table>
 
-``` r
-kable(surv_summ,format='markdown') %>%
-  kable_styling(bootstrap_options = c("striped",'border'))
-```
+<thead>
 
-|  survived|    n|
-|---------:|----:|
-|         0|  809|
-|         1|  500|
+<tr>
+
+<th style="text-align:right;">
+
+survived
+
+</th>
+
+<th style="text-align:right;">
+
+n
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:right;">
+
+809
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:right;">
+
+500
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 ``` r
 titanic_summ_dot <- titanic_summ %>%
@@ -142,7 +1426,6 @@ titanic_miss <- titanic %>% select(pclass,sex,age,survived) %>%
   dplyr::summarize(perc_missing=mean(missing_age)) %>%
   mutate(group=str_c(sex,'-',pclass))
   
-
 ggplot(titanic_summ_dot, aes(x=reorder(group,-perc_surv_num), y=perc_surv_num)) + 
   geom_point(size=3,color='black') +   # Draw points
   theme(legend.position='none',
@@ -160,7 +1443,7 @@ ggplot(titanic_summ_dot, aes(x=reorder(group,-perc_surv_num), y=perc_surv_num)) 
   ylab('Survival Rate') 
 ```
 
-![](Titanic_files/figure-markdown_github/explore-1.png)
+![](../rmd_images/Titanic/explore-1.png)<!-- -->
 
 ``` r
 ggplot(data=titanic_summ,
@@ -180,7 +1463,7 @@ ylab('') +
 guides(fill = guide_legend(title='',reverse=T)) # reverse legend order
 ```
 
-![](Titanic_files/figure-markdown_github/explore-2.png)
+![](../rmd_images/Titanic/explore-2.png)<!-- -->
 
 ``` r
 ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) + 
@@ -200,14 +1483,16 @@ ggplot(titanic_miss, aes(x=reorder(group,-perc_missing), y=perc_missing)) +
   ylab('Percent Missing Age') 
 ```
 
-![](Titanic_files/figure-markdown_github/explore-3.png)
+![](../rmd_images/Titanic/explore-3.png)<!-- -->
 
-Imputation
-----------
+## Imputation
 
-Discarding rows with missing age has the potential to bias our data so we will impute.
+Discarding rows with missing age has the potential to bias our data so
+we will impute.
 
-<https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/> <https://www.andrew.cmu.edu/user/aurorat/MIA_r.html> <http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html>
+<https://www.analyticsvidhya.com/blog/2016/03/tutorial-powerful-packages-imputing-missing-values/>
+<https://www.andrew.cmu.edu/user/aurorat/MIA_r.html>
+<http://www.gerkovink.com/miceVignettes/Convergence_pooling/Convergence_and_pooling.html>
 
 ``` r
 # Use mice to impute data - takes a few seconds on my laptop
@@ -219,20 +1504,12 @@ titanic_imputed <- mice(titanic %>% select(sex,pclass,age), method = 'pmm', maxi
     ## Warning: Number of logged events: 1
 
 ``` r
-#imp_with <- with(titanic_imputed, lm(age ~ pclass + sex + fare))
-#pooled <- pool(imp_with)
-
-# check the fit
-#summary(pooled)
-
 # Add imputed Data
 titanic_imp <- complete(titanic_imputed,5) %>%
   bind_cols(titanic %>% select(survived,age,fare) %>% rename(age_orig=age)) %>%
   mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original'))
 
-
 # Plot
-
 ggplot(data=titanic_imp) +
  geom_density(aes(x=age,color=imputed), alpha=0.8) + 
   #facet_grid(vars(sex),vars(pclass)) +
@@ -241,7 +1518,7 @@ ggplot(data=titanic_imp) +
   guides(color=guide_legend(title=''))
 ```
 
-![](Titanic_files/figure-markdown_github/imputation-1.png)
+![](../rmd_images/Titanic/imputation-1.png)<!-- -->
 
 ``` r
 ggplot(data=titanic_imp) +
@@ -252,12 +1529,14 @@ ggplot(data=titanic_imp) +
   guides(color=guide_legend(title=''))
 ```
 
-![](Titanic_files/figure-markdown_github/imputation-2.png)
+![](../rmd_images/Titanic/imputation-2.png)<!-- -->
 
-Logistic Regression Model
--------------------------
+## Logistic Regression Model
 
-We will use the brier score as one measurement of accuracy for our model: <https://en.wikipedia.org/wiki/Brier_score> The book 'Superforecasting' by Philip Tetlock has a good discussion of the use of brier scores.
+We will use the brier score as one measurement of accuracy for our
+model: <https://en.wikipedia.org/wiki/Brier_score> The book
+‘Superforecasting’ by Philip Tetlock has a good discussion of the use
+of brier scores.
 
 ``` r
 log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic_imp)
@@ -300,25 +1579,26 @@ confusionMatrix(factor(predictions$prediction_binary), factor(predictions$surviv
     ## 
     ##           Reference
     ## Prediction   0   1
-    ##          0 686 156
-    ##          1 123 344
+    ##          0 684 157
+    ##          1 125 343
     ##                                           
-    ##                Accuracy : 0.7869          
-    ##                  95% CI : (0.7637, 0.8088)
+    ##                Accuracy : 0.7846          
+    ##                  95% CI : (0.7613, 0.8066)
     ##     No Information Rate : 0.618           
     ##     P-Value [Acc > NIR] : < 2e-16         
     ##                                           
-    ##                   Kappa : 0.5428          
-    ##  Mcnemar's Test P-Value : 0.05539         
+    ##                   Kappa : 0.5381          
     ##                                           
-    ##             Sensitivity : 0.8480          
-    ##             Specificity : 0.6880          
-    ##          Pos Pred Value : 0.8147          
-    ##          Neg Pred Value : 0.7366          
+    ##  Mcnemar's Test P-Value : 0.06489         
+    ##                                           
+    ##             Sensitivity : 0.8455          
+    ##             Specificity : 0.6860          
+    ##          Pos Pred Value : 0.8133          
+    ##          Neg Pred Value : 0.7329          
     ##              Prevalence : 0.6180          
-    ##          Detection Rate : 0.5241          
-    ##    Detection Prevalence : 0.6432          
-    ##       Balanced Accuracy : 0.7680          
+    ##          Detection Rate : 0.5225          
+    ##    Detection Prevalence : 0.6425          
+    ##       Balanced Accuracy : 0.7657          
     ##                                           
     ##        'Positive' Class : 0               
     ## 
@@ -337,7 +1617,7 @@ ylab('Survival Probability') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 ```
 
-![](Titanic_files/figure-markdown_github/logistic-regression-1.png)
+![](../rmd_images/Titanic/logistic-regression-1.png)<!-- -->
 
 ``` r
 ggplot(predictions, aes(prediction))+
@@ -356,7 +1636,9 @@ ylab('Count') +
 guides(fill = guide_legend(title='')) 
 ```
 
-![](Titanic_files/figure-markdown_github/logistic-regression-2.png)
+    ## Warning: Removed 4 rows containing missing values (geom_bar).
+
+![](../rmd_images/Titanic/logistic-regression-2.png)<!-- -->
 
 ``` r
 # Same graph as prior but faceted on class
@@ -378,7 +1660,7 @@ ylab('Count') +
 guides(fill = guide_legend(title='')) 
 ```
 
-![](Titanic_files/figure-markdown_github/logistic-regression-3.png)
+![](../rmd_images/Titanic/logistic-regression-3.png)<!-- -->
 
 ``` r
 ggplot(predictions, aes(brier_score)) +
@@ -394,9 +1676,12 @@ ylab('Count') +
 guides(fill = guide_legend(title='')) 
 ```
 
-![](Titanic_files/figure-markdown_github/logistic-regression-4.png)
+    ## Warning: Removed 4 rows containing missing values (geom_bar).
 
-OR = Odds Ratio. LCLM and UCLM are lower and upper 95% confidence limits.
+![](../rmd_images/Titanic/logistic-regression-4.png)<!-- -->
+
+OR = Odds Ratio. LCLM and UCLM are lower and upper 95% confidence
+limits.
 
 ``` r
 kable(log_info %>% 
@@ -404,25 +1689,24 @@ kable(log_info %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-|  meanBrierScore|  null.deviance|  logLik|     AIC|      BIC|
-|---------------:|--------------:|-------:|-------:|--------:|
-|             0.3|        1741.02|  -615.9|  1241.8|  1267.68|
+| meanBrierScore | null.deviance |   logLik |     AIC |    BIC |
+| -------------: | ------------: | -------: | ------: | -----: |
+|            0.3 |       1741.02 | \-618.61 | 1247.21 | 1273.1 |
 
 ``` r
 kable(log_terms,format='markdown',digits = 2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-| Term        |  Coefficient|   LCLM|   UCLM|     OR|  LCLM\_OR|  UCLM\_OR|  std.error|  statistic|  p.value|
-|:------------|------------:|------:|------:|------:|---------:|---------:|----------:|----------:|--------:|
-| sexMale     |        -2.49|  -2.78|  -2.20|   0.08|      0.06|      0.11|       0.15|     -16.76|        0|
-| pclass3rd   |        -2.19|  -2.58|  -1.80|   0.11|      0.08|      0.17|       0.20|     -10.90|        0|
-| pclass2nd   |        -1.17|  -1.59|  -0.76|   0.31|      0.20|      0.47|       0.21|      -5.58|        0|
-| age         |        -0.03|  -0.04|  -0.02|   0.97|      0.96|      0.98|       0.01|      -4.94|        0|
-| (Intercept) |         3.19|   2.64|   3.77|  24.38|     14.00|     43.41|       0.29|      11.08|        0|
+| Term        | Coefficient |   LCLM |   UCLM |    OR | LCLM\_OR | UCLM\_OR | std.error | statistic | p.value |
+| :---------- | ----------: | -----: | -----: | ----: | -------: | -------: | --------: | --------: | ------: |
+| sexMale     |      \-2.48 | \-2.78 | \-2.20 |  0.08 |     0.06 |     0.11 |      0.15 |   \-16.78 |       0 |
+| pclass3rd   |      \-2.13 | \-2.52 | \-1.74 |  0.12 |     0.08 |     0.17 |      0.20 |   \-10.69 |       0 |
+| pclass2nd   |      \-1.15 | \-1.56 | \-0.74 |  0.32 |     0.21 |     0.48 |      0.21 |    \-5.46 |       0 |
+| age         |      \-0.02 | \-0.04 | \-0.01 |  0.98 |     0.96 |     0.99 |      0.01 |    \-4.40 |       0 |
+| (Intercept) |        3.08 |   2.52 |   3.65 | 21.71 |    12.48 |    38.62 |      0.29 |     10.69 |       0 |
 
-Linear Regression Model
------------------------
+## Linear Regression Model
 
 A linear model of passenger fare cost.
 
@@ -469,7 +1753,7 @@ ylab('Count')
 
     ## Warning: Removed 1 rows containing non-finite values (stat_bin).
 
-![](Titanic_files/figure-markdown_github/linear-regression-1.png)
+![](../rmd_images/Titanic/linear-regression-1.png)<!-- -->
 
 ``` r
 ggplot(data=lm_predictions,
@@ -485,7 +1769,7 @@ ylab('Fare Cost') +
 guides(color = guide_legend(title='Passenger Class',reverse=F,override.aes = list(size=2.5))) 
 ```
 
-![](Titanic_files/figure-markdown_github/linear-regression-2.png)
+![](../rmd_images/Titanic/linear-regression-2.png)<!-- -->
 
 ``` r
 ggplot(data=lm_predictions,
@@ -506,7 +1790,7 @@ guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.
 
     ## Warning: Removed 1 rows containing missing values (geom_point).
 
-![](Titanic_files/figure-markdown_github/linear-regression-3.png)
+![](../rmd_images/Titanic/linear-regression-3.png)<!-- -->
 
 ``` r
 ggplot(data=lm_predictions,
@@ -525,7 +1809,7 @@ guides(color = guide_legend(title='Gender',reverse=F,override.aes = list(size=2.
 
     ## Warning: Removed 1 rows containing missing values (geom_point).
 
-![](Titanic_files/figure-markdown_github/linear-regression-4.png)
+![](../rmd_images/Titanic/linear-regression-4.png)<!-- -->
 
 ``` r
 ggplot(data=lm_terms,
@@ -538,27 +1822,27 @@ labs(title='Linear Model Coefficients with Confidence Intervals') +
 xlab('Term')
 ```
 
-![](Titanic_files/figure-markdown_github/linear-regression-5.png)
+![](../rmd_images/Titanic/linear-regression-5.png)<!-- -->
 
 ``` r
 kable((lm_info %>% dplyr::select(-df.residual,-logLik,-deviance)),format='markdown',digits = 2) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-|       |  r.squared|  adj.r.squared|  sigma|  statistic|  p.value|   df|       AIC|       BIC|
-|:------|----------:|--------------:|------:|----------:|--------:|----:|---------:|---------:|
-| value |       0.38|           0.38|  40.84|     159.46|        0|    6|  13424.38|  13460.62|
+| r.squared | adj.r.squared | sigma | statistic | p.value | df |      AIC |      BIC |
+| --------: | ------------: | ----: | --------: | ------: | -: | -------: | -------: |
+|      0.38 |          0.38 |  40.8 |    160.23 |       0 |  6 | 13421.99 | 13458.22 |
 
 ``` r
 kable(lm_terms,format='markdown',digits = c(1,1,1,1,2,2,2)) %>%
   kable_styling(bootstrap_options = c("striped",'border'))
 ```
 
-| Term        |  Coefficient|   LCLM|   UCLM|  std.error|  statistic|  p.value|
-|:------------|------------:|------:|------:|----------:|----------:|--------:|
-| pclass3rd   |        -75.0|  -81.4|  -68.6|       3.24|     -23.12|     0.00|
-| pclass2nd   |        -67.2|  -74.0|  -60.3|       3.50|     -19.19|     0.00|
-| sexMale     |        -11.9|  -17.4|   -6.4|       2.78|      -4.27|     0.00|
-| survived    |          0.8|   -4.9|    6.4|       2.89|       0.27|     0.79|
-| age         |         -0.2|   -0.4|    0.0|       0.09|      -2.08|     0.04|
-| (Intercept) |        100.8|   90.6|  111.0|       5.18|      19.45|     0.00|
+| Term        | Coefficient |   LCLM |   UCLM | std.error | statistic | p.value |
+| :---------- | ----------: | -----: | -----: | --------: | --------: | ------: |
+| pclass3rd   |      \-75.7 | \-82.1 | \-69.4 |      3.24 |   \-23.39 |    0.00 |
+| pclass2nd   |      \-67.7 | \-74.5 | \-60.8 |      3.50 |   \-19.33 |    0.00 |
+| sexMale     |      \-11.8 | \-17.2 |  \-6.3 |      2.78 |    \-4.24 |    0.00 |
+| survived    |         0.7 |  \-5.0 |    6.3 |      2.88 |      0.24 |    0.81 |
+| age         |       \-0.2 |  \-0.4 |  \-0.1 |      0.09 |    \-2.59 |    0.01 |
+| (Intercept) |       102.7 |   92.5 |  112.9 |      5.19 |     19.79 |    0.00 |
