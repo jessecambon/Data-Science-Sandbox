@@ -11,9 +11,6 @@ Goal: Simple, minimal code for getting started with R.
     transformations
   - basic minimal ggplots (histogram, point, bar, line)
   - basic modeling - caret, lm, glm
-  - bind\_rows, bind\_cols for stacking data (vertically or
-    horizontally)
-  - left\_join, inner\_join
 
 ## Setup
 
@@ -30,7 +27,75 @@ theme_set(theme_bw()+
 
 ## Data Manipulation
 
+### Warm Up
+
+Initial ‘mpg’
+Dataset:
+
+| manufacturer | model | displ | year | cyl | trans      | drv | cty | hwy | fl | class   |
+| :----------- | :---- | ----: | ---: | --: | :--------- | :-- | --: | --: | :- | :------ |
+| audi         | a4    |   1.8 | 1999 |   4 | auto(l5)   | f   |  18 |  29 | p  | compact |
+| audi         | a4    |   1.8 | 1999 |   4 | manual(m5) | f   |  21 |  29 | p  | compact |
+| audi         | a4    |   2.0 | 2008 |   4 | manual(m6) | f   |  20 |  31 | p  | compact |
+
+Use `View(mpg)` to preview the dataset in R.
+
+``` r
+mpg_subset <- mpg %>%
+  filter(cyl==4 & year >= 2005  & manufacturer == "nissan") %>%
+  mutate(ratio=hwy/cty) %>%
+  select(manufacturer,model,cyl,year,hwy,cty)
+```
+
+| manufacturer | model  | cyl | year | hwy | cty |
+| :----------- | :----- | --: | ---: | --: | --: |
+| nissan       | altima |   4 | 2008 |  31 |  23 |
+| nissan       | altima |   4 | 2008 |  32 |  23 |
+
+### Counting
+
+``` r
+count_cyl <- mpg %>%
+  count(cyl)
+```
+
+| cyl |  n |
+| --: | -: |
+|   4 | 81 |
+|   5 |  4 |
+|   6 | 79 |
+|   8 | 70 |
+
+### Calculate Summary Stats
+
+``` r
+mpg_stats <- mpg %>% select(class,hwy) %>%
+  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
+                               TRUE ~ class)) %>%
+  group_by(class_c) %>%
+  summarize(count=n(),
+            max_hwy=max(hwy),
+            min_hwy=min(hwy),
+            median_hwy=median(hwy),
+            mean_hwy=mean(hwy)) %>%
+  ungroup() %>%
+  arrange(desc(count)) # sort dataset
+```
+
+Note that ‘2seater’ is reclassified as ‘subcompact’
+
+| class\_c   | count | max\_hwy | min\_hwy | median\_hwy | mean\_hwy |
+| :--------- | ----: | -------: | -------: | ----------: | --------: |
+| suv        |    62 |       27 |       12 |        17.5 |  18.12903 |
+| compact    |    47 |       44 |       23 |        27.0 |  28.29787 |
+| midsize    |    41 |       32 |       23 |        27.0 |  27.29268 |
+| subcompact |    40 |       44 |       20 |        26.0 |  27.72500 |
+| pickup     |    33 |       22 |       12 |        17.0 |  16.87879 |
+| minivan    |    11 |       24 |       17 |        23.0 |  22.36364 |
+
 ### Stacking Data
+
+Slice data
 
 ``` r
 mpg1 <- mpg %>% slice(1:2) %>% 
@@ -41,15 +106,23 @@ mpg2 <- mpg %>% slice(44:45) %>%
   select(manufacturer,model,hwy,cty) %>%
   mutate(dataset=2)
 
+mpg3 <- mpg %>% slice(1:2,5:6) %>%
+  select(displ,year)
+```
+
+Stack vertically and horizontally
+
+``` r
 mpg_stack_vert <- mpg1 %>% 
   bind_rows(mpg2)
 
-mpg3 <- mpg %>% slice(1:2,5:6) %>%
-  select(displ,year)
-
 mpg_stack_horz <- mpg_stack_vert %>%
   bind_cols(mpg3)
+```
 
+### Joining
+
+``` r
 car_type <- mpg %>% select(manufacturer,model,class) %>%
   distinct() # distinct rows only
 
@@ -94,7 +167,8 @@ Income and Rent are now in separate columns:
 
 ### Wide to Long
 
-Initial Data:
+Initial
+Data:
 
 | country | indicator   |         2000 |         2001 |         2002 |        2003 |         2004 |         2005 |          2006 |           2007 |           2008 |           2009 |           2010 |         2011 |         2012 |        2013 |         2014 |         2015 |        2016 |         2017 |
 | :------ | :---------- | -----------: | -----------: | -----------: | ----------: | -----------: | -----------: | ------------: | -------------: | -------------: | -------------: | -------------: | -----------: | -----------: | ----------: | -----------: | -----------: | ----------: | -----------: |
@@ -126,55 +200,6 @@ After:
 | ABW     | SP.URB.TOTL | 2005 | 44889 |
 | ABW     | SP.URB.TOTL | 2010 | 43778 |
 
-Initial ‘mpg’ Dataset:
-
-| manufacturer | model | displ | year | cyl | trans      | drv | cty | hwy | fl | class   |
-| :----------- | :---- | ----: | ---: | --: | :--------- | :-- | --: | --: | :- | :------ |
-| audi         | a4    |   1.8 | 1999 |   4 | auto(l5)   | f   |  18 |  29 | p  | compact |
-| audi         | a4    |   1.8 | 1999 |   4 | manual(m5) | f   |  21 |  29 | p  | compact |
-| audi         | a4    |   2.0 | 2008 |   4 | manual(m6) | f   |  20 |  31 | p  | compact |
-
-### Counting
-
-``` r
-count_cyl <- mpg %>%
-  count(cyl)
-```
-
-| cyl |  n |
-| --: | -: |
-|   4 | 81 |
-|   5 |  4 |
-|   6 | 79 |
-|   8 | 70 |
-
-### Calculate Summary Stats
-
-``` r
-mpg_stats <- mpg %>% select(class,hwy) %>%
-  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
-                               TRUE ~ class)) %>%
-  group_by(class_c) %>%
-  summarize(count=n(),
-            max_hwy=max(hwy),
-            min_hwy=min(hwy),
-            median_hwy=median(hwy),
-            mean_hwy=mean(hwy)) %>%
-  ungroup() %>%
-  arrange(desc(count)) # sort dataset
-```
-
-Note that ‘2seater’ is reclassified as ‘subcompact’
-
-| class\_c   | count | max\_hwy | min\_hwy | median\_hwy | mean\_hwy |
-| :--------- | ----: | -------: | -------: | ----------: | --------: |
-| suv        |    62 |       27 |       12 |        17.5 |  18.12903 |
-| compact    |    47 |       44 |       23 |        27.0 |  28.29787 |
-| midsize    |    41 |       32 |       23 |        27.0 |  27.29268 |
-| subcompact |    40 |       44 |       20 |        26.0 |  27.72500 |
-| pickup     |    33 |       22 |       12 |        17.0 |  16.87879 |
-| minivan    |    11 |       24 |       17 |        23.0 |  22.36364 |
-
 ## Visualizations
 
 ### Bar Chart
@@ -199,7 +224,7 @@ xlab('') +
 ylab('')
 ```
 
-![](../rmd_images/R-Quickstart/unnamed-chunk-13-1.png)<!-- -->
+![](../rmd_images/R-Quickstart/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 ## Drop missing height and weight values for scatter plot
