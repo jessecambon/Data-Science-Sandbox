@@ -1,7 +1,7 @@
 R Quickstart
 ================
 Jesse Cambon
-25 November, 2019
+29 November, 2019
 
 Goal: Simple, minimal code for getting started with R.
 
@@ -9,6 +9,7 @@ Goal: Simple, minimal code for getting started with R.
 
   - Clearly label before and after datasets to illustrate data
     transformations
+  - basic string operations, conversion from character to numeric, etc.
   - basic minimal ggplots (histogram, point, bar, line)
   - basic modeling - caret, lm, glm
 
@@ -29,8 +30,7 @@ theme_set(theme_bw()+
 
 ### Warm Up
 
-Initial ‘mpg’
-Dataset:
+Initial ‘mpg’ Dataset:
 
 | manufacturer | model | displ | year | cyl | trans      | drv | cty | hwy | fl | class   |
 | :----------- | :---- | ----: | ---: | --: | :--------- | :-- | --: | --: | :- | :------ |
@@ -95,7 +95,13 @@ Note that ‘2seater’ is reclassified as ‘subcompact’
 
 ### Stacking Data
 
-Slice data
+Initial ‘mpg’ Dataset:
+
+| manufacturer | model | displ | year | cyl | trans      | drv | cty | hwy | fl | class   |
+| :----------- | :---- | ----: | ---: | --: | :--------- | :-- | --: | --: | :- | :------ |
+| audi         | a4    |   1.8 | 1999 |   4 | auto(l5)   | f   |  18 |  29 | p  | compact |
+| audi         | a4    |   1.8 | 1999 |   4 | manual(m5) | f   |  21 |  29 | p  | compact |
+| audi         | a4    |   2.0 | 2008 |   4 | manual(m6) | f   |  20 |  31 | p  | compact |
 
 ``` r
 mpg1 <- mpg %>% slice(1:2) %>% 
@@ -167,8 +173,7 @@ Income and Rent are now in separate columns:
 
 ### Wide to Long
 
-Initial
-Data:
+Initial Data:
 
 | country | indicator   |         2000 |         2001 |         2002 |        2003 |         2004 |         2005 |          2006 |           2007 |           2008 |           2009 |           2010 |         2011 |         2012 |        2013 |         2014 |         2015 |        2016 |         2017 |
 | :------ | :---------- | -----------: | -----------: | -----------: | ----------: | -----------: | -----------: | ------------: | -------------: | -------------: | -------------: | -------------: | -----------: | -----------: | ----------: | -----------: | -----------: | ----------: | -----------: |
@@ -189,16 +194,58 @@ Data:
 ``` r
 wb_pop <- world_bank_pop %>%
   pivot_longer(c(-country,-indicator), names_to = "year", values_to = "value") %>%
-  filter(year %in% seq(2000,2015,5))
+  mutate(year=as.numeric(year)) %>% # convert to numeric
+  filter(year %in% seq(2000,2016,2))
 ```
 
 After:
 
 | country | indicator   | year | value |
-| :------ | :---------- | :--- | ----: |
+| :------ | :---------- | ---: | ----: |
 | ABW     | SP.URB.TOTL | 2000 | 42444 |
-| ABW     | SP.URB.TOTL | 2005 | 44889 |
-| ABW     | SP.URB.TOTL | 2010 | 43778 |
+| ABW     | SP.URB.TOTL | 2002 | 43670 |
+| ABW     | SP.URB.TOTL | 2004 | 44669 |
+
+### Counting
+
+``` r
+count_cyl <- mpg %>%
+  count(cyl)
+```
+
+| cyl |  n |
+| --: | -: |
+|   4 | 81 |
+|   5 |  4 |
+|   6 | 79 |
+|   8 | 70 |
+
+### Calculate Summary Stats
+
+``` r
+mpg_stats <- mpg %>% select(class,hwy) %>%
+  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
+                               TRUE ~ class)) %>%
+  group_by(class_c) %>%
+  summarize(count=n(),
+            max_hwy=max(hwy),
+            min_hwy=min(hwy),
+            median_hwy=median(hwy),
+            mean_hwy=mean(hwy)) %>%
+  ungroup() %>%
+  arrange(desc(count)) # sort dataset
+```
+
+Note that ‘2seater’ is reclassified as ‘subcompact’
+
+| class\_c   | count | max\_hwy | min\_hwy | median\_hwy | mean\_hwy |
+| :--------- | ----: | -------: | -------: | ----------: | --------: |
+| suv        |    62 |       27 |       12 |        17.5 |  18.12903 |
+| compact    |    47 |       44 |       23 |        27.0 |  28.29787 |
+| midsize    |    41 |       32 |       23 |        27.0 |  27.29268 |
+| subcompact |    40 |       44 |       20 |        26.0 |  27.72500 |
+| pickup     |    33 |       22 |       12 |        17.0 |  16.87879 |
+| minivan    |    11 |       24 |       17 |        23.0 |  22.36364 |
 
 ## Visualizations
 
@@ -224,53 +271,44 @@ xlab('') +
 ylab('')
 ```
 
-![](../rmd_images/R-Quickstart/unnamed-chunk-17-1.png)<!-- -->
-
-``` r
-## Drop missing height and weight values for scatter plot
-# Also drop Jabba and Yoda because they are outliers
-starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
-  filter(!str_detect(name,'Jabba|Yoda')) %>% 
-  filter(num_films >= 3) 
-
-### Crime Data
-
-murder_rates <- USArrests %>% 
-  rownames_to_column('State') %>%
-  as_tibble() %>%
-  arrange(desc(UrbanPop)) %>%
-  head(15) %>%
-  arrange(desc(Murder)) %>% 
-  mutate(State=factor(State,levels=rev(State)))
-
-### Stock Data
-eu_stock <- EuStockMarkets %>% 
-  as_tibble() %>%
-  gather(Index,Price) %>%
-  mutate(Year=rep(time(EuStockMarkets),4)) 
-```
+![](../rmd_images/R-Quickstart/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 # Histogram with autobinning based on gender
-ggplot(starwars_jac %>% replace_na(list(gender='None')), aes(height)) + #scale_fill_manual(values = wes_palette('Moonrise2')) +
-  geom_histogram(aes(fill=gender), 
-                   binwidth = 10, 
-                   col="black") +
-            #       size=.1) +  # change binwidth
-  # remove bottom inner margin with expand
+ggplot(mpg,aes(hwy)) +
+geom_histogram(aes(fill=cyl)) +
 scale_y_continuous(expand = c(0,0,0.08,0)) + 
-  labs(title="Height Distribution of Star Wars Characters", 
-       caption="Han Shot First") +
-xlab('Height (cm)') +
-ylab('Count') +
-guides(fill = guide_legend(title='Gender'))
+xlab('') + ylab('')
 ```
+
+## Line
+
+``` r
+ggplot(wb_pop %>% filter(country %in% c("USA","CAN","MEX") & indicator == "SP.POP.GROW"),
+          aes(x=year,y=value,color = country)) +
+  theme_classic() +
+geom_line() + geom_point() + # lines and points
+scale_x_continuous(expand=c(0.02,0,0.02,0)) +
+#scale_y_continuous(labels=scales::comma) + 
+labs(title='',
+     caption='') +
+theme(legend.title = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      legend.text=element_text(size=10),
+      legend.position='right') +
+xlab('Year') +
+ylab('Population Growth (millions)') +
+# make legend lines bigger
+guides(colour = guide_legend(override.aes = list(size=2.5))) 
+```
+
+![](../rmd_images/R-Quickstart/line-1.png)<!-- -->
 
 ## Lollipop
 
 ``` r
-  ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
-    geom_segment( aes(x=State ,xend=State, y=0, yend=Murder), color="grey") +
+  ggplot(data=col_ratio %>% arrange(desc(rent)) %>% head(8), aes(x=NAME, y=rent) ) +
+    geom_segment( aes(x=reorder(NAME,rent) ,xend=NAME, y=0, yend=rent), color="grey") +
     geom_point(size=3, color="navy") +
    theme_minimal() +
   theme(    plot.subtitle= element_text(face="bold",hjust=0.5),
@@ -282,35 +320,11 @@ guides(fill = guide_legend(title='Gender'))
     ) +
   coord_flip() +
     # expand gets rid of space between labels stem of lollipops
-    scale_y_continuous(expand = c(0, .15)) + 
-    labs(title='Murder Rates of Selected States - 1975',
-        caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
+    scale_y_continuous(expand = c(0, 0,0,70)) + 
+    labs(title='States With Highest Rent',
+        caption='') +
     xlab("") +
-    ylab('Murders Per 100,000 Residents')
+    ylab('')
 ```
 
-## Line
-
-``` r
-# Start and end for the breaks on the horizontal axis
-eu_plot_lims <- c(ceiling(min(eu_stock$Year)),floor(max(eu_stock$Year)))
-
-# Performance of EU Stock Indexes
-ggplot(eu_stock,
-          aes(x=Year,y=Price,color = fct_rev(Index))) +
-geom_line() +
-scale_x_continuous(breaks=eu_plot_lims[1]:eu_plot_lims[2],
-                   expand=c(0,0,0.02,0)) +
-scale_y_continuous(labels=scales::comma) + 
-#scale_color_manual(values=wes_palette('GrandBudapest2')) +
-labs(title='EU Stock Indexes',
-     caption='Data provided by Erste Bank AG, Vienna, Austria') +
-theme(legend.title = element_blank(),
-      panel.grid.minor.x = element_blank(),
-      legend.text=element_text(size=10),
-      legend.position='right') +
-xlab('Year') +
-ylab('Value') +
-# make legend lines bigger
-guides(colour = guide_legend(override.aes = list(size=2.5))) 
-```
+![](../rmd_images/R-Quickstart/lollipop-1.png)<!-- -->
