@@ -1,7 +1,7 @@
 R Quickstart
 ================
 Jesse Cambon
-27 November, 2019
+29 November, 2019
 
 Goal: Simple, minimal code for getting started with R.
 
