@@ -1,0 +1,287 @@
+---
+title: "R Quickstart"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+Goal: Simple, minimal code for getting started with R.
+
+## Todo 
+* Clearly label before and after datasets to illustrate data transformations
+* basic minimal ggplots (histogram, point, bar, line)
+* basic modeling - caret, lm, glm
+
+## Setup
+
+```{r setup, message=FALSE, results=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+
+# Set default ggplot theme
+theme_set(theme_bw()+
+  theme(legend.position = "top",
+            plot.subtitle= element_text(face="bold",hjust=0.5),
+            plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
+```
+
+## Data Manipulation
+
+### Warm Up
+
+Initial 'mpg' Dataset:
+```{r,echo=F} 
+kable(head(mpg,3))
+```
+
+Use `View(mpg)` to preview the dataset in R. 
+
+```{r}
+mpg_subset <- mpg %>%
+  filter(cyl==4 & year >= 2005  & manufacturer == "nissan") %>%
+  mutate(ratio=hwy/cty) %>%
+  select(manufacturer,model,cyl,year,hwy,cty)
+```
+
+```{r,echo=F} 
+kable(mpg_subset)
+```
+
+
+### Counting
+```{r}
+count_cyl <- mpg %>%
+  count(cyl)
+```
+
+```{r,echo=F}
+kable(count_cyl)
+```
+
+### Calculate Summary Stats
+```{r}
+mpg_stats <- mpg %>% select(class,hwy) %>%
+  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
+                               TRUE ~ class)) %>%
+  group_by(class_c) %>%
+  summarize(count=n(),
+            max_hwy=max(hwy),
+            min_hwy=min(hwy),
+            median_hwy=median(hwy),
+            mean_hwy=mean(hwy)) %>%
+  ungroup() %>%
+  arrange(desc(count)) # sort dataset
+```
+
+Note that '2seater' is reclassified as 'subcompact'
+
+```{r,echo=F}
+kable(mpg_stats)
+```
+
+### Stacking Data
+
+Slice data 
+```{r}
+mpg1 <- mpg %>% slice(1:2) %>% 
+  select(manufacturer,model,hwy,cty) %>%
+  mutate(dataset=1)
+
+mpg2 <- mpg %>% slice(44:45) %>%
+  select(manufacturer,model,hwy,cty) %>%
+  mutate(dataset=2)
+
+mpg3 <- mpg %>% slice(1:2,5:6) %>%
+  select(displ,year)
+```
+
+Stack vertically and horizontally
+```{r}
+mpg_stack_vert <- mpg1 %>% 
+  bind_rows(mpg2)
+
+mpg_stack_horz <- mpg_stack_vert %>%
+  bind_cols(mpg3)
+```
+
+### Joining
+
+```{r}
+car_type <- mpg %>% select(manufacturer,model,class) %>%
+  distinct() # distinct rows only
+
+joined <- mpg_stack_horz %>%
+  left_join(car_type,by=c('manufacturer','model')) %>% 
+  select(-dataset,everything())
+```
+
+### Long to Wide
+Initial Data:
+```{r,echo=F}
+kable(head(us_rent_income,4))
+```
+
+* pivot_wider
+  * names_from: column containing values that we will use for our new column names
+  
+```{r}
+col_ratio <- us_rent_income %>%
+  select(-GEOID,-moe) %>%
+  pivot_wider(names_from = variable, values_from = estimate) %>% 
+  drop_na() %>%   # drop missing values
+  mutate(income_rent_ratio = income / (12*rent))
+```
+
+Income and Rent are now in separate columns:
+
+```{r,echo=F}
+kable(head(col_ratio,4))
+```
+
+### Wide to Long 
+Initial Data:
+```{r,echo=F}
+kable(head(world_bank_pop,3))
+```
+
+* pivot_longer
+  * cols (1st arg): what columns do we want to pivot? (ie. subtract ones we don't want to)
+  * names_to : the name of new column holding the column names as values
+  * values_to : name of new column containing values
+* seq(start, stop, increment)  ->  generates sequence
+
+```{r} 
+wb_pop <- world_bank_pop %>%
+  pivot_longer(c(-country,-indicator), names_to = "year", values_to = "value") %>%
+  filter(year %in% seq(2000,2015,5))
+```
+
+After:
+```{r,echo=F} 
+kable(head(wb_pop,3))
+```
+
+## Visualizations
+
+### Bar Chart
+
+* use fill argument in ggplot() to set bar color based on a variable
+* reorder() orders the bars
+```{r}
+# A simple bar chart - average heights of the species
+# the reorder command orders our bars in order of descending height
+ggplot(data=mpg_stats,
+    aes(x = reorder(class_c,-mean_hwy), y=mean_hwy)) +
+geom_bar(stat='identity',position='dodge',color='black') +
+scale_y_continuous(expand = c(0,0,0.08,0)) +    # plot margins
+geom_text(aes(label=round(mean_hwy)), vjust=-0.5) +  # labelling
+theme(legend.position="none", # no legend (in case we want to use fill)
+      panel.grid = element_blank()) + # turn off grid
+labs(title='') +
+xlab('') +
+ylab('')
+```
+
+
+
+
+```{r,eval=FALSE}
+## Drop missing height and weight values for scatter plot
+# Also drop Jabba and Yoda because they are outliers
+starwars_ht_wt <- starwars_jac %>% drop_na(c(height,mass,gender)) %>%
+  filter(!str_detect(name,'Jabba|Yoda')) %>% 
+  filter(num_films >= 3) 
+
+### Crime Data
+
+murder_rates <- USArrests %>% 
+  rownames_to_column('State') %>%
+  as_tibble() %>%
+  arrange(desc(UrbanPop)) %>%
+  head(15) %>%
+  arrange(desc(Murder)) %>% 
+  mutate(State=factor(State,levels=rev(State)))
+
+### Stock Data
+eu_stock <- EuStockMarkets %>% 
+  as_tibble() %>%
+  gather(Index,Price) %>%
+  mutate(Year=rep(time(EuStockMarkets),4)) 
+```
+
+```{r histogram, eval=FALSE}
+# Histogram with autobinning based on gender
+ggplot(starwars_jac %>% replace_na(list(gender='None')), aes(height)) + #scale_fill_manual(values = wes_palette('Moonrise2')) +
+  geom_histogram(aes(fill=gender), 
+                   binwidth = 10, 
+                   col="black") +
+            #       size=.1) +  # change binwidth
+  # remove bottom inner margin with expand
+scale_y_continuous(expand = c(0,0,0.08,0)) + 
+  labs(title="Height Distribution of Star Wars Characters", 
+       caption="Han Shot First") +
+xlab('Height (cm)') +
+ylab('Count') +
+guides(fill = guide_legend(title='Gender'))
+```
+
+
+
+## Lollipop
+
+```{r lollipop,eval=FALSE}
+  ggplot(data=murder_rates, aes(x=State, y=Murder) ) +
+    geom_segment( aes(x=State ,xend=State, y=0, yend=Murder), color="grey") +
+    geom_point(size=3, color="navy") +
+   theme_minimal() +
+  theme(    plot.subtitle= element_text(face="bold",hjust=0.5),
+            plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
+      panel.grid.minor.y = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      legend.position="none"
+    ) +
+  coord_flip() +
+    # expand gets rid of space between labels stem of lollipops
+    scale_y_continuous(expand = c(0, .15)) + 
+    labs(title='Murder Rates of Selected States - 1975',
+        caption='Data: World Almanac and Book of facts 1975. (Crime rates)') +
+    xlab("") +
+    ylab('Murders Per 100,000 Residents')
+```
+
+## Line
+
+```{r line,eval=FALSE}
+
+# Start and end for the breaks on the horizontal axis
+eu_plot_lims <- c(ceiling(min(eu_stock$Year)),floor(max(eu_stock$Year)))
+
+# Performance of EU Stock Indexes
+ggplot(eu_stock,
+          aes(x=Year,y=Price,color = fct_rev(Index))) +
+geom_line() +
+scale_x_continuous(breaks=eu_plot_lims[1]:eu_plot_lims[2],
+                   expand=c(0,0,0.02,0)) +
+scale_y_continuous(labels=scales::comma) + 
+#scale_color_manual(values=wes_palette('GrandBudapest2')) +
+labs(title='EU Stock Indexes',
+     caption='Data provided by Erste Bank AG, Vienna, Austria') +
+theme(legend.title = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      legend.text=element_text(size=10),
+      legend.position='right') +
+xlab('Year') +
+ylab('Value') +
+# make legend lines bigger
+guides(colour = guide_legend(override.aes = list(size=2.5))) 
+
+```
+
