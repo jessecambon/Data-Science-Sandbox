@@ -3,15 +3,7 @@ R Quickstart
 Jesse Cambon
 30 November, 2019
 
-Goal: Simple, minimal code for getting started with R.
-
-## Todo
-
-  - Clearly label before and after datasets to illustrate data
-    transformations
-  - basic string operations, conversion from character to numeric, etc.
-  - basic minimal ggplots (histogram, point, bar, line)
-  - basic modeling - caret, lm, glm
+Simple tidyverse code for common data science operations in R.
 
 ## Setup
 
@@ -222,7 +214,7 @@ After:
 ggplot(data=mpg_stats,
     aes(x = reorder(class_c,-mean_hwy), y=mean_hwy)) +
 geom_bar(stat='identity',position='dodge',color='black') +
-scale_y_continuous(expand = c(0,0,0.08,0)) +    # plot margins
+scale_y_continuous(expand = expand_scale(mult = c(0, .1))) +    # plot margins
 geom_text(aes(label=round(mean_hwy)), vjust=-0.5) +  # labelling
 theme(legend.position="none", # no legend (in case we want to use fill)
       panel.grid = element_blank()) + # turn off grid
@@ -236,12 +228,10 @@ ylab('')
 ``` r
 # Histogram with autobinning based on gender
 ggplot(mpg,aes(hwy)) +
-geom_histogram(aes(fill=cyl)) +
-scale_y_continuous(expand = c(0,0,0.08,0)) + 
-xlab('') + ylab('')
+geom_histogram(aes(fill=cyl),binwidth=1) +
+scale_y_continuous(expand = expand_scale(mult = c(0, .05))) +
+xlab('Highway mpg') + ylab('Count')
 ```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 ![](../rmd_images/R-Quickstart/histogram-1.png)<!-- -->
 
@@ -257,7 +247,7 @@ ggplot(wb_pop %>% filter(country %in% c("USA","CAN","MEX") & indicator == "SP.PO
           aes(x=year,y=value/100,color = country)) +
   theme_classic() +
 geom_line() + geom_point() + # lines and points
-scale_x_continuous(expand=c(0.02,0,0.02,0)) +
+scale_x_continuous(expand = expand_scale(mult = c(.05, .05))) +
 scale_y_continuous(labels=scales::percent) + 
 labs(title='',
      caption='') +
@@ -266,9 +256,9 @@ theme(legend.title = element_blank(),
       legend.text=element_text(size=10),
       legend.position='right') +
 xlab('Year') +
-ylab('Population Growth (millions)') +
-# make legend lines bigger
-guides(colour = guide_legend(override.aes = list(size=2.5))) 
+ylab('Population Growth') +
+# make legend items bigger
+guides(colour = guide_legend(override.aes = list(size=2))) 
 ```
 
 ![](../rmd_images/R-Quickstart/line-1.png)<!-- -->
@@ -278,23 +268,19 @@ guides(colour = guide_legend(override.aes = list(size=2.5)))
 ``` r
   ggplot(data=col_ratio %>% arrange(desc(rent)) %>% head(15), aes(x=NAME, y=rent) ) +
     geom_segment( aes(x=reorder(NAME,rent) ,xend=NAME, y=0, yend=rent), color="grey") +
-    geom_point(size=3, color="navy") +
+    geom_point(size=3) +
    theme_minimal() +
-  
-  theme(    plot.subtitle= element_text(face="bold",hjust=0.5),
-            plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
+  theme(plot.subtitle= element_text(face="bold",hjust=0.5),
+      plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
       panel.grid.minor.y = element_blank(),
       panel.grid.major.y = element_blank(),
-      panel.grid.minor.x = element_blank(),
-      legend.position="none"
+      panel.grid.minor.x = element_blank()
     ) +
   coord_flip() +
-    # expand gets rid of space between labels stem of lollipops
     scale_y_continuous(labels=scales::dollar,expand = expand_scale(mult = c(0, .1))) + 
     labs(title='States With Highest Rent',
-        caption='') +
-    xlab("") +
-    ylab('')
+        caption='Source: 2017 American Community Survey (Census)') +
+    xlab('') + ylab('Median Monthly Rent')
 ```
 
 ![](../rmd_images/R-Quickstart/lollipop-1.png)<!-- -->
