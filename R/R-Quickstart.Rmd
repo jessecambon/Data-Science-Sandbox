@@ -47,8 +47,9 @@ Use `View(mpg)` to preview the dataset in R.
 ```{r}
 mpg_subset <- mpg %>%
   filter(cyl==4 & year >= 2005  & manufacturer == "nissan") %>%
-  mutate(ratio=hwy/cty) %>%
-  select(manufacturer,model,cyl,year,hwy,cty)
+  mutate(ratio=hwy/cty,
+         make_model=str_c(manufacturer,' ',model)) %>%
+  select(make_model,cyl,year,hwy,cty,ratio)
 ```
 
 ```{r,echo=F} 
@@ -176,36 +177,7 @@ After:
 kable(head(wb_pop,3))
 ```
 
-### Counting
-```{r}
-count_cyl <- mpg %>%
-  count(cyl)
-```
 
-```{r,echo=F}
-kable(count_cyl)
-```
-
-### Calculate Summary Stats
-```{r}
-mpg_stats <- mpg %>% select(class,hwy) %>%
-  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
-                               TRUE ~ class)) %>%
-  group_by(class_c) %>%
-  summarize(count=n(),
-            max_hwy=max(hwy),
-            min_hwy=min(hwy),
-            median_hwy=median(hwy),
-            mean_hwy=mean(hwy)) %>%
-  ungroup() %>%
-  arrange(desc(count)) # sort dataset
-```
-
-Note that '2seater' is reclassified as 'subcompact'
-
-```{r,echo=F}
-kable(mpg_stats)
-```
 
 ## Visualizations
 
@@ -229,7 +201,7 @@ ylab('')
 ```
 
 
-```{r histogram, eval=FALSE}
+```{r histogram}
 # Histogram with autobinning based on gender
 ggplot(mpg,aes(hwy)) +
 geom_histogram(aes(fill=cyl)) +
@@ -239,13 +211,17 @@ xlab('') + ylab('')
 
 ## Line
 
+We divide the `value` field by 100 since to convert it to a decimal percentage value.
+
+SP.POP.GROW is the % population growth
+
 ```{r line}
 ggplot(wb_pop %>% filter(country %in% c("USA","CAN","MEX") & indicator == "SP.POP.GROW"),
-          aes(x=year,y=value,color = country)) +
+          aes(x=year,y=value/100,color = country)) +
   theme_classic() +
 geom_line() + geom_point() + # lines and points
 scale_x_continuous(expand=c(0.02,0,0.02,0)) +
-#scale_y_continuous(labels=scales::comma) + 
+scale_y_continuous(labels=scales::percent) + 
 labs(title='',
      caption='') +
 theme(legend.title = element_blank(),
@@ -262,10 +238,11 @@ guides(colour = guide_legend(override.aes = list(size=2.5)))
 ## Lollipop
 
 ```{r lollipop}
-  ggplot(data=col_ratio %>% arrange(desc(rent)) %>% head(8), aes(x=NAME, y=rent) ) +
+  ggplot(data=col_ratio %>% arrange(desc(rent)) %>% head(15), aes(x=NAME, y=rent) ) +
     geom_segment( aes(x=reorder(NAME,rent) ,xend=NAME, y=0, yend=rent), color="grey") +
     geom_point(size=3, color="navy") +
    theme_minimal() +
+  
   theme(    plot.subtitle= element_text(face="bold",hjust=0.5),
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
       panel.grid.minor.y = element_blank(),
@@ -275,7 +252,7 @@ guides(colour = guide_legend(override.aes = list(size=2.5)))
     ) +
   coord_flip() +
     # expand gets rid of space between labels stem of lollipops
-    scale_y_continuous(expand = c(0, 0,0,70)) + 
+    scale_y_continuous(labels=scales::dollar,expand = expand_scale(mult = c(0, .1))) + 
     labs(title='States With Highest Rent',
         caption='') +
     xlab("") +

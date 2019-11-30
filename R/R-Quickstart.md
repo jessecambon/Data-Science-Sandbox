@@ -1,7 +1,7 @@
 R Quickstart
 ================
 Jesse Cambon
-29 November, 2019
+30 November, 2019
 
 Goal: Simple, minimal code for getting started with R.
 
@@ -43,14 +43,15 @@ Use `View(mpg)` to preview the dataset in R.
 ``` r
 mpg_subset <- mpg %>%
   filter(cyl==4 & year >= 2005  & manufacturer == "nissan") %>%
-  mutate(ratio=hwy/cty) %>%
-  select(manufacturer,model,cyl,year,hwy,cty)
+  mutate(ratio=hwy/cty,
+         make_model=str_c(manufacturer,' ',model)) %>%
+  select(make_model,cyl,year,hwy,cty,ratio)
 ```
 
-| manufacturer | model  | cyl | year | hwy | cty |
-| :----------- | :----- | --: | ---: | --: | --: |
-| nissan       | altima |   4 | 2008 |  31 |  23 |
-| nissan       | altima |   4 | 2008 |  32 |  23 |
+| make\_model   | cyl | year | hwy | cty |    ratio |
+| :------------ | --: | ---: | --: | --: | -------: |
+| nissan altima |   4 | 2008 |  31 |  23 | 1.347826 |
+| nissan altima |   4 | 2008 |  32 |  23 | 1.391304 |
 
 ### Counting
 
@@ -206,47 +207,6 @@ After:
 | ABW     | SP.URB.TOTL | 2002 | 43670 |
 | ABW     | SP.URB.TOTL | 2004 | 44669 |
 
-### Counting
-
-``` r
-count_cyl <- mpg %>%
-  count(cyl)
-```
-
-| cyl |  n |
-| --: | -: |
-|   4 | 81 |
-|   5 |  4 |
-|   6 | 79 |
-|   8 | 70 |
-
-### Calculate Summary Stats
-
-``` r
-mpg_stats <- mpg %>% select(class,hwy) %>%
-  mutate(class_c=case_when(class %in% c("2seater","subcompact") ~ "subcompact",
-                               TRUE ~ class)) %>%
-  group_by(class_c) %>%
-  summarize(count=n(),
-            max_hwy=max(hwy),
-            min_hwy=min(hwy),
-            median_hwy=median(hwy),
-            mean_hwy=mean(hwy)) %>%
-  ungroup() %>%
-  arrange(desc(count)) # sort dataset
-```
-
-Note that ‘2seater’ is reclassified as ‘subcompact’
-
-| class\_c   | count | max\_hwy | min\_hwy | median\_hwy | mean\_hwy |
-| :--------- | ----: | -------: | -------: | ----------: | --------: |
-| suv        |    62 |       27 |       12 |        17.5 |  18.12903 |
-| compact    |    47 |       44 |       23 |        27.0 |  28.29787 |
-| midsize    |    41 |       32 |       23 |        27.0 |  27.29268 |
-| subcompact |    40 |       44 |       20 |        26.0 |  27.72500 |
-| pickup     |    33 |       22 |       12 |        17.0 |  16.87879 |
-| minivan    |    11 |       24 |       17 |        23.0 |  22.36364 |
-
 ## Visualizations
 
 ### Bar Chart
@@ -271,7 +231,7 @@ xlab('') +
 ylab('')
 ```
 
-![](../rmd_images/R-Quickstart/unnamed-chunk-22-1.png)<!-- -->
+![](../rmd_images/R-Quickstart/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
 # Histogram with autobinning based on gender
@@ -281,15 +241,24 @@ scale_y_continuous(expand = c(0,0,0.08,0)) +
 xlab('') + ylab('')
 ```
 
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](../rmd_images/R-Quickstart/histogram-1.png)<!-- -->
+
 ## Line
+
+We divide the `value` field by 100 since to convert it to a decimal
+percentage value.
+
+SP.POP.GROW is the % population growth
 
 ``` r
 ggplot(wb_pop %>% filter(country %in% c("USA","CAN","MEX") & indicator == "SP.POP.GROW"),
-          aes(x=year,y=value,color = country)) +
+          aes(x=year,y=value/100,color = country)) +
   theme_classic() +
 geom_line() + geom_point() + # lines and points
 scale_x_continuous(expand=c(0.02,0,0.02,0)) +
-#scale_y_continuous(labels=scales::comma) + 
+scale_y_continuous(labels=scales::percent) + 
 labs(title='',
      caption='') +
 theme(legend.title = element_blank(),
@@ -307,10 +276,11 @@ guides(colour = guide_legend(override.aes = list(size=2.5)))
 ## Lollipop
 
 ``` r
-  ggplot(data=col_ratio %>% arrange(desc(rent)) %>% head(8), aes(x=NAME, y=rent) ) +
+  ggplot(data=col_ratio %>% arrange(desc(rent)) %>% head(15), aes(x=NAME, y=rent) ) +
     geom_segment( aes(x=reorder(NAME,rent) ,xend=NAME, y=0, yend=rent), color="grey") +
     geom_point(size=3, color="navy") +
    theme_minimal() +
+  
   theme(    plot.subtitle= element_text(face="bold",hjust=0.5),
             plot.title = element_text(lineheight=1, face="bold",hjust = 0.5),
       panel.grid.minor.y = element_blank(),
@@ -320,7 +290,7 @@ guides(colour = guide_legend(override.aes = list(size=2.5)))
     ) +
   coord_flip() +
     # expand gets rid of space between labels stem of lollipops
-    scale_y_continuous(expand = c(0, 0,0,70)) + 
+    scale_y_continuous(labels=scales::dollar,expand = expand_scale(mult = c(0, .1))) + 
     labs(title='States With Highest Rent',
         caption='') +
     xlab("") +
