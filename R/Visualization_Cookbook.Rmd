@@ -5,6 +5,7 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   github_document:
     toc: true
+    toc_depth: 3
 ---
 
 ```{r knit-settings, include=FALSE}
@@ -14,7 +15,7 @@ source(here("rmd_config.R"))
 
 The purpose of this document is to provide code that can be easily copied and adapted for use in data science projects to generate a wide variety of data visualizations. Because of this, I have opted to use inbuilt datasets in R so that you should not have to download any datasets external to R packages.
 
-## Getting Started
+# Getting Started
 
 * Install all the listed packages in the setup block using install.packages('package') or install.packages('package1','package2','package3',...) for multiple packages.
 * To recreate any graph, make sure to first run the theme_set() command from the setup code block and also the relevant code from the data preparation code block to create the relevant dataset. After you have successfully recreated a graph, you can switch out the data and variable names for your own uses.
@@ -33,7 +34,7 @@ The purpose of this document is to provide code that can be easily copied and ad
 * Make use of ordering as a visual cue. For example, a bar chart that has the bars ordered by size is much easier to read.
 * Experiment with variations of a graph. For example, changing the bin width for histograms can yield different results.
 
-# Setup
+## Setup
 
 ```{r setup, message=FALSE, results=FALSE, warning=FALSE}
 # Load libraries - you will need to install these with install.packages('packagename')
@@ -163,7 +164,8 @@ eu_stock <- EuStockMarkets %>%
   mutate(Year=rep(time(EuStockMarkets),4)) 
 ```
 
-# Chart Types
+
+# Types of Charts
 
 ## Distribution
 
@@ -462,6 +464,7 @@ guides(color=guide_legend(title='Continent',override.aes = list(size=2.5)),
 
 
 ## Evolution
+
 ### Line
 
 ```{r line}

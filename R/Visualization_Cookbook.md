@@ -1,7 +1,7 @@
 Visualization Cookbook
 ================
 Jesse Cambon
-24 November, 2019
+05 December, 2019
 
 The purpose of this document is to provide code that can be easily
 copied and adapted for use in data science projects to generate a wide
@@ -9,7 +9,7 @@ variety of data visualizations. Because of this, I have opted to use
 inbuilt datasets in R so that you should not have to download any
 datasets external to R packages.
 
-## Getting Started
+# Getting Started
 
   - Install all the listed packages in the setup block using
     install.packages(‘package’) or
@@ -42,7 +42,7 @@ datasets external to R packages.
   - Experiment with variations of a graph. For example, changing the bin
     width for histograms can yield different results.
 
-# Setup
+## Setup
 
 ``` r
 # Load libraries - you will need to install these with install.packages('packagename')
@@ -171,7 +171,7 @@ eu_stock <- EuStockMarkets %>%
   mutate(Year=rep(time(EuStockMarkets),4)) 
 ```
 
-# Chart Types
+# Types of Charts
 
 ## Distribution
 
