@@ -41,6 +41,5 @@ The purpose of this repository is to provide code and resources that can be quic
 
 ## NLP 
 * [Document Embeddings](Python/state_of_union_embeddings.ipynb) (Python) - Using document embeddings to find similar state of the union addresses.
-* [Hello NLP](Python/Hello_NLP.ipynb) (Python) - Testing out some NLP techniques on Wall Street Journal sample data
 * [State of the Union Analysis](Python/state_of_union_v2.ipynb) (Python) - An exploration of state of the union addresses with NLP
 * [LSTM Demo](Python/LSTM-Demo.ipynb) (Python) - An LSTM network for predicting if a company review from glassdoor is positive
