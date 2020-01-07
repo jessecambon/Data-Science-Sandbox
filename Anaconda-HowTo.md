@@ -4,7 +4,15 @@
 
 List all installed environments:
 
-``` conda env list```
+```conda env list```
+
+Activate a conda environment:
+
+```conda activate <env-name>```
+
+List all modules installed in current active environment:
+
+```conda list```
 
 [Updating all packages](https://www.anaconda.com/keeping-anaconda-date/):
 
