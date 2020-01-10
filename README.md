@@ -37,7 +37,7 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library to do machine learning.
 * [Predicting Fuel Economy](R/Vehicles.md) (R) - Predicting the fuel economy of cars.
 * [Ordinal Regression](R/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
-* [Presenting Regression Models](R/Regression_Model_Tidying.md) (R) - Code for cleaning the outputs of regression models
+* [Presenting Regression Models](R/Regression-Model-Tidying.md) (R) - Code for cleaning the outputs of regression models
 
 ## NLP 
 * [Document Embeddings](Python/state_of_union_embeddings.ipynb) (Python) - Using document embeddings to find similar state of the union addresses.
