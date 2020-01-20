@@ -34,8 +34,7 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Sklearn Modeling Workflows](Python/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves)
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, etc.)
 * [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
-* [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library to do machine learning.
-* [Predicting Fuel Economy](R/Vehicles.md) (R) - Predicting the fuel economy of cars.
+* [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library for machine learning.
 * [Ordinal Regression](R/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
 * [Presenting Regression Models](R/Regression-Model-Tidying.md) (R) - Code for cleaning the outputs of regression models
 
