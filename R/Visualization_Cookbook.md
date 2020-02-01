@@ -1,7 +1,31 @@
-Visualization Cookbook
-================
-Jesse Cambon
-05 December, 2019
+-   [Getting Started](#getting-started)
+    -   [References](#references)
+    -   [Tips for Effective Visual
+        Communication](#tips-for-effective-visual-communication)
+    -   [Setup](#setup)
+    -   [Data Preparation](#data-preparation)
+-   [Types of Charts](#types-of-charts)
+    -   [Distribution](#distribution)
+        -   [Histogram](#histogram)
+        -   [Ridgeplot](#ridgeplot)
+        -   [Population Pyramid](#population-pyramid)
+        -   [Boxplot](#boxplot)
+        -   [Dotplot](#dotplot)
+        -   [Violin](#violin)
+    -   [Ranking](#ranking)
+        -   [Dotplot](#dotplot-1)
+        -   [Lollipop](#lollipop)
+        -   [Bar](#bar)
+    -   [Correlation](#correlation)
+        -   [Scatterplot](#scatterplot)
+        -   [Bubbleplot](#bubbleplot)
+    -   [Evolution](#evolution)
+        -   [Line](#line)
+        -   [Stacked Area](#stacked-area)
+    -   [Composition](#composition)
+        -   [Heatmap](#heatmap)
+        -   [Treemap](#treemap)
+        -   [Waffle](#waffle)
 
 The purpose of this document is to provide code that can be easily
 copied and adapted for use in data science projects to generate a wide
@@ -9,40 +33,46 @@ variety of data visualizations. Because of this, I have opted to use
 inbuilt datasets in R so that you should not have to download any
 datasets external to R packages.
 
-# Getting Started
+Getting Started
+===============
 
-  - Install all the listed packages in the setup block using
+-   Install all the listed packages in the setup block using
     install.packages(‘package’) or
-    install.packages(‘package1’,‘package2’,‘package3’,…) for
-    multiple packages.
-  - To recreate any graph, make sure to first run the theme\_set()
+    install.packages(‘package1’,‘package2’,‘package3’,…) for multiple
+    packages.
+-   To recreate any graph, make sure to first run the theme\_set()
     command from the setup code block and also the relevant code from
     the data preparation code block to create the relevant dataset.
     After you have successfully recreated a graph, you can switch out
     the data and variable names for your own uses.
-  - Use ‘fill’ commands for areas and ‘color’ for lines.
-  - To save any plot to a file, use the ggsave() command
+-   Use ‘fill’ commands for areas and ‘color’ for lines.
+-   To save any plot to a file, use the ggsave() command
 
-## References
+References
+----------
 
-  - ggplot: <https://ggplot2.tidyverse.org/reference/index.html>
-  - ggplot cheat sheet:
-    <https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf>
-  - dplyr: <https://dplyr.tidyverse.org/>
-  - [“Top 50
+-   ggplot:
+    <a href="https://ggplot2.tidyverse.org/reference/index.html" class="uri">https://ggplot2.tidyverse.org/reference/index.html</a>
+-   ggplot cheat sheet:
+    <a href="https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf" class="uri">https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf</a>
+-   dplyr:
+    <a href="https://dplyr.tidyverse.org/" class="uri">https://dplyr.tidyverse.org/</a>
+-   [“Top 50
     GGplots”](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
 
-## Tips for Effective Visual Communication
+Tips for Effective Visual Communication
+---------------------------------------
 
-  - Simplicity is key. Remove duplicative labels and other elements,
+-   Simplicity is key. Remove duplicative labels and other elements,
     hide gridlines that aren’t visually helpful, and remove everything
     from the graph that isn’t part of the story you are looking to tell.
-  - Make use of ordering as a visual cue. For example, a bar chart that
+-   Make use of ordering as a visual cue. For example, a bar chart that
     has the bars ordered by size is much easier to read.
-  - Experiment with variations of a graph. For example, changing the bin
+-   Experiment with variations of a graph. For example, changing the bin
     width for histograms can yield different results.
 
-## Setup
+Setup
+-----
 
 ``` r
 # Load libraries - you will need to install these with install.packages('packagename')
@@ -74,7 +104,8 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
                "#D55E00", "#CC79A7")
 ```
 
-## Data Preparation
+Data Preparation
+----------------
 
 ``` r
 ### Titanic Data
@@ -171,9 +202,11 @@ eu_stock <- EuStockMarkets %>%
   mutate(Year=rep(time(EuStockMarkets),4)) 
 ```
 
-# Types of Charts
+Types of Charts
+===============
 
-## Distribution
+Distribution
+------------
 
 ### Histogram
 
@@ -195,11 +228,11 @@ guides(fill = guide_legend(title='Gender'))
 
     ## Warning: Removed 6 rows containing non-finite values (stat_bin).
 
-![](../rmd_images/Visualization_Cookbook/histogram-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/histogram-1.png)
 
 ### Ridgeplot
 
-<https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html>
+<a href="https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html" class="uri">https://cran.r-project.org/web/packages/ggridges/vignettes/introduction.html</a>
 
 ``` r
 library(ggridges) # text labels
@@ -225,7 +258,7 @@ ggplot(lincoln_weather , aes(x = `Mean Wind Speed[MPH]`, y = `Month`, fill = ..x
 
     ## Picking joint bandwidth of 1.32
 
-![](../rmd_images/Visualization_Cookbook/ridge-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/ridge-1.png)
 
 ### Population Pyramid
 
@@ -261,7 +294,7 @@ geom_bar(stat='identity',color='black',size=0.25) +
   guides(fill = guide_legend(title='')) # remove legend title
 ```
 
-![](../rmd_images/Visualization_Cookbook/pyramid-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/pyramid-1.png)
 
 ### Boxplot
 
@@ -274,7 +307,7 @@ first and third quartiles). The lower whisker extends from the \[lower
 hinge (ie. 25 percentile)\] to the smallest value at most 1.5 \* IQR of
 the \[lower hinge\]. Data beyond the end of the whiskers are
 called”outlying" points and are plotted individually."
-<https://ggplot2.tidyverse.org/reference/geom_boxplot.html>
+<a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_boxplot.html</a>
 
 ``` r
  ggplot(eu_stock, aes(x=Index, y=Price,fill=Index)) + 
@@ -289,7 +322,7 @@ called”outlying" points and are plotted individually."
   scale_fill_manual(values = wes_palette('Zissou1'))
 ```
 
-![](../rmd_images/Visualization_Cookbook/boxplot-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/boxplot-1.png)
 
 ### Dotplot
 
@@ -306,7 +339,7 @@ ggplot(starwars_jac %>% filter(gender %in% c('Male','Female')), aes(x = factor(g
 
     ## Warning: Removed 5 rows containing non-finite values (stat_bindot).
 
-![](../rmd_images/Visualization_Cookbook/dotplot-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/dotplot-1.png)
 
 ### Violin
 
@@ -321,9 +354,10 @@ ggplot(starwars_jac %>% filter(gender %in% c('Male','Female')), aes(x = factor(g
 
     ## Warning: Removed 27 rows containing non-finite values (stat_ydensity).
 
-![](../rmd_images/Visualization_Cookbook/violin-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/violin-1.png)
 
-## Ranking
+Ranking
+-------
 
 ### Dotplot
 
@@ -342,7 +376,7 @@ geom_pointrange(mapping=aes(ymin=min_life, ymax=max_life)) +
   ylab('Life Expectancy at Birth') 
 ```
 
-![](../rmd_images/Visualization_Cookbook/dotplot-rank-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/dotplot-rank-1.png)
 
 ### Lollipop
 
@@ -367,7 +401,7 @@ geom_pointrange(mapping=aes(ymin=min_life, ymax=max_life)) +
     ylab('Murders Per 100,000 Residents')
 ```
 
-![](../rmd_images/Visualization_Cookbook/lollipop-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/lollipop-1.png)
 
 ### Bar
 
@@ -388,7 +422,7 @@ xlab('Species') +
 ylab('')
 ```
 
-![](../rmd_images/Visualization_Cookbook/bar-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/bar-1.png)
 
 ``` r
 ## Side-by-Side Barchart
@@ -411,7 +445,7 @@ p2 <- ggplot(mtcars, aes(x = reorder(row.names(mtcars), mpg), y = mpg)) +
 grid.arrange(p1, p2, ncol = 2)
 ```
 
-![](../rmd_images/Visualization_Cookbook/bar-2.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/bar-2.png)
 
 ``` r
 ##  Take a look at number of each species from each Starwars homeworld
@@ -433,7 +467,7 @@ xlab('') +
 ylab('')
 ```
 
-![](../rmd_images/Visualization_Cookbook/bar-3.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/bar-3.png)
 
 ``` r
 ## Stacked bar of Titanic dataset
@@ -457,9 +491,10 @@ guides(fill = guide_legend(title='Class',reverse=T))
 
     ## Warning: Removed 4 rows containing missing values (geom_text).
 
-![](../rmd_images/Visualization_Cookbook/bar-4.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/bar-4.png)
 
-## Correlation
+Correlation
+-----------
 
 ### Scatterplot
 
@@ -498,7 +533,7 @@ ylab('Height (cm)') +
 guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 ```
 
-![](../rmd_images/Visualization_Cookbook/scatter-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/scatter-1.png)
 
 ### Bubbleplot
 
@@ -521,9 +556,10 @@ guides(color=guide_legend(title='Continent',override.aes = list(size=2.5)),
        size=guide_legend(title='Population'))
 ```
 
-![](../rmd_images/Visualization_Cookbook/bubbleplot-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/bubbleplot-1.png)
 
-## Evolution
+Evolution
+---------
 
 ### Line
 
@@ -551,7 +587,7 @@ ylab('Value') +
 guides(colour = guide_legend(override.aes = list(size=2.5))) 
 ```
 
-![](../rmd_images/Visualization_Cookbook/line-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/line-1.png)
 
 ``` r
 # Number of characters from each species 
@@ -583,7 +619,7 @@ ylab('') +
   guides(color=guide_legend(title='Gender',override.aes = list(size=2.5)))
 ```
 
-![](../rmd_images/Visualization_Cookbook/line-2.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/line-2.png)
 
 ### Stacked Area
 
@@ -603,9 +639,10 @@ xlab('Episode') +
 ylab('')
 ```
 
-![](../rmd_images/Visualization_Cookbook/stackedarea-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/stackedarea-1.png)
 
-## Composition
+Composition
+-----------
 
 ### Heatmap
 
@@ -633,7 +670,7 @@ ggplot(titanic_survival_rates, aes(Sex, Class)) +
      guides(fill=guide_legend(title='Survival Rate')) #+
 ```
 
-![](../rmd_images/Visualization_Cookbook/heatmap-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/heatmap-1.png)
 
 ``` r
   #   xlab(quo_name(axis1)) + ylab(quo_name(axis2))
@@ -655,7 +692,7 @@ treemap(titanic, #Your data frame object
         )
 ```
 
-![](../rmd_images/Visualization_Cookbook/treemap-1.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/treemap-1.png)
 
 ``` r
 library(treemapify)
@@ -670,7 +707,7 @@ ggplot(data=starwars %>% drop_na(mass) %>% replace_na(list(gender='none')) %>%
   guides(fill=guide_legend(title="Gender"))
 ```
 
-![](../rmd_images/Visualization_Cookbook/treemap-2.png)<!-- -->
+![](../rmd_images/Visualization_Cookbook/treemap-2.png)
 
 ### Waffle
 
