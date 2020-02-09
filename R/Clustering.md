@@ -74,7 +74,7 @@ kable(combine_summ,format='markdown',digits=2) %>%
 fviz_cluster(clust3,data=vehicles_sel,repel=F,ggtheme=theme_bw())
 ```
 
-![](../rmd_images/Clustering/unnamed-chunk-3-1.png)<!-- -->
+![](/rmd_images/Clustering/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
 ggplot(aes(x=cyl,y=cty,color=.cluster),data=combine_results) + 
