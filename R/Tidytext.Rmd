@@ -1,0 +1,94 @@
+---
+title: "Tidytext"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+Sources:
+* https://www.tidytextmining.com/sentiment.html
+
+
+Using Tidytext for sentiment analysis
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+```{r}
+library(janeaustenr)
+library(tidyverse)
+library(tidytext)
+library(knitr)
+# import original dataset - one row per line of each jane austen book
+austen_df <- austen_books()
+
+# tokenize each jane austen book
+tidy_books <- austen_df %>%
+  group_by(book) %>%
+  # add some variables
+  mutate(linenumber = row_number(),
+         chapter = cumsum(str_detect(text, regex("^chapter [\\divxlc]", 
+                                                 ignore_case = TRUE)))) %>%
+  ungroup() %>%
+  unnest_tokens(word, text)
+```
+
+Sentiment Analysis (grouping by book)
+
+```{r}
+jane_austen_sentiment <- tidy_books %>%
+  inner_join(get_sentiments("afinn"))
+
+kable(head(jane_austen_sentiment,5))
+
+# Summarize sentiment by book
+sentiment_summ <- jane_austen_sentiment %>%
+  group_by(book) %>%
+  summarize(mean_sentiment = mean(value),
+            num_sentiment_words= n() ) %>%
+  ungroup() %>%
+  arrange(desc(mean_sentiment))
+  
+kable(sentiment_summ)
+```
+
+Make a function for quickly tokenizing a string and returning the mean sentiment
+
+```{r}
+mean_sentiment <- function(.tbl,text) {
+# Returns mean sentiment 
+# Args:
+#   .tbl : tibble dataframe
+#   text (STRING) : quoted column name in .tbl of text content
+
+#text <- enquo(text)
+  
+df <- .tbl %>%
+  unnest_tokens(word, {{text}}) %>%
+  left_join(get_sentiments("afinn"), by='word') %>%
+  group_by({{text}}) %>%
+  summarize(mean_sentiment = mean(value,na.rm=TRUE),
+            num_words = n()) %>%
+  ungroup()
+
+return(df)
+  
+}
+```
+
+
+```{r,eval=F}
+test_df <- tribble( ~review,
+"This is the worst restaurant I have ever eaten at. It's service is abysmal.",
+"Wow, amazing food, great atmosphere. Wil. definitely be coming back.",
+"The restaurant was okay. Not good or bad"
+)
+
+test_sentiment <- test_df %>%
+  mean_sentiment(review)
+```
+
