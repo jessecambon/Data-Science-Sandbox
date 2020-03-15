@@ -18,7 +18,7 @@ library(here)
 source(here("rmd_config.R"))
 ```
 
-```{r}
+```{r,warning=F,message=F}
 library(janeaustenr)
 library(tidyverse)
 library(tidytext)
@@ -64,31 +64,56 @@ mean_sentiment <- function(.tbl,text) {
 # Args:
 #   .tbl : tibble dataframe
 #   text (STRING) : quoted column name in .tbl of text content
+# Returns:
+#   Dataframe with mean sentiment and counts of both total words
+#   and words that had a sentiment value
 
 #text <- enquo(text)
+
+# number each row
+# use this to join text column back on later
+text_num <- .tbl %>%
+  mutate(row_num = row_number())
   
-df <- .tbl %>%
+# tokenize the dataset (one row per token)
+tokens <- text_num %>%
   unnest_tokens(word, {{text}}) %>%
   left_join(get_sentiments("afinn"), by='word') %>%
-  group_by({{text}}) %>%
-  summarize(mean_sentiment = mean(value,na.rm=TRUE),
-            num_words = n()) %>%
-  ungroup()
+  mutate(non_missing=case_when(!is.na(value) ~ 1, TRUE ~0)) # record if missing sentiment value
 
-return(df)
-  
+# summarize the sentiment (value column contains sentiment of each token)
+summ <- tokens %>%
+  group_by(row_num) %>%
+  summarize(mean_sentiment = mean(value,na.rm=TRUE),
+            num_words = n(),
+            num_sentiment_words = sum(non_missing)) %>%
+  ungroup() %>%
+  left_join(text_num,by='row_num') %>%
+  select(row_num,{{text}},everything())
+
+return(summ)
 }
 ```
 
 
-```{r,eval=F}
+```{r}
 test_df <- tribble( ~review,
 "This is the worst restaurant I have ever eaten at. It's service is abysmal.",
-"Wow, amazing food, great atmosphere. Wil. definitely be coming back.",
-"The restaurant was okay. Not good or bad"
+"Wow, amazing food, great atmosphere. Will definitely be coming back.",
+"The restaurant was okay. Not good or bad",
+"The restaurant was okay. Not good or bad", # duplicate row
+"The stock market crashed and it was a disaster",
+"Sunshine and rainbows. Everything is fantastical."
 )
 
 test_sentiment <- test_df %>%
-  mean_sentiment(review)
+  mean_sentiment(review) %>%
+  arrange(desc(mean_sentiment))
+
+# test <- test_df %>%
+#   unnest_tokens(word,review) %>%
+#   left_join(get_sentiments("afinn"), by='word')
+
+kable(test_sentiment)
 ```
 

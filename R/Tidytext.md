@@ -10,20 +10,6 @@ Using Tidytext for sentiment analysis
 ``` r
 library(janeaustenr)
 library(tidyverse)
-```
-
-    ## ── Attaching packages ──────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──
-
-    ## ✓ ggplot2 3.2.1     ✓ purrr   0.3.3
-    ## ✓ tibble  2.1.3     ✓ dplyr   0.8.3
-    ## ✓ tidyr   1.0.0     ✓ forcats 0.4.0
-    ## ✓ readr   1.3.1
-
-    ## ── Conflicts ─────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
-``` r
 library(tidytext)
 library(knitr)
 # import original dataset - one row per line of each jane austen book
@@ -91,29 +77,63 @@ mean_sentiment <- function(.tbl,text) {
 # Args:
 #   .tbl : tibble dataframe
 #   text (STRING) : quoted column name in .tbl of text content
+# Returns:
+#   Dataframe with mean sentiment and counts of both total words
+#   and words that had a sentiment value
 
 #text <- enquo(text)
+
+# number each row
+# use this to join text column back on later
+text_num <- .tbl %>%
+  mutate(row_num = row_number())
   
-df <- .tbl %>%
+# tokenize the dataset (one row per token)
+tokens <- text_num %>%
   unnest_tokens(word, {{text}}) %>%
   left_join(get_sentiments("afinn"), by='word') %>%
-  group_by({{text}}) %>%
-  summarize(mean_sentiment = mean(value,na.rm=TRUE),
-            num_words = n()) %>%
-  ungroup()
+  mutate(non_missing=case_when(!is.na(value) ~ 1, TRUE ~0)) # record if missing sentiment value
 
-return(df)
-  
+# summarize the sentiment (value column contains sentiment of each token)
+summ <- tokens %>%
+  group_by(row_num) %>%
+  summarize(mean_sentiment = mean(value,na.rm=TRUE),
+            num_words = n(),
+            num_sentiment_words = sum(non_missing)) %>%
+  ungroup() %>%
+  left_join(text_num,by='row_num') %>%
+  select(row_num,{{text}},everything())
+
+return(summ)
 }
 ```
 
 ``` r
 test_df <- tribble( ~review,
 "This is the worst restaurant I have ever eaten at. It's service is abysmal.",
-"Wow, amazing food, great atmosphere. Wil. definitely be coming back.",
-"The restaurant was okay. Not good or bad"
+"Wow, amazing food, great atmosphere. Will definitely be coming back.",
+"The restaurant was okay. Not good or bad",
+"The restaurant was okay. Not good or bad", # duplicate row
+"The stock market crashed and it was a disaster",
+"Sunshine and rainbows. Everything is fantastical."
 )
 
 test_sentiment <- test_df %>%
-  mean_sentiment(review)
+  mean_sentiment(review) %>%
+  arrange(desc(mean_sentiment))
+
+# test <- test_df %>%
+#   unnest_tokens(word,review) %>%
+#   left_join(get_sentiments("afinn"), by='word')
+
+kable(test_sentiment)
 ```
+
+| row\_num | review                                                                      | mean\_sentiment | num\_words | num\_sentiment\_words |
+| -------: | :-------------------------------------------------------------------------- | --------------: | ---------: | --------------------: |
+|        2 | Wow, amazing food, great atmosphere. Will definitely be coming back.        |        3.666667 |         10 |                     3 |
+|        6 | Sunshine and rainbows. Everything is fantastical.                           |        2.000000 |          6 |                     1 |
+|        3 | The restaurant was okay. Not good or bad                                    |        0.000000 |          8 |                     2 |
+|        4 | The restaurant was okay. Not good or bad                                    |        0.000000 |          8 |                     2 |
+|        5 | The stock market crashed and it was a disaster                              |      \-2.000000 |          9 |                     1 |
+|        1 | This is the worst restaurant I have ever eaten at. It’s service is abysmal. |      \-3.000000 |         14 |                     1 |
