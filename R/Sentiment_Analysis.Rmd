@@ -7,17 +7,17 @@ output:
     toc: true
 ---
 
-Sources:
-
-* https://www.tidytextmining.com/sentiment.html
-
-
-Using Tidytext for sentiment analysis
 
 ```{r knit-settings, include=FALSE}
 library(here)
 source(here("rmd_config.R"))
 ```
+
+## Tidytext
+
+Using Tidytext for sentiment analysis
+
+* https://www.tidytextmining.com/sentiment.html
 
 ```{r,warning=F,message=F}
 library(janeaustenr)
@@ -126,7 +126,7 @@ kable(test_sentiment)
 
 https://github.com/trinker/sentimentr
 
-Use alternative package for sentiment analysis. Thi approach does handle negation
+An example of using the `sentimentr` package for sentiment analysis. This approach does handle negation.
 
 ```{r}
 library(sentimentr)

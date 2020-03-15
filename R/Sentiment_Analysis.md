@@ -1,13 +1,15 @@
 Sentiment Analysis with R
 ================
 Jesse Cambon
-14 March, 2020
+15 March, 2020
 
-Sources:
+## Tidytext
+
+Using Tidytext for sentiment analysis
 
   - <https://www.tidytextmining.com/sentiment.html>
 
-Using Tidytext for sentiment analysis
+<!-- end list -->
 
 ``` r
 library(janeaustenr)
@@ -152,8 +154,8 @@ kable(test_sentiment)
 
 <https://github.com/trinker/sentimentr>
 
-Use alternative package for sentiment analysis. Thi approach does handle
-negation
+An example of using the `sentimentr` package for sentiment analysis.
+This approach does handle negation.
 
 ``` r
 library(sentimentr)
