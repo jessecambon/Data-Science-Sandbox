@@ -1,0 +1,26 @@
+---
+title: "Pandas Essentials"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+https://github.com/rstudio/reticulate/#python-in-r-markdown 
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+library(reticulate)
+```
+
+
+```{python}
+from rpy2.robjects import r, pandas2ri
+pandas2ri.activate()
+
+r['iris'].head()
+
+```
+

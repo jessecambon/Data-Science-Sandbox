@@ -1,0 +1,62 @@
+---
+title: "Parsnip"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+* https://tidymodels.github.io/parsnip/articles/parsnip_Intro.html
+* https://www.tidyverse.org/blog/2018/11/parsnip-0-0-1/
+
+Requires packages: ranger, randomForest
+
+```{r}
+library(parsnip)
+library(tidymodels)
+
+set.seed(4831)
+split <- initial_split(mtcars, props = 9/10)
+car_train <- training(split)
+car_test  <- testing(split)
+```
+
+
+
+
+
+
+
+## Random Forests 
+
+```{r}
+
+rf_with_seed <- 
+  rand_forest(trees = 2000, mtry = varying(), mode = "regression") %>%
+  set_engine("ranger", seed = 63233)
+
+# Fig with ranger
+ranger_model <- rf_with_seed %>% 
+  set_args(mtry = 4) %>% 
+  set_engine("ranger") %>%
+  fit(mpg ~ ., data = mtcars)
+
+# First with random forest package
+rf_model <- rf_with_seed %>% 
+  set_args(mtry = 4) %>% 
+  set_engine("randomForest") %>%
+  fit(mpg ~ ., data = mtcars)
+```
+
+```{r}
+
+ranger_predictions <- predict(ranger_model, mtcars, type = "conf_int")
+```
+
