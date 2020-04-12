@@ -13,24 +13,87 @@ library(here)
 source(here("rmd_config.R"))
 ```
 
+References: 
 * https://tidymodels.github.io/parsnip/articles/parsnip_Intro.html
 * https://www.tidyverse.org/blog/2018/11/parsnip-0-0-1/
+* https://m-clark.github.io/workshops/bayesian/04_R.html
 
-Requires packages: ranger, randomForest
+Requires packages: ranger, randomForest, rstanarm
+
+## Setup
 
 ```{r}
 library(parsnip)
 library(tidymodels)
 
-set.seed(4831)
+set.seed(4831) # set seed for reproducibility
+# Split data
 split <- initial_split(mtcars, props = 9/10)
 car_train <- training(split)
 car_test  <- testing(split)
+
+# Defines type of model we want
+car_model <- linear_reg()
+```
+
+## Bayesian Model
+
+
+```{r}
+library(rstanarm)
+
+wide_prior <- normal(0, 10)
+
+stan_car_model <- 
+  car_model %>%
+  set_engine("stan", iter = 5000, prior = wide_prior, seed = 2347)
+stan_car_model
+```
+
+```{r}
+# don't print anything:
+ctrl <- fit_control(verbosity = 0)
+
+stan_fit <- 
+  stan_car_model %>%
+    fit(mpg ~ ., data = car_train, control = ctrl)
+stan_fit
 ```
 
 
+```{r}
+predict(stan_fit, car_test,type='conf_int')
+```
 
 
+```{r}
+library(tidybayes)
+library(bayesplot)
+
+# tidybayes to extract info
+stan_fit$fit %>% get_variables()
+
+
+## Use bayesplot to plot
+posterior <- as.matrix(stan_fit$fit)
+plot_title <- ggtitle("Posterior distributions",
+                      "with medians and 80% intervals")
+mcmc_areas(posterior,
+           pars = c("cyl", "drat", "am", "wt"),
+           prob = .8) + plot_title
+
+#stan_fit %>% spread_draws()
+```
+
+```{r}
+pp_check(stan_fit$fit)
+```
+
+```{r}
+library(shinystan)
+launch_shinystan(stan_fit$fit)
+
+```
 
 
 
@@ -45,7 +108,7 @@ rf_with_seed <-
 # Fig with ranger
 ranger_model <- rf_with_seed %>% 
   set_args(mtry = 4) %>% 
-  set_engine("ranger") %>%
+  set_engine("ranger",keep.inbag=TRUE) %>%
   fit(mpg ~ ., data = mtcars)
 
 # First with random forest package
@@ -56,7 +119,6 @@ rf_model <- rf_with_seed %>%
 ```
 
 ```{r}
-
 ranger_predictions <- predict(ranger_model, mtcars, type = "conf_int")
 ```
 

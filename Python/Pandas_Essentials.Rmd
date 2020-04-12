@@ -12,15 +12,18 @@ https://github.com/rstudio/reticulate/#python-in-r-markdown
 ```{r knit-settings, include=FALSE}
 library(here)
 source(here("rmd_config.R"))
-library(reticulate)
 ```
 
 
 ```{python}
-from rpy2.robjects import r, pandas2ri
+import pandas as pd
+from rpy2.robjects import r,pandas2ri
 pandas2ri.activate()
 
-r['iris'].head()
+iris = r.data('iris')
+
+iris.info()
+#mtcars.info()
 
 ```
 
