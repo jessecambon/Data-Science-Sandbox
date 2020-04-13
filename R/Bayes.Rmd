@@ -1,0 +1,69 @@
+---
+title: "Parsnip"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+Experiment with Bayesian modeling techniques on the titianic dataset.
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+References: 
+* https://m-clark.github.io/workshops/bayesian/04_R.html
+
+## Setup
+
+```{r}
+library(PASWR) #titanic3 dataset
+library(tidyverse)
+library(rstanarm)
+options(mc.cores = parallel::detectCores()) # for using multiple cores
+```
+
+Data manipulation and imputation
+
+```{r}
+
+titanic <- titanic3 %>% as_tibble() %>%
+  mutate(sex=str_to_title(sex))
+
+library(mice)
+titanic_imputed <- mice(titanic %>% select(sex,pclass,age), method = 'pmm', maxit=80,seed = 3530,printFlag=F)
+
+# Add imputed Data
+titanic_imp <- complete(titanic_imputed,5) %>%
+  bind_cols(titanic %>% select(survived,age,fare) %>% rename(age_orig=age)) %>%
+  mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original'))
+```
+
+Fit models
+
+
+https://m-clark.github.io/workshops/bayesian/04_R.html#rstanarm
+
+```{r}
+
+stan_fit <- stan_glm(survived ~ sex + pclass + age,data=titanic_imp,
+  family=binomial(link="logit"),
+  iter=2000, warmup=1000)
+
+# Fit a logistic regression for comparison
+log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic_imp)
+
+```
+
+```{r}
+summary(stan_fit,probs=c(.025, .975), digits=3)
+summary(log_fit)
+```
+
+```{r}
+pp_check(stan_fit)
+```
+
