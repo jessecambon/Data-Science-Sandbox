@@ -29,7 +29,6 @@ options(mc.cores = parallel::detectCores()) # for using multiple cores
 Data manipulation and imputation
 
 ```{r}
-
 titanic <- titanic3 %>% as_tibble() %>%
   mutate(sex=str_to_title(sex))
 
@@ -39,11 +38,11 @@ titanic_imputed <- mice(titanic %>% select(sex,pclass,age), method = 'pmm', maxi
 # Add imputed Data
 titanic_imp <- complete(titanic_imputed,5) %>%
   bind_cols(titanic %>% select(survived,age,fare) %>% rename(age_orig=age)) %>%
-  mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original'))
+  mutate(imputed=case_when(is.na(age_orig) ~ 'Imputed', TRUE ~ 'Original')) %>%
+  drop_na(fare) # drop one row where fare is NA
 ```
 
 Fit models
-
 
 https://m-clark.github.io/workshops/bayesian/04_R.html#rstanarm
 
@@ -57,6 +56,45 @@ stan_fit <- stan_glm(survived ~ sex + pclass + age,data=titanic_imp,
 log_fit <- glm(survived ~ sex + pclass + age ,family=binomial(link="logit"),data=titanic_imp)
 
 ```
+
+## Insights
+
+
+
+* https://easystats.github.io/see/articles/bayestestR.html
+* https://easystats.github.io/see/ 
+
+```{r}
+library(bayestestR)
+library(see)
+library(insight)
+library(rstanarm)
+#theme_set(theme_modern())
+
+model <- stan_glm(Sepal.Length ~ Petal.Width * Species, data = iris)
+
+result <- estimate_density(model)
+
+plot(result, stack=FALSE,priors = TRUE,xlim=c(-10,10),ylim=c(-10,10))
+```
+
+
+
+
+
+```{r}
+
+prior_summary(stan_fit)
+
+library(insight)
+priors <- get_priors(stan_fit)
+
+parameters <- get_parameters(stan_fit)
+```
+
+
+
+
 
 ```{r}
 summary(stan_fit,probs=c(.025, .975), digits=3)
