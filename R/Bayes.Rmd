@@ -14,9 +14,45 @@ library(here)
 source(here("rmd_config.R"))
 ```
 
+* http://biostat.mc.vanderbilt.edu/wiki/pub/Main/StatisticalComputingSeries/bayes_reg_rstanarm.html
+
+```{r}
+# install.packages("rstanarm") # may take a while
+library(rstan)
+library(rstanarm)
+library(ggplot2)
+library(bayesplot)
+
+# this option uses multiple cores if they're available
+options(mc.cores = parallel::detectCores()) 
+```
+```{r}
+glm_post1 <- stan_glm(dist~speed, data=cars, family=gaussian)
+```
+```{r}
+summary(glm_post1)
+```
+
+```{r}
+stan_hist(glm_post1, pars=c("speed"), bins=40)
+
+```
+
+```{r}
+prior_summary(glm_post1)
+```
+
+```{r}
+posterior_vs_prior(glm_post1, group_by_parameter = TRUE, pars=c("(Intercept)"))
+posterior_vs_prior(glm_post1, group_by_parameter = TRUE, pars=c("speed","sigma"))
+```
+
+
+# Archive
+
+
 References: 
 * https://m-clark.github.io/workshops/bayesian/04_R.html
-
 ## Setup
 
 ```{r}
@@ -75,7 +111,7 @@ model <- stan_glm(Sepal.Length ~ Petal.Width * Species, data = iris)
 
 result <- estimate_density(model)
 
-plot(result, stack=FALSE,priors = TRUE,xlim=c(-10,10),ylim=c(-10,10))
+plot(result, stack=FALSE,priors = TRUE)
 ```
 
 

@@ -1,0 +1,91 @@
+---
+title: "Bayesian Distributions"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+* https://github.com/easystats/see/issues/48
+* https://easystats.github.io/see/articles/bayestestR.html
+* https://cran.r-project.org/web/packages/bayestestR/vignettes/bayes_factors.html
+
+```{r}
+library(rstanarm)
+library(tidyverse)
+library(bayestestR)
+library(wesanderson)
+options(mc.cores = parallel::detectCores()) 
+
+model <- stan_glm(extra ~ group, data = sleep,
+                  prior = normal(0, 3, autoscale = FALSE))
+
+summary(model)
+```
+
+https://github.com/easystats/see/issues/48
+
+```{r}
+#My_first_BF <- bayesfactor_parameters(model, null = c(-1, 1))
+
+density <- estimate_density(model)
+sim_prior <- simulate_prior(model)
+density_prior <- estimate_density(sim_prior)
+
+# Combine density for prior and posterior distributions
+post_prior <- density %>% mutate(type='posterior') %>%
+  bind_rows(density_prior %>% mutate(type='prior'))
+
+```
+
+Plot the prior and posterior distributions
+
+```{r}
+ggplot(data=post_prior,aes(x=x,y=y,fill=type)) + 
+  theme_bw() +
+  facet_wrap(~Parameter,ncol=1,scales='free') +
+  geom_ribbon( mapping = aes(
+    ymin = 0,
+    ymax = y  ),
+  alpha = .8) +   
+  scale_fill_manual(values=c('steelblue','grey'))
+
+
+#  scale_x_continuous(expand=expand_scale(mult = c(-.4, -.4)))
+```
+
+
+```{r}
+point_est <- point_estimate(model,centrality='median')
+
+p <- plot(point_est, panel = F)[[1]]
+sp <- simulate_prior(model)
+ed <- estimate_density(sp[["group2"]])
+
+p + geom_ribbon(
+  data = ed,
+  mapping = aes(
+    x = x,
+    ymin = 0,
+    ymax = y,
+    group = NA
+  ),
+  fill = "#FFC107",
+  alpha = .3
+)
+```
+
+Check posterior distribution
+
+```{r}
+pp_check(model)
+```
+
+

@@ -28,15 +28,16 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Visualization Cookbook](R/Visualization_Cookbook.md) (R) - A wide variety of data visualizations demonstrated.
 * [Geospatial Data Analysis](R/Geospatial_Analysis.md) (R) - Maps.
 
-## Modeling and Machine Learning 
+## Statistical Modeling and Machine Learning
 * [Modeling Fundamentals](R/Titanic.md) (R) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
+* [Bayesian Modeling](R/Bayesian_Distributions.md) (R) - Experimenting with bayesian models using rstanarm
 * [Modeling Workflows](R/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
-* [Sklearn Modeling Workflows](Python/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves).
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, prophet, etc.)
 * [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
-* [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library for machine learning.
 * [Ordinal Regression](R/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
 * [Presenting Regression Models](R/Regression-Model-Tidying.md) (R) - Code for cleaning the outputs of regression models for presentations.
+* [Sklearn Modeling Workflows](Python/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves).
+* [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library for machine learning.
 
 ## NLP 
 * [Document Embeddings](Python/state_of_union_embeddings.ipynb) (Python) - Using word embeddings to compare the similarity of State of the Union addresses.
