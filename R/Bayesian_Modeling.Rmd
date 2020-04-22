@@ -7,21 +7,29 @@ output:
     toc: true
 ---
 
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
 References:
 * http://appliedpredictivemodeling.com/data
 * http://faculty.marshall.usc.edu/gareth-james/ISL/data.html
+
 ## Setup
 
-```{r}
-library(AppliedPredictiveModeling) # datasets
+```{r,message=F,warning=F}
+#library(AppliedPredictiveModeling) # datasets
 library(ISLR) # datasets
 library(skimr)
 library(tidyverse)
 library(wesanderson)
 library(rstanarm)
 library(bayestestR)
+library(bayesplot)
 library(broom)
 library(rsample)
+library(knitr)
 
 num_cores <-  parallel::detectCores()
 options(mc.cores = num_cores)
@@ -34,8 +42,6 @@ carseat_train <- training(split) %>% as_tibble()
 carseat_test  <- testing(split) %>% as_tibble()
 ```
 
-
-
 Fit models
 
 ```{r}
@@ -44,8 +50,8 @@ stan_model <- stan_glm(Sales ~ Advertising + Price, data = carseat_train)
 ```
 
 ```{r}
-tidy(lm_model)
-tidy(stan_model)
+tidy(lm_model) %>% kable()
+tidy(stan_model) %>% kable()
 ```
 
 
@@ -62,35 +68,51 @@ post_pred <- posterior_predict(stan_model,new_data = carseat_test,draws = 1000) 
 Look at the posterior prediction distribution for a single observation
 
 ```{r}
-ggplot(aes(x=`5`),data=post_pred) + geom_density() + theme_minimal()
+
+row_num <- quo(`25`)
+ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal()
+
+# Take a look at that same row number
+print(carseat_test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as_label(row_num))))
 ```
 
-Plot prior and posterior distributions for predictors
-
-https://github.com/easystats/see/issues/48
+Draw from the prior distribution
 
 ```{r}
-density <- estimate_density(stan_model)
-sim_prior <- simulate_prior(stan_model)
-
-density_prior <- estimate_density(sim_prior)
-
-# Combine density for prior and posterior distributions
-post_prior <- density %>% mutate(type='posterior') %>%
-  bind_rows(density_prior %>% mutate(type='prior'))
+sim_prior <- simulate_prior(stan_model) %>%
+  pivot_longer(everything(),names_to='Parameter')
 ```
 
-Plot the prior and posterior distributions
-
+Plot priors
 ```{r}
-ggplot(data=post_prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=x,y=y,fill=type)) + 
+ggplot(data=sim_prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value)) + 
+  facet_grid(~Parameter,scales='free_x') +
   theme_minimal() +
-  theme(legend.position='top') +
-  facet_wrap(~Parameter,ncol=1,scales='free') +
-  geom_ribbon( mapping = aes(
-    ymin = 0,
-    ymax = y  ),
-  alpha = .8) +   
-  scale_fill_manual(values=c('steelblue','grey'))
+  theme(legend.position='top',
+        plot.title = element_text(hjust = 0.5)) +
+  geom_density() + ggtitle('Prior Distributions')
 ```
+
+
+```{r}
+mcmc_areas(stan_model,pars=c('Advertising','Price')) + theme_bw()
+mcmc_intervals(stan_model,pars=c('Advertising','Price')) + theme_bw()
+posterior_vs_prior(stan_model)
+```
+
+
+Posterior Prediction Check
+
+```{r}
+pp_check(stan_model)
+```
+
+
+Manually plot the outcome distribution to compare to the posterior check plot above 
+
+```{r}
+ggplot(aes(x=Sales),data=carseat_train) + geom_density() + theme_minimal()
+```
+
+
 
