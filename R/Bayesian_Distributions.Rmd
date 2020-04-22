@@ -39,6 +39,10 @@ density <- estimate_density(model)
 sim_prior <- simulate_prior(model)
 density_prior <- estimate_density(sim_prior)
 
+sim_likelihood <-  sleep %>% select(group) 
+
+density_likelihood <- estimate_density(sim_likelihood)
+
 # Combine density for prior and posterior distributions
 post_prior <- density %>% mutate(type='posterior') %>%
   bind_rows(density_prior %>% mutate(type='prior'))

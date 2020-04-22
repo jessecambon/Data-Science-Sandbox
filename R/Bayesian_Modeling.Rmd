@@ -1,0 +1,96 @@
+---
+title: "Bayesian Modeling"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+References:
+* http://appliedpredictivemodeling.com/data
+* http://faculty.marshall.usc.edu/gareth-james/ISL/data.html
+## Setup
+
+```{r}
+library(AppliedPredictiveModeling) # datasets
+library(ISLR) # datasets
+library(skimr)
+library(tidyverse)
+library(wesanderson)
+library(rstanarm)
+library(bayestestR)
+library(broom)
+library(rsample)
+
+num_cores <-  parallel::detectCores()
+options(mc.cores = num_cores)
+
+set.seed(42) # for reproducibility
+
+# C/V split
+split <- initial_split(Carseats, prop = 1/2)
+carseat_train <- training(split) %>% as_tibble()
+carseat_test  <- testing(split) %>% as_tibble()
+```
+
+
+
+Fit models
+
+```{r}
+lm_model <- lm(Sales ~ Advertising + Price, data = carseat_train)
+stan_model <- stan_glm(Sales ~ Advertising + Price, data = carseat_train)
+```
+
+```{r}
+tidy(lm_model)
+tidy(stan_model)
+```
+
+
+Make predictions using the posterior distribution
+
+```{r}
+post_pred <- posterior_predict(stan_model,new_data = carseat_test,draws = 1000) %>%
+  as_tibble()
+
+#post_pred_density <- estimate_density(post_pred)
+
+```
+
+Look at the posterior prediction distribution for a single observation
+
+```{r}
+ggplot(aes(x=`5`),data=post_pred) + geom_density() + theme_minimal()
+```
+
+Plot prior and posterior distributions for predictors
+
+https://github.com/easystats/see/issues/48
+
+```{r}
+density <- estimate_density(stan_model)
+sim_prior <- simulate_prior(stan_model)
+
+density_prior <- estimate_density(sim_prior)
+
+# Combine density for prior and posterior distributions
+post_prior <- density %>% mutate(type='posterior') %>%
+  bind_rows(density_prior %>% mutate(type='prior'))
+```
+
+Plot the prior and posterior distributions
+
+```{r}
+ggplot(data=post_prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=x,y=y,fill=type)) + 
+  theme_minimal() +
+  theme(legend.position='top') +
+  facet_wrap(~Parameter,ncol=1,scales='free') +
+  geom_ribbon( mapping = aes(
+    ymin = 0,
+    ymax = y  ),
+  alpha = .8) +   
+  scale_fill_manual(values=c('steelblue','grey'))
+```
+
