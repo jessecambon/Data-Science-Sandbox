@@ -59,8 +59,6 @@ tidy(stan_model) %>% kable()
 
 ```{r}
 prior_summary(stan_model)
-
-pointest <- point_estimate(stan_model)
 ```
 
 
@@ -69,20 +67,6 @@ Make predictions using the posterior distribution
 ```{r}
 post_pred <- posterior_predict(stan_model,new_data = carseat_test,draws = 1000) %>%
   as_tibble()
-
-#post_pred_density <- estimate_density(post_pred)
-
-```
-
-Look at the posterior prediction distribution for a single observation
-
-```{r}
-
-row_num <- quo(`25`)
-ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal()
-
-# Take a look at that same row number
-print(carseat_test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as_label(row_num))))
 ```
 
 Draw from the prior distribution
@@ -96,39 +80,24 @@ prior <- simulate_prior(stan_model) %>%
 posterior <- get_parameters(stan_model,iterations=10000) %>% 
   pivot_longer(everything(),names_to='Parameter')
 
+# Combine into one dataset
 prior_posterior <- prior %>% mutate(Distribution='Prior') %>% 
   bind_rows(posterior %>% mutate(Distribution='Posterior'))
 
 ```
 
 ```{r}
-ggplot(data=prior_posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Distribution)) + 
-  facet_wrap(Parameter~Distribution,scales='free') +
+ggplot(data=prior_posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) +
+  facet_wrap(.~fct_rev(Distribution),scales='free') +
   theme_minimal() +
+  geom_vline(xintercept=0,color='red',size=0.2,linetype='dashed') +
   theme(legend.position='top',
         legend.title=element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  geom_density() + ggtitle('Prior vs Posterior Distributions') +
-  xlab('') + ylab('') 
+  geom_density() + ggtitle('Parameter Distributions') +
+  xlab('') + ylab('') + scale_color_jcolors('pal6') + 
+  guides(color = guide_legend(reverse=T))
   
-```
-
-
-
-Plot priors
-```{r}
-ggplot(data=prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) + 
-  facet_grid(~Parameter,scales='free_x') +
-  theme_minimal() +
-  theme(legend.position='top',
-        plot.title = element_text(hjust = 0.5)) +
-  geom_density() + ggtitle('Prior Distributions') +
-ggplot(data=posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) + 
-  facet_grid(~Parameter,scales='free_x') +
-  theme_minimal() +
-  theme(legend.position='top',
-        plot.title = element_text(hjust = 0.5)) +
-  geom_density() + ggtitle('Posterior Distributions') 
 ```
 
 
@@ -152,5 +121,14 @@ Manually plot the outcome distribution to compare to the posterior check plot ab
 ggplot(aes(x=Sales),data=carseat_train) + geom_density() + theme_minimal()
 ```
 
+Look at the posterior prediction distribution for a single observation
 
+```{r}
+
+row_num <- quo(`25`)
+ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal()
+
+# Take a look at that same row number
+print(carseat_test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as_label(row_num))))
+```
 
