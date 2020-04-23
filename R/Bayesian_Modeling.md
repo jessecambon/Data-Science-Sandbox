@@ -1,7 +1,7 @@
 Bayesian Modeling
 ================
 Jesse Cambon
-22 April, 2020
+23 April, 2020
 
 References: \* <http://appliedpredictivemodeling.com/data> \*
 <http://faculty.marshall.usc.edu/gareth-james/ISL/data.html>
@@ -16,10 +16,13 @@ library(tidyverse)
 library(wesanderson)
 library(rstanarm)
 library(bayestestR)
+library(insight)
 library(bayesplot)
 library(broom)
 library(rsample)
 library(knitr)
+library(jcolors)
+library(patchwork)
 
 num_cores <-  parallel::detectCores()
 options(mc.cores = num_cores)
@@ -59,6 +62,36 @@ tidy(stan_model) %>% kable()
 | Advertising |   0.1361909 | 0.0250300 |
 | Price       | \-0.0586394 | 0.0071318 |
 
+``` r
+prior_summary(stan_model)
+```
+
+    ## Priors for model 'stan_model' 
+    ## ------
+    ## Intercept (after predictors centered)
+    ##   Specified prior:
+    ##     ~ normal(location = 0, scale = 10)
+    ##   Adjusted prior:
+    ##     ~ normal(location = 0, scale = 28)
+    ## 
+    ## Coefficients
+    ##   Specified prior:
+    ##     ~ normal(location = [0,0], scale = [2.5,2.5])
+    ##   Adjusted prior:
+    ##     ~ normal(location = [0,0], scale = [1.05,0.31])
+    ## 
+    ## Auxiliary (sigma)
+    ##   Specified prior:
+    ##     ~ exponential(rate = 1)
+    ##   Adjusted prior:
+    ##     ~ exponential(rate = 0.35)
+    ## ------
+    ## See help('prior_summary.stanreg') for more details
+
+``` r
+pointest <- point_estimate(stan_model)
+```
+
 Make predictions using the posterior
 distribution
 
@@ -78,7 +111,7 @@ ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal()
 
     ## Don't know how to automatically pick scale for object of type ppd/matrix. Defaulting to continuous.
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-5-1.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-6-1.png)<!-- -->
 
 ``` r
 # Take a look at that same row number
@@ -93,35 +126,64 @@ print(carseat_test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as
 Draw from the prior distribution
 
 ``` r
-sim_prior <- simulate_prior(stan_model) %>%
+# Simulate prior with bayestestR package
+prior <- simulate_prior(stan_model) %>%
   pivot_longer(everything(),names_to='Parameter')
+
+# Simulate Posterior with insight package
+posterior <- get_parameters(stan_model,iterations=10000) %>% 
+  pivot_longer(everything(),names_to='Parameter')
+
+prior_posterior <- prior %>% mutate(Distribution='Prior') %>% 
+  bind_rows(posterior %>% mutate(Distribution='Posterior'))
 ```
+
+``` r
+ggplot(data=prior_posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Distribution)) + 
+  facet_wrap(Parameter~Distribution,scales='free') +
+  theme_minimal() +
+  theme(legend.position='top',
+        legend.title=element_blank(),
+        plot.title = element_text(hjust = 0.5)) +
+  geom_density() + ggtitle('Prior vs Posterior Distributions') +
+  xlab('') + ylab('') 
+```
+
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-8-1.png)<!-- -->
 
 Plot
 priors
 
 ``` r
-ggplot(data=sim_prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value)) + 
+ggplot(data=prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) + 
   facet_grid(~Parameter,scales='free_x') +
   theme_minimal() +
   theme(legend.position='top',
         plot.title = element_text(hjust = 0.5)) +
-  geom_density() + ggtitle('Prior Distributions')
+  geom_density() + ggtitle('Prior Distributions') +
+ggplot(data=posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) + 
+  facet_grid(~Parameter,scales='free_x') +
+  theme_minimal() +
+  theme(legend.position='top',
+        plot.title = element_text(hjust = 0.5)) +
+  geom_density() + ggtitle('Posterior Distributions') 
 ```
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-7-1.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
 mcmc_areas(stan_model,pars=c('Advertising','Price')) + theme_bw()
 ```
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-8-1.png)<!-- -->
+    ## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
+
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 mcmc_intervals(stan_model,pars=c('Advertising','Price')) + theme_bw()
 ```
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-8-2.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-10-2.png)<!-- -->
 
 ``` r
 posterior_vs_prior(stan_model)
@@ -130,7 +192,7 @@ posterior_vs_prior(stan_model)
     ## 
     ## Drawing from prior...
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-8-3.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-10-3.png)<!-- -->
 
 Posterior Prediction Check
 
@@ -138,7 +200,7 @@ Posterior Prediction Check
 pp_check(stan_model)
 ```
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-9-1.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-11-1.png)<!-- -->
 
 Manually plot the outcome distribution to compare to the posterior check
 plot
@@ -148,4 +210,4 @@ above
 ggplot(aes(x=Sales),data=carseat_train) + geom_density() + theme_minimal()
 ```
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-10-1.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-12-1.png)<!-- -->

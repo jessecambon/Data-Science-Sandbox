@@ -26,10 +26,13 @@ library(tidyverse)
 library(wesanderson)
 library(rstanarm)
 library(bayestestR)
+library(insight)
 library(bayesplot)
 library(broom)
 library(rsample)
 library(knitr)
+library(jcolors)
+library(patchwork)
 
 num_cores <-  parallel::detectCores()
 options(mc.cores = num_cores)
@@ -52,6 +55,12 @@ stan_model <- stan_glm(Sales ~ Advertising + Price, data = carseat_train)
 ```{r}
 tidy(lm_model) %>% kable()
 tidy(stan_model) %>% kable()
+```
+
+```{r}
+prior_summary(stan_model)
+
+pointest <- point_estimate(stan_model)
 ```
 
 
@@ -79,18 +88,47 @@ print(carseat_test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as
 Draw from the prior distribution
 
 ```{r}
-sim_prior <- simulate_prior(stan_model) %>%
+# Simulate prior with bayestestR package
+prior <- simulate_prior(stan_model) %>%
   pivot_longer(everything(),names_to='Parameter')
+
+# Simulate Posterior with insight package
+posterior <- get_parameters(stan_model,iterations=10000) %>% 
+  pivot_longer(everything(),names_to='Parameter')
+
+prior_posterior <- prior %>% mutate(Distribution='Prior') %>% 
+  bind_rows(posterior %>% mutate(Distribution='Posterior'))
+
 ```
+
+```{r}
+ggplot(data=prior_posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Distribution)) + 
+  facet_wrap(Parameter~Distribution,scales='free') +
+  theme_minimal() +
+  theme(legend.position='top',
+        legend.title=element_blank(),
+        plot.title = element_text(hjust = 0.5)) +
+  geom_density() + ggtitle('Prior vs Posterior Distributions') +
+  xlab('') + ylab('') 
+  
+```
+
+
 
 Plot priors
 ```{r}
-ggplot(data=sim_prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value)) + 
+ggplot(data=prior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) + 
   facet_grid(~Parameter,scales='free_x') +
   theme_minimal() +
   theme(legend.position='top',
         plot.title = element_text(hjust = 0.5)) +
-  geom_density() + ggtitle('Prior Distributions')
+  geom_density() + ggtitle('Prior Distributions') +
+ggplot(data=posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) + 
+  facet_grid(~Parameter,scales='free_x') +
+  theme_minimal() +
+  theme(legend.position='top',
+        plot.title = element_text(hjust = 0.5)) +
+  geom_density() + ggtitle('Posterior Distributions') 
 ```
 
 
