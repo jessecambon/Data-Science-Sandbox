@@ -30,7 +30,7 @@ The purpose of this repository is to provide code and resources that can be quic
 
 ## Statistical Modeling and Machine Learning
 * [Modeling Fundamentals](R/Titanic.md) (R) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
-* [Bayesian Modeling](R/Bayesian_Distributions.md) (R) - Experimenting with bayesian models using rstanarm
+* [Bayesian Modeling](R/Bayesian_Modeling.md) (R) - Experimenting with bayesian models using rstanarm
 * [Modeling Workflows](R/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, prophet, etc.)
 * [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
