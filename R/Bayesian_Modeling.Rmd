@@ -43,6 +43,9 @@ set.seed(42) # for reproducibility
 split <- initial_split(Carseats, prop = 1/2)
 carseat_train <- training(split) %>% as_tibble()
 carseat_test  <- testing(split) %>% as_tibble()
+
+carseat_train_small <- carseat_train %>% sample_n(50)
+carseat_train_tiny <- carseat_train %>% sample_n(10)
 ```
 
 Fit models
@@ -50,6 +53,8 @@ Fit models
 ```{r}
 lm_model <- lm(Sales ~ Advertising + Price, data = carseat_train)
 stan_model <- stan_glm(Sales ~ Advertising + Price, data = carseat_train)
+stan_model_small <- stan_glm(Sales ~ Advertising + Price, data = carseat_train_small)
+stan_model_tiny <- stan_glm(Sales ~ Advertising + Price, data = carseat_train_tiny)
 ```
 
 ```{r}
@@ -61,57 +66,79 @@ tidy(stan_model) %>% kable()
 prior_summary(stan_model)
 ```
 
-
-Make predictions using the posterior distribution
-
 ```{r}
-post_pred <- posterior_predict(stan_model,new_data = carseat_test,draws = 1000) %>%
-  as_tibble()
+prior_summary(stan_model_small)
 ```
 
-Draw from the prior distribution
+```{r}
+prior_summary(stan_model_tiny)
+```
+
+Draw from the prior and posterior distributions
 
 ```{r}
-# Simulate prior with bayestestR package
-prior <- simulate_prior(stan_model) %>%
+# Function for simulating prior and posterior distributions from stan model
+sim_post_prior <- function(model) {
+  # Simulate prior with bayestestR package
+  prior <- simulate_prior(model) %>%
   pivot_longer(everything(),names_to='Parameter')
 
-# Simulate Posterior with insight package
-posterior <- get_parameters(stan_model,iterations=10000) %>% 
+  # Simulate Posterior with insight package
+  posterior <- get_parameters(model,iterations=10000) %>% 
   pivot_longer(everything(),names_to='Parameter')
 
-# Combine into one dataset
-prior_posterior <- prior %>% mutate(Distribution='Prior') %>% 
+  # Combine into one dataset
+  combined <- prior %>% mutate(Distribution='Prior') %>% 
   bind_rows(posterior %>% mutate(Distribution='Posterior'))
+  
+  return(combined)
+}
+
+prior_posterior <- sim_post_prior(stan_model)
+prior_posterior_small <- sim_post_prior(stan_model_small)
+prior_posterior_tiny <- sim_post_prior(stan_model_tiny)
 
 ```
 
 ```{r}
-ggplot(data=prior_posterior %>% filter(!str_detect(Parameter,'Intercept')),aes(x=value,color=Parameter)) +
+# Function for plotting 
+plot_parameters <- function(distribution_sample,train_data) {
+ggplot(data=distribution_sample %>% filter(!str_detect(Parameter,'Intercept')),
+       aes(x=value,color=Parameter)) +
   facet_wrap(.~fct_rev(Distribution),scales='free') +
   theme_minimal() +
   geom_vline(xintercept=0,color='red',size=0.2,linetype='dashed') +
   theme(legend.position='top',
         legend.title=element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  geom_density() + ggtitle('Parameter Distributions') +
+  geom_density() + ggtitle(str_c('n = ',as.character(nrow(train_data)))) +
   xlab('') + ylab('') + scale_color_jcolors('pal6') + 
   guides(color = guide_legend(reverse=T))
-  
+}
 ```
 
+Compare parameter distributions by sample size of training dataset
 
 ```{r}
-mcmc_areas(stan_model,pars=c('Advertising','Price')) + theme_bw()
-mcmc_intervals(stan_model,pars=c('Advertising','Price')) + theme_bw()
-posterior_vs_prior(stan_model)
+plot_parameters(prior_posterior,carseat_train) 
+plot_parameters(prior_posterior_small,carseat_train_small) 
+plot_parameters(prior_posterior_tiny,carseat_train_tiny)
+
 ```
 
 
 Posterior Prediction Check
 
 ```{r}
-pp_check(stan_model)
+# Function that adds size of training dataset to pp_check
+pp_check_info <- function(model) {
+  pp_check(model) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
+      theme(plot.title = element_text(hjust = 0.5))
+}
+
+pp_check_info(stan_model)
+pp_check_info(stan_model_small)
+pp_check_info(stan_model_tiny)
 ```
 
 
@@ -120,6 +147,21 @@ Manually plot the outcome distribution to compare to the posterior check plot ab
 ```{r}
 ggplot(aes(x=Sales),data=carseat_train) + geom_density() + theme_minimal()
 ```
+
+Make predictions using the posterior distribution
+
+```{r}
+post_pred <- posterior_predict(stan_model,new_data = carseat_test,draws = 1000) %>%
+  as_tibble()
+```
+
+```{r}
+mcmc_areas(stan_model,pars=c('Advertising','Price')) + theme_bw()
+mcmc_intervals(stan_model,pars=c('Advertising','Price')) + theme_bw()
+posterior_vs_prior(stan_model)
+```
+
+
 
 Look at the posterior prediction distribution for a single observation
 
