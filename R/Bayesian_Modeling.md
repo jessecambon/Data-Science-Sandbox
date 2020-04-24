@@ -1,7 +1,7 @@
 Bayesian Modeling
 ================
 Jesse Cambon
-23 April, 2020
+24 April, 2020
 
 References: \* <http://appliedpredictivemodeling.com/data> \*
 <http://faculty.marshall.usc.edu/gareth-james/ISL/data.html>
@@ -23,6 +23,7 @@ library(rsample)
 library(knitr)
 library(jcolors)
 library(patchwork)
+library(ggrepel)
 
 num_cores <-  parallel::detectCores()
 options(mc.cores = num_cores)
@@ -145,7 +146,8 @@ prior_summary(stan_model_tiny)
     ## ------
     ## See help('prior_summary.stanreg') for more details
 
-Draw from the prior and posterior distributions
+Draw from the prior and posterior
+distributions
 
 ``` r
 # Function for simulating prior and posterior distributions from stan model
@@ -170,20 +172,47 @@ prior_posterior_small <- sim_post_prior(stan_model_small)
 prior_posterior_tiny <- sim_post_prior(stan_model_tiny)
 ```
 
+Plot our parameter prior and posterior distributions
+
 ``` r
+# Find the x,y coordinates for peak density in a sample
+find_peak_density <- function(x_sample) {
+# need the unlist() call to read from nested tibble data
+density_x <- density(x_sample)
+# Find coordinates for peak density
+x_max <- density_x$x[which.max(density_x$y)]
+y_max <- max(density_x$y)
+
+return(tibble(x=x_max,y=y_max))
+}
+
 # Function for plotting 
 plot_parameters <- function(distribution_sample,train_data) {
-ggplot(data=distribution_sample %>% filter(!str_detect(Parameter,'Intercept')),
-       aes(x=value,color=Parameter)) +
-  facet_wrap(.~fct_rev(Distribution),scales='free') +
-  theme_minimal() +
-  geom_vline(xintercept=0,color='red',size=0.2,linetype='dashed') +
-  theme(legend.position='top',
-        legend.title=element_blank(),
-        plot.title = element_text(hjust = 0.5)) +
-  geom_density() + ggtitle(str_c('n = ',as.character(nrow(train_data)))) +
-  xlab('') + ylab('') + scale_color_jcolors('pal6') + 
-  guides(color = guide_legend(reverse=T))
+    
+  # data to plot - exclude intercept term
+  plot_data <- distribution_sample %>% filter(!str_detect(Parameter,'Intercept'))
+    
+  # Points for labeling max density 
+  # based loosely on: https://stackoverflow.com/questions/56520287/how-to-add-label-to-each-geom-density-line)
+ density_coordinates <- plot_data %>% 
+  group_by(Distribution,Parameter) %>%
+  do(find_peak_density(.$value))
+    
+  ggplot(data=plot_data,
+         aes(x=value,fill=Parameter)) +
+    facet_wrap(~fct_rev(Distribution),scales='free') +
+    theme_minimal() +
+    scale_y_continuous(expand =c(0,0,0.15,0)) + # add spacing for labels
+    geom_vline(xintercept=0,color='red',size=0.25,linetype='dashed') +
+    geom_point(data=density_coordinates, aes(x=x, y=y),show.legend = F) +
+    geom_text_repel(data=density_coordinates, aes(label=round(x,2),x=x, y=y),
+                     force=1.5,size=4,show.legend = F) +
+    theme(legend.position='top',
+          legend.title=element_blank(),
+          plot.title = element_text(hjust = 0.5)) +
+    geom_density(alpha=0.4,size=0.05) + ggtitle(str_c('n = ',as.character(nrow(train_data)))) +
+    xlab('') + ylab('') + scale_fill_jcolors('pal6') + 
+    guides(color = guide_legend(reverse=T))
 }
 ```
 
@@ -213,6 +242,7 @@ Posterior Prediction Check
 # Function that adds size of training dataset to pp_check
 pp_check_info <- function(model) {
   pp_check(model) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
+      theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5))
 }
 
@@ -234,7 +264,8 @@ pp_check_info(stan_model_tiny)
 ![](../rmd_images/Bayesian_Modeling/unnamed-chunk-10-3.png)<!-- -->
 
 Manually plot the outcome distribution to compare to the posterior check
-plot above
+plot
+above
 
 ``` r
 ggplot(aes(x=Sales),data=carseat_train) + geom_density() + theme_minimal()
@@ -242,7 +273,8 @@ ggplot(aes(x=Sales),data=carseat_train) + geom_density() + theme_minimal()
 
 ![](../rmd_images/Bayesian_Modeling/unnamed-chunk-11-1.png)<!-- -->
 
-Make predictions using the posterior distribution
+Make predictions using the posterior
+distribution
 
 ``` r
 post_pred <- posterior_predict(stan_model,new_data = carseat_test,draws = 1000) %>%
