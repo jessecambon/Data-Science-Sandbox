@@ -16,6 +16,11 @@ References:
 * http://appliedpredictivemodeling.com/data
 * http://faculty.marshall.usc.edu/gareth-james/ISL/data.html
 
+Todo:
+* HDI
+* Sigma Term
+* References
+
 ## Setup
 
 ```{r,message=F,warning=F}
@@ -39,23 +44,46 @@ num_cores <-  parallel::detectCores()
 options(mc.cores = num_cores)
 
 set.seed(42) # for reproducibility
+```
 
-# C/V split
-split <- initial_split(Carseats, prop = 1/2)
-carseat_train <- training(split) %>% as_tibble()
-carseat_test  <- testing(split) %>% as_tibble()
+## Set input data and formula
 
-carseat_train_small <- carseat_train %>% sample_n(50)
-carseat_train_tiny <- carseat_train %>% sample_n(10)
+Datasets and formulas:
+* ISLR::Carseats : Sales ~ Advertising + Price
+* ISLR::Credit : Limit ~ Income + Rating
+
+```{r}
+### Set input dataset here ################
+split <- initial_split(Credit, prop = 1/2)
+############################################
+
+### Set model equation here ##########################
+model_formula = as.formula(Limit ~ Income + Rating + Age)
+######################################################
+```
+
+```{r}
+library(DataExplorer)
+plot_histogram(Credit)
+```
+
+
+C/V split
+```{r}
+train <- training(split) %>% as_tibble()
+test  <- testing(split) %>% as_tibble()
+
+train_small <- train %>% sample_n(50)
+train_tiny <- train %>% sample_n(10)
 ```
 
 Fit models
 
 ```{r}
-lm_model <- lm(Sales ~ Advertising + Price, data = carseat_train)
-stan_model <- stan_glm(Sales ~ Advertising + Price, data = carseat_train)
-stan_model_small <- stan_glm(Sales ~ Advertising + Price, data = carseat_train_small)
-stan_model_tiny <- stan_glm(Sales ~ Advertising + Price, data = carseat_train_tiny)
+lm_model <- glm(model_formula, data = train)
+stan_model <- stan_glm(model_formula, data = train)
+stan_model_small <- stan_glm(model_formula, data = train_small)
+stan_model_tiny <- stan_glm(model_formula, data = train_tiny)
 ```
 
 ```{r}
@@ -107,17 +135,16 @@ Plot our parameter prior and posterior distributions
 
 # Find the x,y coordinates for peak density in a sample
 find_peak_density <- function(x_sample) {
-# need the unlist() call to read from nested tibble data
-density_x <- density(x_sample)
-# Find coordinates for peak density
-x_max <- density_x$x[which.max(density_x$y)]
-y_max <- max(density_x$y)
-
-return(tibble(x=x_max,y=y_max))
+  density_x <- density(x_sample)
+  # Find coordinates for peak density
+  x_max <- density_x$x[which.max(density_x$y)]
+  y_max <- max(density_x$y)
+  
+  return(tibble(x=x_max,y=y_max))
 }
 
 # Function for plotting 
-plot_parameters <- function(distribution_sample,train_data) {
+plot_parameters <- function(distribution_sample,train_data,plot_peaks=FALSE) {
     
   # data to plot - exclude intercept term
   plot_data <- distribution_sample %>% filter(!str_detect(Parameter,'Intercept'))
@@ -128,30 +155,37 @@ plot_parameters <- function(distribution_sample,train_data) {
   group_by(Distribution,Parameter) %>%
   do(find_peak_density(.$value))
     
-  ggplot(data=plot_data,
+  base_plot <- ggplot(data=plot_data,
          aes(x=value,fill=Parameter)) +
     facet_wrap(~fct_rev(Distribution),scales='free') +
     theme_minimal() +
     scale_y_continuous(expand =c(0,0,0.15,0)) + # add spacing for labels
     geom_vline(xintercept=0,color='red',size=0.25,linetype='dashed') +
-    geom_point(data=density_coordinates, aes(x=x, y=y),show.legend = F) +
-    geom_text_repel(data=density_coordinates, aes(label=round(x,2),x=x, y=y),
-                     force=1.5,size=4,show.legend = F) +
     theme(legend.position='top',
           legend.title=element_blank(),
           plot.title = element_text(hjust = 0.5)) +
     geom_density(alpha=0.4,size=0.05) + ggtitle(str_c('n = ',as.character(nrow(train_data)))) +
     xlab('') + ylab('') + scale_fill_jcolors('pal6') + 
     guides(color = guide_legend(reverse=T))
+  
+  if (plot_peaks == TRUE) {
+    return(base_plot +
+    geom_point(data=density_coordinates, aes(x=x, y=y),show.legend = F) +
+    geom_text_repel(data=density_coordinates, aes(label=round(x,2),x=x, y=y),
+                     force=1.5,size=4,show.legend = F))
+  }
+  else {
+    return(base_plot)
+  }
 }
 ```
 
 Compare parameter distributions by sample size of training dataset
 
 ```{r}
-plot_parameters(prior_posterior,carseat_train) 
-plot_parameters(prior_posterior_small,carseat_train_small) 
-plot_parameters(prior_posterior_tiny,carseat_train_tiny)
+plot_parameters(prior_posterior,train,plot_peaks=T) 
+plot_parameters(prior_posterior_small,train_small,plot_peaks=T) 
+plot_parameters(prior_posterior_tiny,train_tiny,plot_peaks=T)
 
 ```
 
@@ -174,33 +208,50 @@ pp_check_info(stan_model_tiny)
 
 Manually plot the outcome distribution to compare to the posterior check plot above 
 
+
+
+
 ```{r}
-ggplot(aes(x=Sales),data=carseat_train) + geom_density() + theme_minimal()
+# Extract variables from formula
+all_model_vars <- all.vars(model_formula)
+outcome_var <- sym(all_model_vars[1])
+predictors <- all_model_vars[-1]
+
+ggplot(aes(x=!!outcome_var),data=train) + geom_density() + theme_minimal()
 ```
 
 Make predictions using the posterior distribution
 
 ```{r}
-post_pred <- posterior_predict(stan_model,new_data = carseat_test,draws = 1000) %>%
+post_pred <- posterior_predict(stan_model,new_data = test,draws = 1000) %>%
   as_tibble()
 ```
 
 ```{r}
-mcmc_areas(stan_model,pars=c('Advertising','Price')) + theme_bw()
-mcmc_intervals(stan_model,pars=c('Advertising','Price')) + theme_bw()
-posterior_vs_prior(stan_model)
+# Function that adds size of training dataset to mcmc_areas
+mcmc_areas_info <- function(model,variables) {
+  mcmc_areas(model,pars=variables) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5))
+}
+
+mcmc_areas_info(stan_model,predictors)
+mcmc_areas_info(stan_model_small,predictors)
+mcmc_areas_info(stan_model_tiny,predictors) 
+#mcmc_intervals(stan_model,pars=predictors) + theme_bw()
+#posterior_vs_prior(stan_model)
 ```
 
 
 
 Look at the posterior prediction distribution for a single observation
 
-```{r}
+```{r,eval=F}
 
 row_num <- quo(`25`)
 ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal()
 
 # Take a look at that same row number
-print(carseat_test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as_label(row_num))))
+print(test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as_label(row_num))))
 ```
 
