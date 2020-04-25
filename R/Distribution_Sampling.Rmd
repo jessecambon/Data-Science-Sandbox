@@ -1,0 +1,38 @@
+---
+title: "Bayesian Modeling"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+References:
+* http://appliedpredictivemodeling.com/data
+* http://faculty.marshall.usc.edu/gareth-james/ISL/data.html
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+unif_sample <- runif(4000,-5,5)
+
+norm_sample <- rnorm(5000,0,1)
+
+binom_sample <- rbinom(10000,10,.5)
+
+```
+
+```{r}
+ggplot(data=binom_sample %>% as_tibble()) + 
+  geom_density(aes(x=value)) + theme_minimal()
+```
+
+
