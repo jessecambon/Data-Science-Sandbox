@@ -1,5 +1,5 @@
 ---
-title: "Bayesian Modeling"
+title: "Distribution Sampling"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -23,16 +23,36 @@ library(tidyverse)
 
 ```{r}
 unif_sample <- runif(4000,-5,5)
-
 norm_sample <- rnorm(5000,0,1)
-
 binom_sample <- rbinom(10000,10,.5)
+bernouli_sample <- rbernoulli(10,p=0.9)
+poison_sample <- rpois(1000,10)
+negbinomial_sample <- rnbinom(10000,10,mu=10)
+
 
 ```
 
 ```{r}
-ggplot(data=binom_sample %>% as_tibble()) + 
-  geom_density(aes(x=value)) + theme_minimal()
+ggplot(data=poison_sample %>% as_tibble()) + 
+  geom_density(aes(x=value)) + theme_minimal() +
+  geom_density(data=rnorm(2000,10,5) %>% as_tibble(),aes(x=value),color='navy') +
+  geom_density(data=negbinomial_sample %>% as_tibble(),aes(x=value),color='red')
+```
+
+```{r}
+t.test(trees$Height)
+
+t.test(trees$Girth)
+
+compare_norms <- rnorm(100,25,10) %>%
+  as_tibble() %>% rename(sample1=value) %>%
+  mutate(sample2 = rnorm(100,28,10))
+
+library(broom)
+results <- t.test(compare_norms$sample1,compare_norms$sample2)
+results
+
+tidy_results <- results %>% tidy()
 ```
 
 
