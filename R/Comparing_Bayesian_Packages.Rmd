@@ -1,0 +1,193 @@
+---
+title: "Comparing Bayesian Modeling Packages"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+Compare rstan, brms, and rstanarm
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+```{r,message=F,warning=F}
+library(rstan)
+library(brms)
+library(rstanarm)
+library(tidyverse)
+library(bayesplot)
+options(mc.cores = parallel::detectCores())
+```
+
+
+## Rstan
+
+Walking through this example: https://cran.r-project.org/web/packages/rstan/vignettes/rstan.html#sample-from-the-posterior-distribution
+
+```{r}
+# Sample Dataset
+schools_data <- list(
+  J = 8,
+  y = c(28,  8, -3,  7, -1,  1, 18, 12),
+  sigma = c(15, 10, 16, 11,  9, 11, 10, 18)
+)
+
+stan_code <- "
+data {
+  int<lower=0> J;          // number of schools 
+  real y[J];               // estimated treatment effects
+  real<lower=0> sigma[J];  // s.e. of effect estimates 
+}
+parameters {
+  real mu; 
+  real<lower=0> tau;
+  vector[J] eta;
+}
+transformed parameters {
+  vector[J] theta;
+  theta = mu + tau * eta;
+}
+model {
+  target += normal_lpdf(eta | 0, 1);
+  target += normal_lpdf(y | theta, sigma);
+}"
+```
+
+
+```{r}
+fit1 <- stan(
+  model_code = stan_code,  # Stan program
+  data = schools_data,    # named list of data
+  chains = 4,             # number of Markov chains
+  warmup = 1000,          # number of warmup iterations per chain
+  iter = 2000,            # total number of iterations per chain
+  cores = 2,              # number of cores (could use one per chain)
+  refresh = 0             # no progress shown
+  )
+```
+
+## Brms
+
+The Brms package supports
+
+Example based on : https://github.com/paul-buerkner/brms
+
+* `(1 | var)` is used to specify the variable as a random effect. Random effects are categorical grouping variables we are trying control for.
+
+Mixed effect model has both random effects and fixed effects
+
+* https://www.theanalysisfactor.com/understanding-random-effects-in-mixed-models/
+* https://ourcodingclub.github.io/tutorials/mixed-models/#what
+* https://ase.tufts.edu/gsc/gradresources/guidetomixedmodelsinr/mixed%20model%20guide.html 
+* https://en.wikipedia.org/wiki/Mixed_model
+
+```{r}
+fit1 <- brm(count ~ zAge + zBase * Trt + (1|patient), 
+            data = epilepsy, family = poisson())
+fit2 <- brm(count ~ zAge + zBase * Trt + (1|patient) + (1|obs), 
+            data = epilepsy, family = poisson())
+
+```
+
+```{r}
+fit1
+```
+
+
+```{r}
+plot(fit1, pars = c("Trt", "zBase")) 
+plot(fit2, pars = c("Trt", "zBase"))
+
+```
+
+Compare model results with leave-one-out validation
+
+https://mc-stan.org/loo/
+
+```{r}
+loo(fit1, fit2)
+```
+
+## RStanarm
+
+Rstanarm examle compared with brms
+
+* https://mc-stan.org/loo/articles/loo2-example.html
+* http://mc-stan.org/rstanarm/articles/count.html
+
+brms prior setting: https://www.jamesrrae.com/post/bayesian-logistic-regression-using-brms-part-1/
+
+```{r}
+# Use rstanarm to fit a poisson model
+roach_pois <-
+  stan_glm(
+    formula = y ~ roach1 + treatment + senior,
+    offset = log(exposure2),
+    data = roaches,
+    family = poisson(link = "log"),
+    prior = normal(0, 2.5, autoscale = TRUE),
+    prior_intercept = normal(0, 5, autoscale = TRUE),
+    seed = 12345
+  )
+
+# # Use rstanarm to fit a negative binomial model
+roach_negbinom2 <- update(roach_pois, family = neg_binomial_2)
+```
+
+Fit a Brms model for comparison
+
+```{r}
+# Priors to be used by brm
+my_priors <- c(
+  prior(normal(0, 5), class = "Intercept"),
+  prior(normal(0, 2.5), class = "b")
+)
+
+# Fit with zero inflated negative binomial with brm
+roach_zinb <-
+  brm(
+    formula=y ~ roach1 + treatment + senior,
+    data = roaches,
+    family = zero_inflated_negbinomial,
+    seed = 12345
+  )
+```
+
+```{r}
+plot(roach_pois)
+plot(roach_zinb,pars=c('roach1','treatment','senior'))
+```
+
+
+```{r}
+pp_check(roach_pois,plotfun='stat')
+pp_check(roach_negbinom2,plotfun='stat')
+pp_check(roach_zinb,plotfun='stat')
+```
+
+```{r}
+prop_zero <- function(y) mean(y == 0)
+
+prop_zero_test1 <- pp_check(roach_pois, plotfun = "stat", stat = "prop_zero", binwidth = .005)
+prop_zero_test2 <- pp_check(roach_negbinom2, plotfun = "stat", stat = "prop_zero", 
+                            binwidth = 0.01)
+prop_zero_test3 <- pp_check(roach_zinb, plotfun = "stat", stat = "prop_zero", 
+                            binwidth = 0.01)
+
+# Show graphs for Poisson and negative binomial side by side
+bayesplot_grid(prop_zero_test1 + ggtitle("Poisson"), 
+               prop_zero_test2 + ggtitle("Negative Binomial"), 
+               prop_zero_test3 + ggtitle("Zero Inflated Negative Binomial"),
+               grid_args = list(ncol = 3))
+```
+
+
+
+```{r}
+#loo(roach_pois, roach_negbinom2)
+```
+

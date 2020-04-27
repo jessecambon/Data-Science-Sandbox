@@ -51,20 +51,21 @@ set.seed(42) # for reproducibility
 Datasets and formulas:
 * ISLR::Carseats : Sales ~ Advertising + Price
 * ISLR::Credit : Limit ~ Income + Rating
+* chickwts: weight ~ feed
 
 ```{r}
 ### Set input dataset here ################
-split <- initial_split(Credit, prop = 1/2)
+split <- initial_split(chickwts, prop = 0.9)
 ############################################
 
 ### Set model equation here ##########################
-model_formula = as.formula(Limit ~ Income + Rating + Age)
+model_formula = as.formula(weight ~ feed)
 ######################################################
 ```
 
 ```{r}
 library(DataExplorer)
-plot_histogram(Credit)
+plot_histogram(chickwts)
 ```
 
 
@@ -86,6 +87,86 @@ stan_model_small <- stan_glm(model_formula, data = train_small)
 stan_model_tiny <- stan_glm(model_formula, data = train_tiny)
 ```
 
+Extract posterior
+
+http://mc-stan.org/rstanarm/reference/as.matrix.stanreg.html
+```{r}
+post1 <- as.data.frame(stan_model) %>% as_tibble()
+```
+
+Posterior Intervals
+
+https://mc-stan.org/rstanarm/reference/posterior_interval.stanreg.html
+https://mc-stan.org/rstanarm/articles/rstanarm.html
+```{r}
+rstanarm::posterior_interval(stan_model)
+```
+
+```{r}
+tidy(lm_model,conf.int=T) %>% select(-p.value,-std.error)
+```
+
+
+
+
+```{r}
+describe_posterior(stan_model, test = c("p_direction","rope","bayesfactor"))
+```
+
+
+
+Rope
+
+```{r}
+rope(stan_model)
+#rope(stan_model_small)
+```
+
+
+
+Markov Chain Diagnostics
+
+```{r}
+mcmc_trace(stan_model)
+#mcmc_trace(stan_model_small)
+#mcmc_trace(stan_model_tiny)
+```
+
+Highest Density Intervals
+
+```{r}
+hdi(stan_model)
+stan_model$coefficients
+hdi(stan_model_small)
+hdi(stan_model_tiny)
+```
+
+What percentage of each posterior distribution is greater than a certain cutoff value
+
+```{r}
+
+cutoff_value <- -100 # define the cutoff
+
+posterior <- get_parameters(stan_model,iterations=10000) %>% 
+  pivot_longer(everything(),names_to='Parameter')
+
+post_pct <- 
+  posterior %>% 
+  mutate(above=case_when(value > cutoff_value ~ 1, TRUE ~ 0)) %>%
+  group_by(Parameter) %>%
+  summarize(above_pct=mean(above)) %>%
+  ungroup()
+
+post_pct %>% kable()
+```
+
+```{r}
+mcmc_areas(stan_model,pars=vars(contains('feed')))
+```
+
+
+
+
 ```{r}
 tidy(lm_model) %>% kable()
 tidy(stan_model) %>% kable()
@@ -93,14 +174,6 @@ tidy(stan_model) %>% kable()
 
 ```{r}
 prior_summary(stan_model)
-```
-
-```{r}
-prior_summary(stan_model_small)
-```
-
-```{r}
-prior_summary(stan_model_tiny)
 ```
 
 Draw from the prior and posterior distributions
@@ -183,9 +256,9 @@ plot_parameters <- function(distribution_sample,train_data,plot_peaks=FALSE) {
 Compare parameter distributions by sample size of training dataset
 
 ```{r}
-plot_parameters(prior_posterior,train,plot_peaks=T) 
-plot_parameters(prior_posterior_small,train_small,plot_peaks=T) 
-plot_parameters(prior_posterior_tiny,train_tiny,plot_peaks=T)
+plot_parameters(prior_posterior,train) 
+plot_parameters(prior_posterior_small,train_small) 
+plot_parameters(prior_posterior_tiny,train_tiny)
 
 ```
 
@@ -230,7 +303,9 @@ post_pred <- posterior_predict(stan_model,new_data = test,draws = 1000) %>%
 ```{r}
 # Function that adds size of training dataset to mcmc_areas
 mcmc_areas_info <- function(model,variables) {
-  mcmc_areas(model,pars=variables) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
+  predictor_vars <- str_c('feed',unlist(stan_model$xlevels,use.names=F)[-1])
+  
+  mcmc_areas(model,pars=predictor_vars) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5))
 }
@@ -247,11 +322,15 @@ mcmc_areas_info(stan_model_tiny,predictors)
 Look at the posterior prediction distribution for a single observation
 
 ```{r,eval=F}
+row_num <- quo(`4`)
 
-row_num <- quo(`25`)
-ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal()
+true_value <- test %>% slice(as.numeric(as_label(row_num))) %>%
+  pull(outcome_var)
+
+ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal() +
+  geom_vline(xintercept=true_value,color='steelblue')
 
 # Take a look at that same row number
-print(test %>% select(Sales, Advertising, Price) %>% slice(as.numeric(as_label(row_num))))
+print(test %>% slice(as.numeric(as_label(row_num))))
 ```
 
