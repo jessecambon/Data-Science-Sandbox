@@ -35,10 +35,10 @@ library(insight)
 library(bayesplot)
 library(broom)
 library(rsample)
-library(knitr)
 library(jcolors)
 library(patchwork)
 library(ggrepel)
+library(knitr)
 
 num_cores <-  parallel::detectCores()
 options(mc.cores = num_cores)
@@ -64,8 +64,25 @@ model_formula = as.formula(weight ~ feed)
 ```
 
 ```{r}
-library(DataExplorer)
-plot_histogram(chickwts)
+chickwts %>% group_by(feed) %>%
+  summarize(n=n(),
+            min=min(weight),
+            median=median(weight),
+            mean=mean(weight),
+            max=max(weight)) %>%
+            ungroup() %>%
+  kable()
+```
+
+
+```{r}
+ggplot(data=chickwts,aes(x=weight,fill=feed)) + 
+  facet_wrap( ~ feed) +
+  theme_minimal() +
+  theme(legend.position='none') +
+  geom_density(alpha=0.7)+
+  scale_color_jcolors('default') +
+  xlab('Weight') + ylab('')
 ```
 
 
@@ -74,8 +91,8 @@ C/V split
 train <- training(split) %>% as_tibble()
 test  <- testing(split) %>% as_tibble()
 
-train_small <- train %>% sample_n(50)
-train_tiny <- train %>% sample_n(10)
+train_small <- train %>% sample_n(30)
+train_tiny <- train %>% sample_n(15)
 ```
 
 Fit models
@@ -99,18 +116,22 @@ Posterior Intervals
 https://mc-stan.org/rstanarm/reference/posterior_interval.stanreg.html
 https://mc-stan.org/rstanarm/articles/rstanarm.html
 ```{r}
-rstanarm::posterior_interval(stan_model)
+rstanarm::posterior_interval(stan_model) %>% as.data.frame() %>%
+  rownames_to_column('feed')
 ```
 
 ```{r}
-tidy(lm_model,conf.int=T) %>% select(-p.value,-std.error)
+tidy(lm_model,conf.int=T) %>% select(-std.error)
 ```
 
 
 
 
 ```{r}
-describe_posterior(stan_model, test = c("p_direction","rope","bayesfactor"))
+# this could take a bit to run
+post_descr <- describe_posterior(stan_model, test = c("p_direction","rope","bayesfactor"))
+
+kable(post_descr)
 ```
 
 
@@ -119,7 +140,7 @@ Rope
 
 ```{r}
 rope(stan_model)
-#rope(stan_model_small)
+rope(stan_model_small)
 ```
 
 
@@ -128,7 +149,7 @@ Markov Chain Diagnostics
 
 ```{r}
 mcmc_trace(stan_model)
-#mcmc_trace(stan_model_small)
+mcmc_trace(stan_model_small)
 #mcmc_trace(stan_model_tiny)
 ```
 
@@ -141,7 +162,7 @@ hdi(stan_model_small)
 hdi(stan_model_tiny)
 ```
 
-What percentage of each posterior distribution is greater than a certain cutoff value
+What percentage of each posterior distribution is greater than a certain cutoff value?
 
 ```{r}
 
@@ -151,7 +172,7 @@ posterior <- get_parameters(stan_model,iterations=10000) %>%
   pivot_longer(everything(),names_to='Parameter')
 
 post_pct <- 
-  posterior %>% 
+  posterior %>% filter(Parameter != '(Intercept)') %>%
   mutate(above=case_when(value > cutoff_value ~ 1, TRUE ~ 0)) %>%
   group_by(Parameter) %>%
   summarize(above_pct=mean(above)) %>%
@@ -160,17 +181,27 @@ post_pct <-
 post_pct %>% kable()
 ```
 
+### Posterior Distributions
+
 ```{r}
-mcmc_areas(stan_model,pars=vars(contains('feed')))
+# Function that adds size of training dataset to mcmc_areas
+mcmc_areas_info <- function(model,variables) {
+  predictor_vars <- str_c('feed',unlist(stan_model$xlevels,use.names=F)[-1])
+  
+  mcmc_areas(model,pars=predictor_vars) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5))
+}
+
+mcmc_areas_info(stan_model,predictors)
+mcmc_areas_info(stan_model_small,predictors)
+mcmc_areas_info(stan_model_tiny,predictors) 
+#mcmc_intervals(stan_model,pars=predictors) + theme_bw()
+#posterior_vs_prior(stan_model)
 ```
 
 
 
-
-```{r}
-tidy(lm_model) %>% kable()
-tidy(stan_model) %>% kable()
-```
 
 ```{r}
 prior_summary(stan_model)
@@ -263,7 +294,7 @@ plot_parameters(prior_posterior_tiny,train_tiny)
 ```
 
 
-Posterior Prediction Check
+## Predictive Posterior Distribution
 
 ```{r}
 # Function that adds size of training dataset to pp_check
@@ -300,29 +331,11 @@ post_pred <- posterior_predict(stan_model,new_data = test,draws = 1000) %>%
   as_tibble()
 ```
 
-```{r}
-# Function that adds size of training dataset to mcmc_areas
-mcmc_areas_info <- function(model,variables) {
-  predictor_vars <- str_c('feed',unlist(stan_model$xlevels,use.names=F)[-1])
-  
-  mcmc_areas(model,pars=predictor_vars) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
-      theme_minimal() +
-      theme(plot.title = element_text(hjust = 0.5))
-}
-
-mcmc_areas_info(stan_model,predictors)
-mcmc_areas_info(stan_model_small,predictors)
-mcmc_areas_info(stan_model_tiny,predictors) 
-#mcmc_intervals(stan_model,pars=predictors) + theme_bw()
-#posterior_vs_prior(stan_model)
-```
-
-
 
 Look at the posterior prediction distribution for a single observation
 
-```{r,eval=F}
-row_num <- quo(`4`)
+```{r}
+row_num <- quo(`2`)
 
 true_value <- test %>% slice(as.numeric(as_label(row_num))) %>%
   pull(outcome_var)

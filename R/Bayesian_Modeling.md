@@ -1,7 +1,7 @@
 Bayesian Modeling
 ================
 Jesse Cambon
-26 April, 2020
+29 April, 2020
 
 References: \* <http://appliedpredictivemodeling.com/data> \*
 <http://faculty.marshall.usc.edu/gareth-james/ISL/data.html>
@@ -22,10 +22,10 @@ library(insight)
 library(bayesplot)
 library(broom)
 library(rsample)
-library(knitr)
 library(jcolors)
 library(patchwork)
 library(ggrepel)
+library(knitr)
 
 num_cores <-  parallel::detectCores()
 options(mc.cores = num_cores)
@@ -49,11 +49,36 @@ model_formula = as.formula(weight ~ feed)
 ```
 
 ``` r
-library(DataExplorer)
-plot_histogram(chickwts)
+chickwts %>% group_by(feed) %>%
+  summarize(n=n(),
+            min=min(weight),
+            median=median(weight),
+            mean=mean(weight),
+            max=max(weight)) %>%
+            ungroup() %>%
+  kable()
 ```
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-3-1.png)<!-- -->
+| feed      |  n | min | median |     mean | max |
+| :-------- | -: | --: | -----: | -------: | --: |
+| casein    | 12 | 216 |  342.0 | 323.5833 | 404 |
+| horsebean | 10 | 108 |  151.5 | 160.2000 | 227 |
+| linseed   | 12 | 141 |  221.0 | 218.7500 | 309 |
+| meatmeal  | 11 | 153 |  263.0 | 276.9091 | 380 |
+| soybean   | 14 | 158 |  248.0 | 246.4286 | 329 |
+| sunflower | 12 | 226 |  328.0 | 328.9167 | 423 |
+
+``` r
+ggplot(data=chickwts,aes(x=weight,fill=feed)) + 
+  facet_wrap( ~ feed) +
+  theme_minimal() +
+  theme(legend.position='none') +
+  geom_density(alpha=0.7)+
+  scale_color_jcolors('default') +
+  xlab('Weight') + ylab('')
+```
+
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-4-1.png)<!-- -->
 
 C/V split
 
@@ -61,8 +86,8 @@ C/V split
 train <- training(split) %>% as_tibble()
 test  <- testing(split) %>% as_tibble()
 
-train_small <- train %>% sample_n(50)
-train_tiny <- train %>% sample_n(10)
+train_small <- train %>% sample_n(30)
+train_tiny <- train %>% sample_n(15)
 ```
 
 Fit models
@@ -88,50 +113,54 @@ Posterior Intervals
 <https://mc-stan.org/rstanarm/articles/rstanarm.html>
 
 ``` r
-rstanarm::posterior_interval(stan_model)
+rstanarm::posterior_interval(stan_model) %>% as.data.frame() %>%
+  rownames_to_column('feed')
 ```
 
-    ##                       5%         95%
-    ## (Intercept)    291.27630  348.823590
-    ## feedhorsebean -200.18273 -117.077455
-    ## feedlinseed   -136.17444  -54.577025
-    ## feedmeatmeal   -87.69721   -6.675457
-    ## feedsoybean   -110.93448  -31.152785
-    ## feedsunflower  -28.86849   52.031729
-    ## sigma           49.65987   67.718056
+    ##            feed         5%         95%
+    ## 1   (Intercept)  290.53537  350.194061
+    ## 2 feedhorsebean -200.23743 -116.511315
+    ## 3   feedlinseed -138.06695  -55.356663
+    ## 4  feedmeatmeal  -91.48396   -4.827427
+    ## 5   feedsoybean -113.34100  -30.701755
+    ## 6 feedsunflower  -30.73630   52.775160
+    ## 7         sigma   50.01772   67.437854
 
 ``` r
-tidy(lm_model,conf.int=T) %>% select(-p.value,-std.error)
+tidy(lm_model,conf.int=T) %>% select(-std.error)
 ```
 
-    ## # A tibble: 6 x 5
-    ##   term          estimate statistic conf.low conf.high
-    ##   <chr>            <dbl>     <dbl>    <dbl>     <dbl>
-    ## 1 (Intercept)     323.      17.9      288.     359.  
-    ## 2 feedhorsebean  -163.      -6.39    -213.    -113.  
-    ## 3 feedlinseed    -100.      -4.01    -149.     -51.2 
-    ## 4 feedmeatmeal    -51.2     -2.01    -101.      -1.19
-    ## 5 feedsoybean     -75.6     -3.10    -124.     -27.8 
-    ## 6 feedsunflower     8.52     0.342    -40.3     57.4
+    ## # A tibble: 6 x 6
+    ##   term          estimate statistic  p.value conf.low conf.high
+    ##   <chr>            <dbl>     <dbl>    <dbl>    <dbl>     <dbl>
+    ## 1 (Intercept)     323.      17.9   2.57e-25    288.     359.  
+    ## 2 feedhorsebean  -163.      -6.39  3.05e- 8   -213.    -113.  
+    ## 3 feedlinseed    -100.      -4.01  1.74e- 4   -149.     -51.2 
+    ## 4 feedmeatmeal    -51.2     -2.01  4.95e- 2   -101.      -1.19
+    ## 5 feedsoybean     -75.6     -3.10  3.02e- 3   -124.     -27.8 
+    ## 6 feedsunflower     8.52     0.342 7.34e- 1    -40.3     57.4
 
 ``` r
-describe_posterior(stan_model, test = c("p_direction","rope","bayesfactor"))
+# this could take a bit to run
+post_descr <- describe_posterior(stan_model, test = c("p_direction","rope","bayesfactor"))
 ```
 
     ## Computation of Bayes factors: sampling priors, please wait...
 
     ## Loading required namespace: logspline
 
-    ## # Description of Posterior Distributions
-    ## 
-    ## Parameter     |   Median | CI |   CI_low |  CI_high |    pd | ROPE_CI | ROPE_low | ROPE_high | ROPE_Percentage |          BF |  Rhat |  ESS
-    ## -------------------------------------------------------------------------------------------------------------------------------------------
-    ## (Intercept)   |  319.321 | 89 |  290.958 |  346.643 | 1.000 |      89 |   -8.001 |     8.001 |           0.000 | 2.71712e+12 | 1.003 | 1224
-    ## feedhorsebean | -158.335 | 89 | -199.135 | -118.498 | 1.000 |      89 |   -8.001 |     8.001 |           0.000 |    4695.152 | 1.002 | 1636
-    ## feedlinseed   |  -95.500 | 89 | -134.784 |  -56.117 | 0.999 |      89 |   -8.001 |     8.001 |           0.000 |      84.706 | 1.001 | 1638
-    ## feedmeatmeal  |  -47.398 | 89 |  -85.796 |   -7.000 | 0.971 |      89 |   -8.001 |     8.001 |           0.006 |       0.784 | 1.001 | 1643
-    ## feedsoybean   |  -71.998 | 89 | -111.022 |  -33.822 | 0.996 |      89 |   -8.001 |     8.001 |           0.000 |       5.994 | 1.001 | 1636
-    ## feedsunflower |   12.480 | 89 |  -28.990 |   49.562 | 0.696 |      89 |   -8.001 |     8.001 |           0.244 |       0.134 | 1.002 | 1842
+``` r
+kable(post_descr)
+```
+
+| Parameter     |      Median | CI |     CI\_low |     CI\_high |      pd | ROPE\_CI |  ROPE\_low | ROPE\_high | ROPE\_Percentage |           BF |     Rhat |  ESS |
+| :------------ | ----------: | -: | ----------: | -----------: | ------: | -------: | ---------: | ---------: | ---------------: | -----------: | -------: | ---: |
+| (Intercept)   |   320.24350 | 89 |   290.08448 |   347.803012 | 1.00000 |       89 | \-8.001383 |   8.001383 |        0.0000000 | 1.862527e+24 | 1.008134 | 1252 |
+| feedhorsebean | \-158.87134 | 89 | \-200.56483 | \-120.058178 | 1.00000 |       89 | \-8.001383 |   8.001383 |        0.0000000 | 3.911899e+03 | 1.004595 | 1767 |
+| feedlinseed   |  \-95.51556 | 89 | \-135.69007 |  \-55.959280 | 1.00000 |       89 | \-8.001383 |   8.001383 |        0.0000000 | 4.199747e+01 | 1.006326 | 1665 |
+| feedmeatmeal  |  \-47.54054 | 89 |  \-92.05273 |   \-8.744213 | 0.96725 |       89 | \-8.001383 |   8.001383 |        0.0000000 | 6.826946e-01 | 1.006196 | 1625 |
+| feedsoybean   |  \-72.21472 | 89 | \-113.19881 |  \-33.269377 | 0.99750 |       89 | \-8.001383 |   8.001383 |        0.0000000 | 8.051012e+00 | 1.006223 | 1636 |
+| feedsunflower |    11.16637 | 89 |  \-27.96346 |    52.923724 | 0.67150 |       89 | \-8.001383 |   8.001383 |        0.2580736 | 1.391958e-01 | 1.003641 | 1768 |
 
 Rope
 
@@ -146,13 +175,24 @@ rope(stan_model)
     ## (Intercept)   |      0.00 %
     ## feedhorsebean |      0.00 %
     ## feedlinseed   |      0.00 %
-    ## feedmeatmeal  |      0.65 %
+    ## feedmeatmeal  |      0.00 %
     ## feedsoybean   |      0.00 %
-    ## feedsunflower |     24.38 %
+    ## feedsunflower |     25.81 %
 
 ``` r
-#rope(stan_model_small)
+rope(stan_model_small)
 ```
+
+    ## # Proportion of samples inside the ROPE [-8.07, 8.07]:
+    ## 
+    ## Parameter     | inside ROPE
+    ## ---------------------------
+    ## (Intercept)   |      0.00 %
+    ## feedhorsebean |      0.00 %
+    ## feedlinseed   |      8.57 %
+    ## feedmeatmeal  |     15.25 %
+    ## feedsoybean   |      0.00 %
+    ## feedsunflower |      9.77 %
 
 Markov Chain Diagnostics
 
@@ -160,10 +200,15 @@ Markov Chain Diagnostics
 mcmc_trace(stan_model)
 ```
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-11-1.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
-#mcmc_trace(stan_model_small)
+mcmc_trace(stan_model_small)
+```
+
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-12-2.png)<!-- -->
+
+``` r
 #mcmc_trace(stan_model_tiny)
 ```
 
@@ -177,21 +222,21 @@ hdi(stan_model)
     ## 
     ## Parameter     |            89% HDI
     ## ----------------------------------
-    ## (Intercept)   | [ 290.96,  346.64]
-    ## feedhorsebean | [-199.14, -118.50]
-    ## feedlinseed   | [-134.78,  -56.12]
-    ## feedmeatmeal  | [ -85.80,   -7.00]
-    ## feedsoybean   | [-111.02,  -33.82]
-    ## feedsunflower | [ -28.99,   49.56]
+    ## (Intercept)   | [ 290.08,  347.80]
+    ## feedhorsebean | [-200.56, -120.06]
+    ## feedlinseed   | [-135.69,  -55.96]
+    ## feedmeatmeal  | [ -92.05,   -8.74]
+    ## feedsoybean   | [-113.20,  -33.27]
+    ## feedsunflower | [ -27.96,   52.92]
 
 ``` r
 stan_model$coefficients
 ```
 
     ##   (Intercept) feedhorsebean   feedlinseed  feedmeatmeal   feedsoybean 
-    ##     319.32076    -158.33490     -95.50015     -47.39838     -71.99846 
+    ##     320.24350    -158.87134     -95.51556     -47.54054     -72.21472 
     ## feedsunflower 
-    ##      12.48013
+    ##      11.16637
 
 ``` r
 hdi(stan_model_small)
@@ -199,14 +244,14 @@ hdi(stan_model_small)
 
     ## # Highest Density Interval
     ## 
-    ## Parameter     |            89% HDI
-    ## ----------------------------------
-    ## (Intercept)   | [ 289.23,  350.53]
-    ## feedhorsebean | [-201.52, -110.40]
-    ## feedlinseed   | [-138.07,  -45.98]
-    ## feedmeatmeal  | [-102.99,  -14.77]
-    ## feedsoybean   | [-101.73,  -20.53]
-    ## feedsunflower | [ -21.10,   62.79]
+    ## Parameter     |           89% HDI
+    ## ---------------------------------
+    ## (Intercept)   | [ 269.04, 351.91]
+    ## feedhorsebean | [-201.99, -83.31]
+    ## feedlinseed   | [-127.78,  17.69]
+    ## feedmeatmeal  | [ -89.46,  36.34]
+    ## feedsoybean   | [-116.26, -12.99]
+    ## feedsunflower | [ -13.58, 105.97]
 
 ``` r
 hdi(stan_model_tiny)
@@ -216,15 +261,15 @@ hdi(stan_model_tiny)
     ## 
     ## Parameter     |           89% HDI
     ## ---------------------------------
-    ## (Intercept)   | [ 248.83, 361.31]
-    ## feedhorsebean | [-203.67, -50.82]
-    ## feedlinseed   | [-135.02,  67.39]
-    ## feedmeatmeal  | [-139.32,  58.56]
-    ## feedsoybean   | [-159.85,  39.94]
-    ## feedsunflower | [ -55.54, 105.11]
+    ## (Intercept)   | [ 304.94, 426.25]
+    ## feedhorsebean | [-225.23, -53.81]
+    ## feedlinseed   | [-245.32, -32.72]
+    ## feedmeatmeal  | [-211.73, -54.28]
+    ## feedsoybean   | [-154.78, -12.64]
+    ## feedsunflower | [ -76.13,  96.25]
 
 What percentage of each posterior distribution is greater than a certain
-cutoff value
+cutoff value?
 
 ``` r
 cutoff_value <- -100 # define the cutoff
@@ -233,7 +278,7 @@ posterior <- get_parameters(stan_model,iterations=10000) %>%
   pivot_longer(everything(),names_to='Parameter')
 
 post_pct <- 
-  posterior %>% 
+  posterior %>% filter(Parameter != '(Intercept)') %>%
   mutate(above=case_when(value > cutoff_value ~ 1, TRUE ~ 0)) %>%
   group_by(Parameter) %>%
   summarize(above_pct=mean(above)) %>%
@@ -244,46 +289,51 @@ post_pct %>% kable()
 
 | Parameter     | above\_pct |
 | :------------ | ---------: |
-| (Intercept)   |    1.00000 |
-| feedhorsebean |    0.01025 |
-| feedlinseed   |    0.57450 |
-| feedmeatmeal  |    0.98200 |
-| feedsoybean   |    0.88175 |
+| feedhorsebean |    0.01075 |
+| feedlinseed   |    0.56675 |
+| feedmeatmeal  |    0.97650 |
+| feedsoybean   |    0.86925 |
 | feedsunflower |    1.00000 |
 
+### Posterior Distributions
+
 ``` r
-mcmc_areas(stan_model,pars=vars(contains('feed')))
+# Function that adds size of training dataset to mcmc_areas
+mcmc_areas_info <- function(model,variables) {
+  predictor_vars <- str_c('feed',unlist(stan_model$xlevels,use.names=F)[-1])
+  
+  mcmc_areas(model,pars=predictor_vars) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5))
+}
+
+mcmc_areas_info(stan_model,predictors)
 ```
 
     ## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
 
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-14-1.png)<!-- -->
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
-tidy(lm_model) %>% kable()
+mcmc_areas_info(stan_model_small,predictors)
 ```
 
-| term          |     estimate | std.error |   statistic |   p.value |
-| :------------ | -----------: | --------: | ----------: | --------: |
-| (Intercept)   |   323.300000 |  18.04243 |  17.9188675 | 0.0000000 |
-| feedhorsebean | \-163.100000 |  25.51586 | \-6.3921038 | 0.0000000 |
-| feedlinseed   | \-100.027273 |  24.92921 | \-4.0124532 | 0.0001744 |
-| feedmeatmeal  |  \-51.200000 |  25.51586 | \-2.0065954 | 0.0494624 |
-| feedsoybean   |  \-75.633333 |  24.42957 | \-3.0959745 | 0.0030196 |
-| feedsunflower |     8.518182 |  24.92921 |   0.3416949 | 0.7338155 |
+    ## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
+
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-15-2.png)<!-- -->
 
 ``` r
-tidy(stan_model) %>% kable()
+mcmc_areas_info(stan_model_tiny,predictors) 
 ```
 
-| term          |    estimate | std.error |
-| :------------ | ----------: | --------: |
-| (Intercept)   |   319.32076 |  17.46102 |
-| feedhorsebean | \-158.33490 |  24.68960 |
-| feedlinseed   |  \-95.50015 |  24.90985 |
-| feedmeatmeal  |  \-47.39838 |  24.37650 |
-| feedsoybean   |  \-71.99846 |  23.99419 |
-| feedsunflower |    12.48013 |  24.61945 |
+    ## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
+
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-15-3.png)<!-- -->
+
+``` r
+#mcmc_intervals(stan_model,pars=predictors) + theme_bw()
+#posterior_vs_prior(stan_model)
+```
 
 ``` r
 prior_summary(stan_model)
@@ -406,7 +456,7 @@ plot_parameters(prior_posterior_tiny,train_tiny)
 
 ![](../rmd_images/Bayesian_Modeling/unnamed-chunk-19-3.png)<!-- -->
 
-Posterior Prediction Check
+## Predictive Posterior Distribution
 
 ``` r
 # Function that adds size of training dataset to pp_check
@@ -454,55 +504,28 @@ post_pred <- posterior_predict(stan_model,new_data = test,draws = 1000) %>%
   as_tibble()
 ```
 
-``` r
-# Function that adds size of training dataset to mcmc_areas
-mcmc_areas_info <- function(model,variables) {
-  predictor_vars <- str_c('feed',unlist(stan_model$xlevels,use.names=F)[-1])
-  
-  mcmc_areas(model,pars=predictor_vars) + ggtitle(str_c('n = ',as.character(nrow(model$data)))) +
-      theme_minimal() +
-      theme(plot.title = element_text(hjust = 0.5))
-}
-
-mcmc_areas_info(stan_model,predictors)
-```
-
-    ## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
-
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-23-1.png)<!-- -->
-
-``` r
-mcmc_areas_info(stan_model_small,predictors)
-```
-
-    ## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
-
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-23-2.png)<!-- -->
-
-``` r
-mcmc_areas_info(stan_model_tiny,predictors) 
-```
-
-    ## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
-
-![](../rmd_images/Bayesian_Modeling/unnamed-chunk-23-3.png)<!-- -->
-
-``` r
-#mcmc_intervals(stan_model,pars=predictors) + theme_bw()
-#posterior_vs_prior(stan_model)
-```
-
 Look at the posterior prediction distribution for a single observation
 
 ``` r
-row_num <- quo(`4`)
+row_num <- quo(`2`)
 
 true_value <- test %>% slice(as.numeric(as_label(row_num))) %>%
   pull(outcome_var)
 
 ggplot(aes(x=!!row_num),data=post_pred) + geom_density() + theme_minimal() +
   geom_vline(xintercept=true_value,color='steelblue')
+```
 
+    ## Don't know how to automatically pick scale for object of type ppd/matrix. Defaulting to continuous.
+
+![](../rmd_images/Bayesian_Modeling/unnamed-chunk-23-1.png)<!-- -->
+
+``` r
 # Take a look at that same row number
 print(test %>% slice(as.numeric(as_label(row_num))))
 ```
+
+    ## # A tibble: 1 x 2
+    ##   weight feed   
+    ##    <dbl> <fct>  
+    ## 1    230 soybean

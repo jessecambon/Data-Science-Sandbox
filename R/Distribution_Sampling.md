@@ -1,7 +1,7 @@
 Distribution Sampling
 ================
 Jesse Cambon
-27 April, 2020
+29 April, 2020
 
 References: \* <http://appliedpredictivemodeling.com/data> \*
 <http://faculty.marshall.usc.edu/gareth-james/ISL/data.html>
@@ -10,6 +10,9 @@ References: \* <http://appliedpredictivemodeling.com/data> \*
 library(tidyverse)
 library(bayestestR)
 library(BayesFactor)
+library(jcolors)
+library(broom)
+library(knitr)
 
 set.seed(42) # for reproducibility
 ```
@@ -17,32 +20,66 @@ set.seed(42) # for reproducibility
 Perform sampling
 
 ``` r
-unif_sample <- runif(4000,-5,5)
-norm_sample <- rnorm(5000,0,1)
-binom_sample <- rbinom(10000,10,.5)
-bernouli_sample <- rbernoulli(10,p=0.9)
-poison_sample <- rpois(1000,5)
-negbinomial_sample <- rnbinom(10000,1,mu=5)
-beta_sample <- rbeta(1000,500,50)
+bernouli_sample <- rbernoulli(10,p=0.9) # T/F
+uniform = runif(10,-4,4)
+
+num_rows <- 1000
+
+dist <- 
+  tibble(
+    cauchy=rcauchy(num_rows,0,0.5),
+    norm_sample = rnorm(num_rows,0,0.5),
+    beta_sample = rbeta(num_rows,0,1)
+) %>%
+  pivot_longer(everything(),values_to='value',names_to='distribution')
+
+
+# Distributions used for count data
+count_dist <- tibble(poisson= rpois(num_rows,2),
+                      `negative binomial`=rnbinom(num_rows,1,mu=2),
+                      binom_sample = rbinom(num_rows,9,.25),
+                      weibull=rweibull(num_rows,1.4)
+                      ) %>%
+  pivot_longer(everything(),values_to='value',names_to='distribution')
 ```
 
+Compare some distributions
+
 ``` r
-ggplot(data=beta_sample %>% as_tibble()) + 
-  geom_density(aes(x=value)) + theme_bw()
+ggplot(data=dist,aes(x=value,color=distribution)) + 
+#  facet_wrap(~distribution,ncol=1) +
+  scale_x_continuous(limits =c(-3,3)) +
+  theme_minimal() +
+  theme(legend.position='top') +
+  geom_density(alpha=0.8) +
+  scale_color_jcolors('default') + 
+  xlab('') + ylab('')
 ```
+
+    ## Warning: Removed 116 rows containing non-finite values (stat_density).
 
 ![](../rmd_images/Distribution_Sampling/unnamed-chunk-3-1.png)<!-- -->
 
+Poisson v Neg Binomial v Weibull
+
 ``` r
-ggplot(data=poison_sample %>% as_tibble()) + 
-  geom_density(aes(x=value)) + theme_minimal() +
-  geom_density(data=rnorm(2000,5,2.5) %>% as_tibble(),aes(x=value),color='navy') +
-  geom_density(data=negbinomial_sample %>% as_tibble(),aes(x=value),color='red')
+ggplot(data=count_dist,aes(x=value,color=distribution)) + 
+#  facet_wrap(~distribution,ncol=1) +
+  scale_x_continuous(limits =c(0,8)) +
+  theme_minimal() +
+  theme(legend.position='top') +
+  geom_density(alpha=0.8) +
+  scale_color_jcolors('default') + 
+  xlab('') + ylab('')
 ```
+
+    ## Warning: Removed 25 rows containing non-finite values (stat_density).
 
 ![](../rmd_images/Distribution_Sampling/unnamed-chunk-4-1.png)<!-- -->
 
-T test on Tree data
+## Significance Testing
+
+### T-test (Frequentist version)
 
 ``` r
 t.test(trees$Height)
@@ -60,22 +97,6 @@ t.test(trees$Height)
     ## mean of x 
     ##        76
 
-``` r
-t.test(trees$Girth)
-```
-
-    ## 
-    ##  One Sample t-test
-    ## 
-    ## data:  trees$Girth
-    ## t = 23.506, df = 30, p-value < 2.2e-16
-    ## alternative hypothesis: true mean is not equal to 0
-    ## 95 percent confidence interval:
-    ##  12.09731 14.39947
-    ## sample estimates:
-    ## mean of x 
-    ##  13.24839
-
 Simulate some data and run more T-tests
 
 ``` r
@@ -83,7 +104,6 @@ compare_norms <- rnorm(100,25,10) %>%
   as_tibble() %>% rename(sample1=value) %>%
   mutate(sample2 = rnorm(100,28,10))
 
-library(broom)
 results <- t.test(compare_norms$sample1,compare_norms$sample2)
 results
 ```
@@ -92,37 +112,36 @@ results
     ##  Welch Two Sample t-test
     ## 
     ## data:  compare_norms$sample1 and compare_norms$sample2
-    ## t = -2.5571, df = 194.89, p-value = 0.01131
+    ## t = 1.4176, df = 197.32, p-value = 0.1579
     ## alternative hypothesis: true difference in means is not equal to 0
     ## 95 percent confidence interval:
-    ##  -6.9818046 -0.9016419
+    ##  -0.7904857  4.8324013
     ## sample estimates:
     ## mean of x mean of y 
-    ##  24.99471  28.93644
+    ##  28.30323  26.28227
 
-``` r
-tidy_results <- results %>% tidy()
-tidy_results
-```
-
-    ## # A tibble: 1 x 10
-    ##   estimate estimate1 estimate2 statistic p.value parameter conf.low conf.high
-    ##      <dbl>     <dbl>     <dbl>     <dbl>   <dbl>     <dbl>    <dbl>     <dbl>
-    ## 1    -3.94      25.0      28.9     -2.56  0.0113      195.    -6.98    -0.902
-    ## # … with 2 more variables: method <chr>, alternative <chr>
-
-Bayesian T-test
+### Bayesian T-test
 
 <https://easystats.github.io/bayestestR/articles/example2.html>
 
 ``` r
-result <- BayesFactor::ttestBF(compare_norms$sample1,compare_norms$sample2)
-describe_posterior(result)
+bayes_result <- BayesFactor::ttestBF(compare_norms$sample1,compare_norms$sample2)
+bayes_result
 ```
 
-    ##    Parameter    Median CI    CI_low   CI_high      pd ROPE_CI ROPE_low
-    ## 1 Difference -3.703567 89 -6.207113 -1.341862 0.99575      89     -0.1
-    ##   ROPE_high ROPE_Percentage       BF Prior_Distribution Prior_Location
-    ## 1       0.1               0 3.181391             cauchy              0
-    ##   Prior_Scale
-    ## 1   0.7071068
+    ## Bayes factor analysis
+    ## --------------
+    ## [1] Alt., r=0.707 : 0.3932028 ±0%
+    ## 
+    ## Against denominator:
+    ##   Null, mu1-mu2 = 0 
+    ## ---
+    ## Bayes factor type: BFindepSample, JZS
+
+``` r
+describe_posterior(bayes_result) %>% kable()
+```
+
+| Parameter  |   Median | CI |     CI\_low | CI\_high |      pd | ROPE\_CI | ROPE\_low | ROPE\_high | ROPE\_Percentage |        BF | Prior\_Distribution | Prior\_Location | Prior\_Scale |
+| :--------- | -------: | -: | ----------: | -------: | ------: | -------: | --------: | ---------: | ---------------: | --------: | :------------------ | --------------: | -----------: |
+| Difference | 1.885353 | 89 | \-0.2588156 | 4.222233 | 0.91725 |       89 |     \-0.1 |        0.1 |        0.0263971 | 0.3932028 | cauchy              |               0 |    0.7071068 |

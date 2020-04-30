@@ -20,6 +20,9 @@ References:
 library(tidyverse)
 library(bayestestR)
 library(BayesFactor)
+library(jcolors)
+library(broom)
+library(knitr)
 
 set.seed(42) # for reproducibility
 ```
@@ -27,35 +30,62 @@ set.seed(42) # for reproducibility
 Perform sampling
 
 ```{r}
-unif_sample <- runif(4000,-5,5)
-norm_sample <- rnorm(5000,0,1)
-binom_sample <- rbinom(10000,10,.5)
-bernouli_sample <- rbernoulli(10,p=0.9)
-poison_sample <- rpois(1000,5)
-negbinomial_sample <- rnbinom(10000,1,mu=5)
-beta_sample <- rbeta(1000,500,50)
+bernouli_sample <- rbernoulli(10,p=0.9) # T/F
+uniform = runif(10,-4,4)
 
+num_rows <- 1000
+
+dist <- 
+  tibble(
+    cauchy=rcauchy(num_rows,0,0.5),
+    norm_sample = rnorm(num_rows,0,0.5),
+    beta_sample = rbeta(num_rows,0,1)
+) %>%
+  pivot_longer(everything(),values_to='value',names_to='distribution')
+
+
+# Distributions used for count data
+count_dist <- tibble(poisson= rpois(num_rows,2),
+                      `negative binomial`=rnbinom(num_rows,1,mu=2),
+                      binom_sample = rbinom(num_rows,9,.25),
+                      weibull=rweibull(num_rows,1.4)
+                      ) %>%
+  pivot_longer(everything(),values_to='value',names_to='distribution')
 ```
+
+Compare some distributions
 
 ```{r}
-ggplot(data=beta_sample %>% as_tibble()) + 
-  geom_density(aes(x=value)) + theme_bw()
+ggplot(data=dist,aes(x=value,color=distribution)) + 
+#  facet_wrap(~distribution,ncol=1) +
+  scale_x_continuous(limits =c(-3,3)) +
+  theme_minimal() +
+  theme(legend.position='top') +
+  geom_density(alpha=0.8) +
+  scale_color_jcolors('default') + 
+  xlab('') + ylab('')
 ```
 
+Poisson v Neg Binomial v Weibull
 
 ```{r}
-ggplot(data=poison_sample %>% as_tibble()) + 
-  geom_density(aes(x=value)) + theme_minimal() +
-  geom_density(data=rnorm(2000,5,2.5) %>% as_tibble(),aes(x=value),color='navy') +
-  geom_density(data=negbinomial_sample %>% as_tibble(),aes(x=value),color='red')
+ggplot(data=count_dist,aes(x=value,color=distribution)) + 
+#  facet_wrap(~distribution,ncol=1) +
+  scale_x_continuous(limits =c(0,8)) +
+  theme_minimal() +
+  theme(legend.position='top') +
+  geom_density(alpha=0.8) +
+  scale_color_jcolors('default') + 
+  xlab('') + ylab('')
 ```
 
 
-T test on Tree data
+## Significance Testing
+
+### T-test (Frequentist version)
+
 ```{r}
 t.test(trees$Height)
-
-t.test(trees$Girth)
 ```
 
 Simulate some data and run more T-tests
@@ -65,19 +95,18 @@ compare_norms <- rnorm(100,25,10) %>%
   as_tibble() %>% rename(sample1=value) %>%
   mutate(sample2 = rnorm(100,28,10))
 
-library(broom)
 results <- t.test(compare_norms$sample1,compare_norms$sample2)
 results
-
-tidy_results <- results %>% tidy()
-tidy_results
 ```
 
-Bayesian T-test
+### Bayesian T-test
 
 https://easystats.github.io/bayestestR/articles/example2.html
 ```{r}
-result <- BayesFactor::ttestBF(compare_norms$sample1,compare_norms$sample2)
-describe_posterior(result)
+bayes_result <- BayesFactor::ttestBF(compare_norms$sample1,compare_norms$sample2)
+bayes_result
+```
+```{r}
+describe_posterior(bayes_result) %>% kable()
 ```
 
