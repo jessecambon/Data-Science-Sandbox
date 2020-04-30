@@ -1,7 +1,7 @@
 Bayesian Modeling
 ================
 Jesse Cambon
-29 April, 2020
+30 April, 2020
 
 References: \* <http://appliedpredictivemodeling.com/data> \*
 <http://faculty.marshall.usc.edu/gareth-james/ISL/data.html>
