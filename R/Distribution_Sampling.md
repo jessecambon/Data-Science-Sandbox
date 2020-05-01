@@ -1,7 +1,7 @@
 Distribution Sampling
 ================
 Jesse Cambon
-29 April, 2020
+01 May, 2020
 
 References: \* <http://appliedpredictivemodeling.com/data> \*
 <http://faculty.marshall.usc.edu/gareth-james/ISL/data.html>
@@ -11,6 +11,7 @@ library(tidyverse)
 library(bayestestR)
 library(BayesFactor)
 library(jcolors)
+library(infer)
 library(broom)
 library(knitr)
 
@@ -119,6 +120,24 @@ results
     ## sample estimates:
     ## mean of x mean of y 
     ##  28.30323  26.28227
+
+Tidy T-test (infer package)
+
+<https://infer.netlify.app/>
+
+``` r
+compare_norms_long <- 
+  compare_norms %>%
+  pivot_longer(everything(),names_to='sample',values_to='value')
+
+compare_norms_long %>%
+  t_test(value ~ sample,order=c('sample1','sample2')) %>%
+  kable()
+```
+
+| statistic |    t\_df |  p\_value | alternative |   lower\_ci | upper\_ci |
+| --------: | -------: | --------: | :---------- | ----------: | --------: |
+|  1.417581 | 197.3181 | 0.1578903 | two.sided   | \-0.7904857 |  4.832401 |
 
 ### Bayesian T-test
 
