@@ -1,0 +1,81 @@
+---
+title: "Hypothesis Testing"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+References:
+* https://www.tidymodels.org/learn/statistics/xtabs/
+
+```{r,message=F,warning=F}
+library(tidymodels) # Includes the infer package
+library(knitr)
+
+# Set ggplot theme
+theme_set(theme_minimal())
+
+
+data(ad_data, package = "modeldata")
+
+```
+
+```{r}
+ad_data %>%
+  count(Genotype, Class,sort=T) %>% head(5) %>% kable()
+```
+
+Chi Squared Test of Independences
+
+```{r}
+ad_data %>% 
+  chisq_test(Genotype ~ Class) %>%
+  kable()
+```
+
+
+```{r}
+observed_indep_statistic <- ad_data %>%
+  specify(Genotype ~ Class) %>%
+  calculate(stat = "Chisq")
+
+
+# generate the null distribution using randomization
+null_distribution_simulated <- ad_data %>%
+  specify(Genotype ~ Class) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "Chisq")
+```
+
+```{r}
+null_distribution_simulated %>%
+  visualize() + 
+  shade_p_value(observed_indep_statistic,
+                direction = "greater") + theme_minimal()
+```
+
+```{r}
+ad_data %>%
+  specify(Genotype ~ Class) %>%
+  hypothesize(null = "independence") %>%
+  visualize(method = "theoretical") + 
+  shade_p_value(observed_indep_statistic,
+                direction = "greater")
+```
+
+
+```{r}
+null_distribution_simulated %>%
+  visualize(method = "both") + 
+  shade_p_value(observed_indep_statistic,
+                direction = "greater")
+```
+
