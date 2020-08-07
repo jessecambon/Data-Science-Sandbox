@@ -1,10 +1,9 @@
 # Notes on Developing R Packages
 
-* The man documents are created with roxygen2 based on `R/` directory code files. Run this with CTRL+SHIFT+D (in RStudio) or `royxenize()` before building the package.
+* The man documents are created with roxygen2 based on `R/` directory code files with `devtools::document()`
 * Test package with `devtools::test()` (see `/tests` directory)
 * Use `devtools::check()` to check for issues (also runs `devtools::test()`)
 * Use `devtools::build()` to build the package with vignettes included (creates .tar.gz file)
-* Use `install.packages(path_to_file, repos = NULL)` to load the package. May need to close out and reopen RStudio to see changes in vignettes and for cross-references in documentation to work. It also may be necessary to knit the vignette `.Rmd` file from a fresh RStudio session (close out the project) to update the HTML file.
 * To run all code examples in the package documentation, use this command from devtools: `run_examples(test=TRUE)`
 
 ### Development Resources

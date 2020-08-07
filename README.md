@@ -13,8 +13,9 @@ A collection of code and resources to serve as a starting point for data science
 
 The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. For more explanation and material on R visit [my blog](https://jessecambon.github.io/).
 
-## General 
+## Notes 
 * [Resources](Resources.md) - Websites and references that I find helpful for data science projects
+* [Developing With R](R-Development.md) - Notes on R package development
 * [How to Git](Git-HowTo.md) - version control with git
 * [How to Anaconda](Anaconda-HowTo.md) - managing environments with Anaconda
 
