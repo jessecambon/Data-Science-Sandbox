@@ -4,7 +4,9 @@
 * Test package with `devtools::test()` (see `/tests` directory)
 * Use `devtools::check()` to check for issues (also runs `devtools::test()`)
 * Use `devtools::build()` to build the package with vignettes included (creates .tar.gz file)
+* Check package on other environments for CRAN release using [rhub::check_for_cran()](https://r-hub.github.io/rhub/reference/check_for_cran.html)
 * To run all code examples in the package documentation, use this command from devtools: `run_examples(test=TRUE)`
+* Use [pkgdown::build_site()](https://pkgdown.r-lib.org/reference/build_site.html) to build the website.
 
 ### Development Resources
 * General Instructions: http://r-pkgs.had.co.nz/
