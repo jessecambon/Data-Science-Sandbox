@@ -43,7 +43,7 @@ lung %>% count(status)
 ggsurvplot(
     fit = survfit(Surv(time, status) ~ sex, data = lung), 
     xlab = "Days", 
-    ylab = "Overall survival probability")$plot
+    ylab = "Survival Probability")$plot
 ```
 
 ![](../rmd_images/Survival/unnamed-chunk-2-1.png)<!-- -->
