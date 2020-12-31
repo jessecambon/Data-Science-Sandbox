@@ -1,5 +1,5 @@
 ---
-title: "Parsnip"
+title: "Bayesian Models"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -7,7 +7,7 @@ output:
     toc: true
 ---
 
-Experiment with Bayesian modeling techniques on the titianic dataset.
+Experiment with Bayesian modeling techniques on the Titanic dataset.
 
 ```{r knit-settings, include=FALSE}
 library(here)

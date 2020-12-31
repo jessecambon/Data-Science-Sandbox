@@ -1,6 +1,6 @@
 # The Data Science Codex
 
-A collection of code and resources to serve as a starting point for data science projects. 
+A collection of code and resources to serve as a starting point for data science projects. For more explanation and material on R visit [my blog](https://jessecambon.github.io/). 
 
 <span>
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Visualization_Cookbook.md#lollipop"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/rmd_images/Visualization_Cookbook/lollipop-1.png" height="150px"/></a>
@@ -10,8 +10,6 @@ A collection of code and resources to serve as a starting point for data science
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Titanic.md#logistic-regression-model"><img src="https://github.com/jessecambon/Data-Science-Codex/blob/master/rmd_images/Titanic/logistic-regression-2.png" height="150px"/></a> 
 <a href = "https://github.com/jessecambon/Data-Science-Cookbook/blob/master/R/Titanic.md#logistic-regression-model"><img src="https://github.com/jessecambon/Data-Science-Cookbook/blob/master/rmd_images/Titanic/logistic-regression-1.png" height="150px"/></a> 
 </span>
-
-The purpose of this repository is to provide code and resources that can be quickly adapted and used for data science projects. For more explanation and material on R visit [my blog](https://jessecambon.github.io/).
 
 ## Notes 
 * [Resources](Resources.md) - Websites and references that I find helpful for data science projects
@@ -25,7 +23,8 @@ The purpose of this repository is to provide code and resources that can be quic
 
 ## Statistical Modeling and Machine Learning
 * [Modeling Fundamentals](R/Titanic.md) (R) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
-* [Bayesian Modeling](R/Bayesian_Modeling.md) (R) - Experimenting with bayesian models using rstanarm
+* [Bayesian Modeling](R/Bayesian_Modeling.md) (R) - Experimenting with Bayesian models using rstanarm
+* [Survival Analysis](R/Survival.md) (R) - Survival analysis methods such as cox proportion hazard models and Kaplan-Meier curves.
 * [Modeling Workflows](R/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, prophet, etc.)
 * [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
