@@ -95,7 +95,8 @@ geom_pointrange(mapping=aes(ymin=conf.low, ymax=conf.high)) +
 xlab('Term') + ylab('HR') + geom_hline(yintercept = 1, color = "grey")
 ```
 
-## Model Validation
+
+### Validation
 
 Reference: 
 http://www.sthda.com/english/wiki/cox-model-assumptions 
@@ -119,5 +120,22 @@ Test proportional hazards assumption
 ```{r, fig.height = 7, fig.wdith = 5}
 zph_fit <- cox.zph(cox_fit)
 ggcoxzph(zph_fit)
+```
+
+## Parametric Survival Model
+
+```{r}
+aft_fit <- survreg(Surv(time, status) ~ sex + age + ph.ecog,
+        dist = 'weibull',
+        data = lung)
+
+# Exponentiate coefficients to get hazard ratios
+aft_hr <- tidy(aft_fit, exponentiate = TRUE, conf.int = TRUE)
+```
+
+
+```{r}
+ggcoxdiagnostics(aft_fit, type = "deviance", ox.scale = 'observation.id')
+ggcoxdiagnostics(aft_fit, type = "deviance", ox.scale = 'linear.predictions')
 ```
 
