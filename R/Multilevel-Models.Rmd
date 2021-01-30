@@ -1,0 +1,56 @@
+---
+title: "Multilevel Models"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+References:
+
+- https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf
+- https://www.rensvandeschoot.com/tutorials/lme4/
+
+
+```{r setup, message = F, warning = F}
+library(lme4)
+library(tidyverse)
+```
+
+
+```{r}
+fm1 <- lmer(Reaction ~ Days + (Days | Subject), data = sleepstudy)
+```
+
+```{r}
+#sleepstudy
+```
+```{r}
+# Overall Trend
+sleepstudy %>%
+  ggplot(aes(x = Days, y = Reaction)) +
+  geom_point() + geom_smooth(method = 'lm')
+
+#
+sleepstudy %>%
+  ggplot(aes(x = Days, y = Reaction)) +
+  facet_wrap(~Subject) +
+  geom_point() + geom_smooth(method = 'lm')
+```
+
+
+
+```{r}
+summary(fm1)
+```
+
+```{r}
+
+```
+
