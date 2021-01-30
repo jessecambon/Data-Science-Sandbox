@@ -1,0 +1,141 @@
+---
+title: "Survival Models"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+Survival Analysis 
+
+* Kaplan-Meier Plots
+* Log-rank test
+* Cox Proportional Hazard Model
+* Bayesian Approaches
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+Reference:
+
+https://www.emilyzabor.com/tutorials/survival_analysis_in_r_tutorial.html
+
+
+```{r setup, message = F, warning = F}
+library(survival)
+library(survminer)
+library(tidyverse)
+library(broom)
+```
+
+
+# Kaplan-Meier 
+
+status: censoring status 1=censored, 2=dead. Can also use TRUE/FALSE see documentation for
+event in ?Surv
+
+```{r}
+lung %>% count(status)
+```
+
+
+```{r}
+ggsurvplot(
+    fit = survfit(Surv(time, status) ~ sex, data = lung), 
+    xlab = "Days", 
+    ylab = "Survival Probability")$plot
+```
+
+# Log-Rank Test
+
+Test if there was a statistically significant difference in survival time between the groups
+
+```{r}
+survdiff(Surv(time, status) ~ sex, 
+         data = lung, 
+         rho = 0 # log-rank, see ?survdiff
+         )
+```
+
+# Cox Proportional Hazard Model
+
+* Multivariate "semi-parametric" regression approach
+* Assumes hazard can change over time, but is proportional between groups at all points in time (ie. hazard ratio is constant over time).
+
+
+```{r}
+cox_fit <- coxph(Surv(time, status) ~ sex + age + ph.ecog,
+        data = lung)
+
+# Exponentiate coefficients to get hazard ratios
+cox_hr <- tidy(cox_fit, exponentiate = TRUE, conf.int = TRUE)
+```
+
+Survival curve
+
+```{r}
+ggsurvplot(survfit(cox_fit), data = lung, risk.table = TRUE)
+```
+
+Plot Hazard Ratios
+
+```{r}
+ggplot(data=cox_hr,
+          aes(x = term, y = estimate)) +
+geom_point() +
+scale_y_continuous() +
+geom_hline(yintercept=0,color='grey') +
+coord_flip() +
+  theme_bw() +
+  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
+geom_pointrange(mapping=aes(ymin=conf.low, ymax=conf.high)) + 
+xlab('Term') + ylab('HR') + geom_hline(yintercept = 1, color = "grey")
+```
+
+
+### Validation
+
+Reference: 
+http://www.sthda.com/english/wiki/cox-model-assumptions 
+
+
+Look at residuals
+
+```{r}
+ggcoxdiagnostics(cox_fit, type = "deviance", ox.scale = 'observation.id')
+ggcoxdiagnostics(cox_fit, type = "deviance", ox.scale = 'linear.predictions')
+```
+
+```{r}
+ggcoxdiagnostics(cox_fit, type = 'dfbeta')
+```
+
+
+
+Test proportional hazards assumption
+
+```{r, fig.height = 7, fig.wdith = 5}
+zph_fit <- cox.zph(cox_fit)
+ggcoxzph(zph_fit)
+```
+
+## Parametric Survival Model
+
+```{r}
+aft_fit <- survreg(Surv(time, status) ~ sex + age + ph.ecog,
+        dist = 'weibull',
+        data = lung)
+
+# Exponentiate coefficients to get hazard ratios
+aft_hr <- tidy(aft_fit, exponentiate = TRUE, conf.int = TRUE)
+```
+
+
+```{r}
+ggcoxdiagnostics(aft_fit, type = "deviance", ox.scale = 'observation.id')
+ggcoxdiagnostics(aft_fit, type = "deviance", ox.scale = 'linear.predictions')
+```
+
