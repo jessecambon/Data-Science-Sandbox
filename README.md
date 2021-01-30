@@ -29,6 +29,7 @@ The purpose of this repository is to provide code and resources that can be quic
 * [Modeling Workflows](R/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, prophet, etc.)
 * [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
+* [Hierarchical Clustering](Python/Clustering.ipynb) (Python) - Agglomerative clustering with sklearn and scipy
 * [Ordinal Regression](R/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
 * [Presenting Regression Models](R/Regression-Model-Tidying.md) (R) - Code for cleaning the outputs of regression models for presentations.
 * [Sklearn Modeling Workflows](Python/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves).
