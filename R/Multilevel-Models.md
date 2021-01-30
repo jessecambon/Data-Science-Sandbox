@@ -16,7 +16,7 @@ library(tidyverse)
 ```
 
 ``` r
-fm1 <- lmer(Reaction ~ Days + (Days | Subject), data = sleepstudy)
+fm1 <- lmer(Reaction ~ Days + (1 + Days | Subject), data = sleepstudy)
 ```
 
 ``` r
@@ -51,7 +51,7 @@ summary(fm1)
 ```
 
     ## Linear mixed model fit by REML ['lmerMod']
-    ## Formula: Reaction ~ Days + (Days | Subject)
+    ## Formula: Reaction ~ Days + (1 + Days | Subject)
     ##    Data: sleepstudy
     ## 
     ## REML criterion at convergence: 1743.6
