@@ -26,6 +26,7 @@ A collection of code and resources to serve as a starting point for data science
 * [Bayesian Modeling](R/Bayesian_Modeling.md) (R) - Experimenting with Bayesian models using rstanarm
 * [Survival Analysis](R/Survival.md) (R) - Survival analysis methods such as cox proportion hazard models and Kaplan-Meier curves.
 * [Modeling Workflows](R/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
+* [Multilevel Models](R/Multilevel-Models.md) (R) - Mulitlevel aka. mixed effects models
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, prophet, etc.)
 * [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
 * [Hierarchical Clustering](Python/Clustering.ipynb) (Python) - Agglomerative clustering with sklearn and scipy
