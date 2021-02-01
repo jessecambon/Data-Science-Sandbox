@@ -20,6 +20,8 @@ References:
 
 ```{r setup, message = F, warning = F}
 library(lme4)
+library(rstanarm)
+library(bayesplot)
 library(tidyverse)
 ```
 
@@ -50,7 +52,42 @@ sleepstudy %>%
 summary(fm1)
 ```
 
-```{r}
+## Bayesian approach
 
+https://mc-stan.org/users/documentation/case-studies/tutorial_rstanarm.html
+
+```{r}
+bm1 <- stan_lmer(Reaction ~ Days + (1 + Days | Subject), data = sleepstudy)
+```
+
+```{r}
+pp_check(bm1)
+```
+
+
+
+```{r, fig.height = 8, fig.width = 5}
+mcmc_areas(bm1)
+```
+
+Posterior predictive check
+
+```{r}
+ppc_ribbon_grouped(
+  y = sleepstudy$Reaction,
+  yrep = posterior_predict(bm1),
+  x = sleepstudy$Days,
+  prob = 0.5,
+  group = sleepstudy$Subject
+) 
+```
+
+
+```{r, fig.height = 6, fig.width = 10}
+#posterior_vs_prior(bm1, pars = "beta", group_by_parameter = TRUE )
+```
+
+```{r}
+summary(bm1)
 ```
 
