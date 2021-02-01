@@ -90,16 +90,34 @@ scale_y_continuous() +
 geom_hline(yintercept=0,color='grey') +
 coord_flip() +
   theme_bw() +
-  theme(plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)) +
-geom_pointrange(mapping=aes(ymin=conf.low, ymax=conf.high)) + 
+  theme(plot.title = element_text(lineheight = 1, face="bold",hjust = 0.5)) +
+geom_pointrange(mapping = aes(ymin = conf.low, ymax = conf.high)) + 
 xlab('Term') + ylab('HR') + geom_hline(yintercept = 1, color = "grey")
 ```
+
+### Predictions 
+
+```{r}
+sample_obs <- lung %>% 
+  sample_n(2, seed = 104) %>%
+  mutate(id = 1:n()) %>%
+  select(id, status, everything())
+
+cox_pred <- predict(cox_fit, newdata = sample_obs, type = 'expected')
+
+```
+
 
 
 ### Validation
 
 Reference: 
 http://www.sthda.com/english/wiki/cox-model-assumptions 
+
+
+```{r}
+concordance(cox_fit)
+```
 
 
 Look at residuals
@@ -124,6 +142,8 @@ ggcoxzph(zph_fit)
 
 ## Parametric Survival Model
 
+Accelerated Failure Time models, an alternative to cox regression
+
 ```{r}
 aft_fit <- survreg(Surv(time, status) ~ sex + age + ph.ecog,
         dist = 'weibull',
@@ -133,9 +153,4 @@ aft_fit <- survreg(Surv(time, status) ~ sex + age + ph.ecog,
 aft_hr <- tidy(aft_fit, exponentiate = TRUE, conf.int = TRUE)
 ```
 
-
-```{r}
-ggcoxdiagnostics(aft_fit, type = "deviance", ox.scale = 'observation.id')
-ggcoxdiagnostics(aft_fit, type = "deviance", ox.scale = 'linear.predictions')
-```
 
