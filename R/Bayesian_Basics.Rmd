@@ -26,7 +26,7 @@ library(wesanderson)
 
 options(mc.cores = parallel::detectCores()) 
 
-model <- stan_glmer(extra ~ factor(group) + (group + 1 | ID), data = sleep,
+model <- stan_glmer(extra ~ group + (1 | ID), data = sleep,
                   prior = normal(0, 3, autoscale = FALSE))
 
 summary(model)
@@ -53,7 +53,7 @@ post_prior <- density %>% mutate(type = 'posterior') %>%
 Plot the prior and posterior distributions for the fixed effects
 
 ```{r}
-ggplot(data=post_prior,aes(x = x ,y = y, fill = type)) + 
+ggplot(data = post_prior, aes(x = x ,y = y, fill = type)) + 
   theme_bw() +
   facet_wrap(~Parameter, ncol=1, scales='free') +
   geom_ribbon( mapping = aes(
@@ -66,26 +66,22 @@ ggplot(data=post_prior,aes(x = x ,y = y, fill = type)) +
 #  scale_x_continuous(expand=expand_scale(mult = c(-.4, -.4)))
 ```
 
+https://easystats.github.io/see/articles/bayestestR.html
 
 ```{r}
-point_est <- point_estimate(model, centrality = 'median')
-
-p <- plot(point_est, panel = F)[[1]]
-sp <- simulate_prior(model)
-ed <- estimate_density(sp[["group2"]])
-
-p + geom_ribbon(
-  data = ed,
-  mapping = aes(
-    x = x,
-    ymin = 0,
-    ymax = y,
-    group = NA
-  ),
-  fill = "#FFC107",
-  alpha = .3
-)
+plot(density, priors = TRUE)
 ```
+
+
+
+```{r}
+p_direction(model)
+```
+
+```{r}
+plot(p_direction(model, effects = "all", component = "all"))
+```
+
 
 Check posterior distribution
 
