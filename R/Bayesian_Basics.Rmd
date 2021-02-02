@@ -1,5 +1,5 @@
 ---
-title: "Bayesian Distributions"
+title: "Bayesian Basics"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -21,10 +21,12 @@ source(here("rmd_config.R"))
 library(rstanarm)
 library(tidyverse)
 library(bayestestR)
+library(bayesplot)
 library(wesanderson)
+
 options(mc.cores = parallel::detectCores()) 
 
-model <- stan_glm(extra ~ group, data = sleep,
+model <- stan_glmer(extra ~ factor(group) + (group + 1 | ID), data = sleep,
                   prior = normal(0, 3, autoscale = FALSE))
 
 summary(model)
@@ -39,27 +41,26 @@ density <- estimate_density(model)
 sim_prior <- simulate_prior(model)
 density_prior <- estimate_density(sim_prior)
 
-sim_likelihood <-  sleep %>% select(group) 
-
-density_likelihood <- estimate_density(sim_likelihood)
+#sim_likelihood <-  sleep %>% select(group) 
+#density_likelihood <- estimate_density(sim_likelihood)
 
 # Combine density for prior and posterior distributions
-post_prior <- density %>% mutate(type='posterior') %>%
+post_prior <- density %>% mutate(type = 'posterior') %>%
   bind_rows(density_prior %>% mutate(type='prior'))
 
 ```
 
-Plot the prior and posterior distributions
+Plot the prior and posterior distributions for the fixed effects
 
 ```{r}
-ggplot(data=post_prior,aes(x=x,y=y,fill=type)) + 
+ggplot(data=post_prior,aes(x = x ,y = y, fill = type)) + 
   theme_bw() +
-  facet_wrap(~Parameter,ncol=1,scales='free') +
+  facet_wrap(~Parameter, ncol=1, scales='free') +
   geom_ribbon( mapping = aes(
     ymin = 0,
     ymax = y  ),
   alpha = .8) +   
-  scale_fill_manual(values=c('steelblue','grey'))
+  scale_fill_manual(values=c('steelblue', 'grey'))
 
 
 #  scale_x_continuous(expand=expand_scale(mult = c(-.4, -.4)))
@@ -67,7 +68,7 @@ ggplot(data=post_prior,aes(x=x,y=y,fill=type)) +
 
 
 ```{r}
-point_est <- point_estimate(model,centrality='median')
+point_est <- point_estimate(model, centrality = 'median')
 
 p <- plot(point_est, panel = F)[[1]]
 sp <- simulate_prior(model)
@@ -91,5 +92,21 @@ Check posterior distribution
 ```{r}
 pp_check(model)
 ```
+```{r}
+pp_check(model, plotfun = "hist")
+```
 
+
+```{r}
+pp_check(model, plotfun = "intervals")
+```
+```{r}
+ppc_intervals_grouped(
+  y = sleep$extra,
+  yrep = posterior_predict(model),
+  x = as.numeric(sleep$group),
+  prob = 0.5,
+  group = sleep$ID
+) 
+```
 

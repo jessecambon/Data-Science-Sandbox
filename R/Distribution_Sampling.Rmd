@@ -1,5 +1,5 @@
 ---
-title: "Distribution Sampling"
+title: "Distribution Sampling and Hypothesis Testing"
 author: "Jesse Cambon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -107,7 +107,7 @@ https://infer.netlify.app/
 ```{r}
 compare_norms_long <- 
   compare_norms %>%
-  pivot_longer(everything(),names_to='sample',values_to='value')
+  pivot_longer(everything(),names_to='sample', values_to='value')
 
 compare_norms_long %>%
   t_test(value ~ sample,order=c('sample1','sample2')) %>%

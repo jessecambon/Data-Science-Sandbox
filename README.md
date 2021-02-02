@@ -23,17 +23,29 @@ A collection of code and resources to serve as a starting point for data science
 
 ## Statistical Modeling and Machine Learning
 * [Modeling Fundamentals](R/Titanic.md) (R) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
-* [Bayesian Modeling](R/Bayesian_Modeling.md) (R) - Experimenting with Bayesian models using rstanarm
 * [Survival Analysis](R/Survival.md) (R) - Survival analysis methods such as cox proportion hazard models and Kaplan-Meier curves.
 * [Modeling Workflows](R/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
 * [Multilevel Models](R/Multilevel-Models.md) (R) - Mulitlevel aka. mixed effects models
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, prophet, etc.)
-* [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
-* [Hierarchical Clustering](Python/Clustering.ipynb) (Python) - Agglomerative clustering with sklearn and scipy
 * [Ordinal Regression](R/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
 * [Presenting Regression Models](R/Regression-Model-Tidying.md) (R) - Code for cleaning the outputs of regression models for presentations.
 * [Sklearn Modeling Workflows](Python/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves).
 * [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library for machine learning.
+* [Parsnip](R/Parsnip.md) (R) 
+
+## Bayesian Models
+* [Bayesian Basics](R/Bayesian_Basics.md) (R) - exploring a simple Bayesian multilevel model
+* [Bayesian Modeling](R/Bayesian_Modeling.md) (R) - Experimenting with Bayesian models using rstanarm
+* [Comparing Bayesian Packages](R/Comparing_Bayesian_Packages.md) (R) - Comparing rstanarm, brms, and rstan.
+
+##  Clustering 
+* [Clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
+* [Hierarchical Clustering](Python/Clustering.ipynb) (Python) - Agglomerative clustering with sklearn and scipy
+
+## Stats Analysis
+* [Power Analysis](Power_Analysis.md) (R) - Statistical power analysis
+* [Distribution Sampling and Hypothesis Testing](Distribution_Sampling.md) (R)
+* [Hypothesis Testing](hypothesis_testing.md) (R)
 
 ## NLP 
 * [Document Embeddings](Python/state_of_union_embeddings.ipynb) (Python) - Using word embeddings to compare the similarity of State of the Union addresses.

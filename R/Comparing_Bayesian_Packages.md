@@ -1,7 +1,11 @@
 Comparing Bayesian Modeling Packages
 ================
 Jesse Cambon
-26 April, 2020
+02 February, 2021
+
+-   [Rstan](#rstan)
+-   [Brms](#brms)
+-   [rstanarm](#rstanarm)
 
 Compare rstan, brms, and rstanarm
 
@@ -60,82 +64,31 @@ fit1 <- stan(
   )
 ```
 
-    ## Trying to compile a simple C file
-
-    ## Running /usr/lib/R/bin/R CMD SHLIB foo.c
-    ## gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG   -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/unsupported"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/BH/include" -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/src/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/rstan/include" -DEIGEN_NO_DEBUG  -D_REENTRANT  -DBOOST_DISABLE_ASSERTS -DBOOST_PENDING_INTEGER_LOG2_HPP -include stan/math/prim/mat/fun/Eigen.hpp     -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-jbaK_j/r-base-3.6.3=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c foo.c -o foo.o
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:88,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:1: error: unknown type name ‘namespace’
-    ##   613 | namespace Eigen {
-    ##       | ^~~~~~~~~
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:17: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘{’ token
-    ##   613 | namespace Eigen {
-    ##       |                 ^
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:96:10: fatal error: complex: No such file or directory
-    ##    96 | #include <complex>
-    ##       |          ^~~~~~~~~
-    ## compilation terminated.
-    ## make: *** [/usr/lib/R/etc/Makeconf:168: foo.o] Error 1
-
-    ## Warning: There were 1 divergent transitions after warmup. Increasing adapt_delta above 0.8 may help. See
+    ## Warning: There were 3 divergent transitions after warmup. See
     ## http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+    ## to find out why this is a problem and how to eliminate them.
 
     ## Warning: Examine the pairs() plot to diagnose sampling problems
 
 ## Brms
 
-The Brms package supports
-
 Example based on : <https://github.com/paul-buerkner/brms>
 
-  - `(1 | var)` is used to specify the variable as a random effect.
-    Random effects are categorical grouping variables we are trying
-    control for.
+-   `(1 | var)` is used to specify a random intercept
 
 Mixed effect model has both random effects and fixed effects
 
-  - <https://www.theanalysisfactor.com/understanding-random-effects-in-mixed-models/>
-  - <https://ourcodingclub.github.io/tutorials/mixed-models/#what>
-  - <https://ase.tufts.edu/gsc/gradresources/guidetomixedmodelsinr/mixed%20model%20guide.html>
-  - <https://en.wikipedia.org/wiki/Mixed_model>
-
-<!-- end list -->
+-   <https://www.theanalysisfactor.com/understanding-random-effects-in-mixed-models/>
+-   <https://ourcodingclub.github.io/tutorials/mixed-models/#what>
+-   <https://ase.tufts.edu/gsc/gradresources/guidetomixedmodelsinr/mixed%20model%20guide.html>
+-   <https://en.wikipedia.org/wiki/Mixed_model>
 
 ``` r
 fit1 <- brm(count ~ zAge + zBase * Trt + (1|patient), 
             data = epilepsy, family = poisson())
 ```
 
-    ## Compiling the C++ model
-
-    ## Trying to compile a simple C file
-
-    ## Running /usr/lib/R/bin/R CMD SHLIB foo.c
-    ## gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG   -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/unsupported"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/BH/include" -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/src/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/rstan/include" -DEIGEN_NO_DEBUG  -D_REENTRANT  -DBOOST_DISABLE_ASSERTS -DBOOST_PENDING_INTEGER_LOG2_HPP -include stan/math/prim/mat/fun/Eigen.hpp     -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-jbaK_j/r-base-3.6.3=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c foo.c -o foo.o
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:88,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:1: error: unknown type name ‘namespace’
-    ##   613 | namespace Eigen {
-    ##       | ^~~~~~~~~
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:17: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘{’ token
-    ##   613 | namespace Eigen {
-    ##       |                 ^
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:96:10: fatal error: complex: No such file or directory
-    ##    96 | #include <complex>
-    ##       |          ^~~~~~~~~
-    ## compilation terminated.
-    ## make: *** [/usr/lib/R/etc/Makeconf:168: foo.o] Error 1
+    ## Compiling Stan program...
 
     ## Start sampling
 
@@ -144,30 +97,7 @@ fit2 <- brm(count ~ zAge + zBase * Trt + (1|patient) + (1|obs),
             data = epilepsy, family = poisson())
 ```
 
-    ## Compiling the C++ model
-    ## Trying to compile a simple C file
-
-    ## Running /usr/lib/R/bin/R CMD SHLIB foo.c
-    ## gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG   -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/unsupported"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/BH/include" -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/src/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/rstan/include" -DEIGEN_NO_DEBUG  -D_REENTRANT  -DBOOST_DISABLE_ASSERTS -DBOOST_PENDING_INTEGER_LOG2_HPP -include stan/math/prim/mat/fun/Eigen.hpp     -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-jbaK_j/r-base-3.6.3=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c foo.c -o foo.o
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:88,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:1: error: unknown type name ‘namespace’
-    ##   613 | namespace Eigen {
-    ##       | ^~~~~~~~~
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:17: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘{’ token
-    ##   613 | namespace Eigen {
-    ##       |                 ^
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:96:10: fatal error: complex: No such file or directory
-    ##    96 | #include <complex>
-    ##       |          ^~~~~~~~~
-    ## compilation terminated.
-    ## make: *** [/usr/lib/R/etc/Makeconf:168: foo.o] Error 1
-
+    ## Compiling Stan program...
     ## Start sampling
 
 ``` r
@@ -184,15 +114,15 @@ fit1
     ## Group-Level Effects: 
     ## ~patient (Number of levels: 59) 
     ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## sd(Intercept)     0.58      0.07     0.46     0.73 1.00      808     1552
+    ## sd(Intercept)     0.58      0.07     0.46     0.73 1.00      970     1614
     ## 
     ## Population-Level Effects: 
     ##            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## Intercept      1.78      0.12     1.54     2.01 1.00      785     1300
-    ## zAge           0.09      0.09    -0.07     0.26 1.00      690     1599
-    ## zBase          0.71      0.12     0.47     0.95 1.00      892     1566
-    ## Trt1          -0.27      0.17    -0.60     0.06 1.01      769     1159
-    ## zBase:Trt1     0.05      0.16    -0.27     0.36 1.00     1014     1735
+    ## Intercept      1.77      0.12     1.53     2.00 1.00      768     1487
+    ## zAge           0.09      0.09    -0.07     0.26 1.01      638     1142
+    ## zBase          0.70      0.12     0.45     0.94 1.00      779     1520
+    ## Trt1          -0.27      0.17    -0.60     0.06 1.01      667     1489
+    ## zBase:Trt1     0.06      0.16    -0.26     0.38 1.00      843     1389
     ## 
     ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
     ## and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -218,32 +148,31 @@ Compare model results with leave-one-out validation
 loo(fit1, fit2)
 ```
 
-    ## Warning: Found 6 observations with a pareto_k > 0.7 in model 'fit1'. It is
-    ## recommended to set 'reloo = TRUE' in order to calculate the ELPD without the
-    ## assumption that these observations are negligible. This will refit the model 6
-    ## times to compute the ELPDs for the problematic observations directly.
+    ## Warning: Found 9 observations with a pareto_k > 0.7 in model 'fit1'. It is
+    ## recommended to set 'moment_match = TRUE' in order to perform moment matching for
+    ## problematic observations.
 
-    ## Warning: Found 56 observations with a pareto_k > 0.7 in model 'fit2'. With this
-    ## many problematic observations, it may be more appropriate to use 'kfold' with
-    ## argument 'K = 10' to perform 10-fold cross-validation rather than LOO.
+    ## Warning: Found 60 observations with a pareto_k > 0.7 in model 'fit2'. It is
+    ## recommended to set 'moment_match = TRUE' in order to perform moment matching for
+    ## problematic observations.
 
     ## Output of model 'fit1':
     ## 
     ## Computed from 4000 by 236 log-likelihood matrix
     ## 
     ##          Estimate   SE
-    ## elpd_loo   -670.3 36.2
-    ## p_loo        92.2 13.6
-    ## looic      1340.5 72.3
+    ## elpd_loo   -671.2 36.5
+    ## p_loo        94.2 14.4
+    ## looic      1342.5 73.1
     ## ------
     ## Monte Carlo SE of elpd_loo is NA.
     ## 
     ## Pareto k diagnostic values:
     ##                          Count Pct.    Min. n_eff
-    ## (-Inf, 0.5]   (good)     212   89.8%   435       
-    ##  (0.5, 0.7]   (ok)        18    7.6%   84        
-    ##    (0.7, 1]   (bad)        5    2.1%   14        
-    ##    (1, Inf)   (very bad)   1    0.4%   7         
+    ## (-Inf, 0.5]   (good)     212   89.8%   703       
+    ##  (0.5, 0.7]   (ok)        15    6.4%   153       
+    ##    (0.7, 1]   (bad)        7    3.0%   49        
+    ##    (1, Inf)   (very bad)   2    0.8%   13        
     ## See help('pareto-k-diagnostic') for details.
     ## 
     ## Output of model 'fit2':
@@ -251,31 +180,31 @@ loo(fit1, fit2)
     ## Computed from 4000 by 236 log-likelihood matrix
     ## 
     ##          Estimate   SE
-    ## elpd_loo   -597.4 14.5
-    ## p_loo       110.1  7.8
-    ## looic      1194.9 29.1
+    ## elpd_loo   -597.4 14.4
+    ## p_loo       109.8  7.6
+    ## looic      1194.7 28.8
     ## ------
     ## Monte Carlo SE of elpd_loo is NA.
     ## 
     ## Pareto k diagnostic values:
     ##                          Count Pct.    Min. n_eff
-    ## (-Inf, 0.5]   (good)      79   33.5%   562       
-    ##  (0.5, 0.7]   (ok)       101   42.8%   119       
-    ##    (0.7, 1]   (bad)       46   19.5%   26        
-    ##    (1, Inf)   (very bad)  10    4.2%   5         
+    ## (-Inf, 0.5]   (good)     78    33.1%   856       
+    ##  (0.5, 0.7]   (ok)       98    41.5%   223       
+    ##    (0.7, 1]   (bad)      53    22.5%   33        
+    ##    (1, Inf)   (very bad)  7     3.0%   7         
     ## See help('pareto-k-diagnostic') for details.
     ## 
     ## Model comparisons:
     ##      elpd_diff se_diff
     ## fit2   0.0       0.0  
-    ## fit1 -72.8      26.0
+    ## fit1 -73.9      26.4
 
-## RStanarm
+## rstanarm
 
 Rstanarm examle compared with brms
 
-  - <https://mc-stan.org/loo/articles/loo2-example.html>
-  - <http://mc-stan.org/rstanarm/articles/count.html>
+-   <https://mc-stan.org/loo/articles/loo2-example.html>
+-   <http://mc-stan.org/rstanarm/articles/count.html>
 
 brms prior setting:
 <https://www.jamesrrae.com/post/bayesian-logistic-regression-using-brms-part-1/>
@@ -316,30 +245,7 @@ roach_zinb <-
   )
 ```
 
-    ## Compiling the C++ model
-
-    ## Trying to compile a simple C file
-
-    ## Running /usr/lib/R/bin/R CMD SHLIB foo.c
-    ## gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG   -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/unsupported"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/BH/include" -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/src/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/"  -I"/home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/rstan/include" -DEIGEN_NO_DEBUG  -D_REENTRANT  -DBOOST_DISABLE_ASSERTS -DBOOST_PENDING_INTEGER_LOG2_HPP -include stan/math/prim/mat/fun/Eigen.hpp     -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-jbaK_j/r-base-3.6.3=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c foo.c -o foo.o
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:88,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:1: error: unknown type name ‘namespace’
-    ##   613 | namespace Eigen {
-    ##       | ^~~~~~~~~
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/src/Core/util/Macros.h:613:17: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘{’ token
-    ##   613 | namespace Eigen {
-    ##       |                 ^
-    ## In file included from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Dense:1,
-    ##                  from /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/StanHeaders/include/stan/math/prim/mat/fun/Eigen.hpp:4,
-    ##                  from <command-line>:
-    ## /home/cambonator/R/x86_64-pc-linux-gnu-library/3.6/RcppEigen/include/Eigen/Core:96:10: fatal error: complex: No such file or directory
-    ##    96 | #include <complex>
-    ##       |          ^~~~~~~~~
-    ## compilation terminated.
-    ## make: *** [/usr/lib/R/etc/Makeconf:168: foo.o] Error 1
+    ## Compiling Stan program...
 
     ## Start sampling
 
@@ -356,7 +262,7 @@ plot(roach_zinb,pars=c('roach1','treatment','senior'))
 ![](../rmd_images/Comparing_Bayesian_Packages/unnamed-chunk-10-2.png)<!-- -->
 
 ``` r
-pp_check(roach_pois,plotfun='stat')
+pp_check(roach_pois, plotfun='stat')
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -364,7 +270,7 @@ pp_check(roach_pois,plotfun='stat')
 ![](../rmd_images/Comparing_Bayesian_Packages/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
-pp_check(roach_negbinom2,plotfun='stat')
+pp_check(roach_negbinom2, plotfun='stat')
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -372,7 +278,7 @@ pp_check(roach_negbinom2,plotfun='stat')
 ![](../rmd_images/Comparing_Bayesian_Packages/unnamed-chunk-11-2.png)<!-- -->
 
 ``` r
-pp_check(roach_zinb,plotfun='stat')
+pp_check(roach_zinb, plotfun='stat')
 ```
 
     ## Using 10 posterior samples for ppc type 'dens_overlay' by default.

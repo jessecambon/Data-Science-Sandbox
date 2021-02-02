@@ -72,11 +72,9 @@ fit1 <- stan(
 
 ## Brms
 
-The Brms package supports
-
 Example based on : https://github.com/paul-buerkner/brms
 
-* `(1 | var)` is used to specify the variable as a random effect. Random effects are categorical grouping variables we are trying control for.
+* `(1 | var)` is used to specify a random intercept 
 
 Mixed effect model has both random effects and fixed effects
 
@@ -112,7 +110,7 @@ https://mc-stan.org/loo/
 loo(fit1, fit2)
 ```
 
-## RStanarm
+## rstanarm
 
 Rstanarm examle compared with brms
 
@@ -164,9 +162,9 @@ plot(roach_zinb,pars=c('roach1','treatment','senior'))
 
 
 ```{r}
-pp_check(roach_pois,plotfun='stat')
-pp_check(roach_negbinom2,plotfun='stat')
-pp_check(roach_zinb,plotfun='stat')
+pp_check(roach_pois, plotfun='stat')
+pp_check(roach_negbinom2, plotfun='stat')
+pp_check(roach_zinb, plotfun='stat')
 ```
 
 ```{r}

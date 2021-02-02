@@ -1,7 +1,11 @@
-Distribution Sampling
+Distribution Sampling and Hypothesis Testing
 ================
 Jesse Cambon
-01 May, 2020
+02 February, 2021
+
+-   [Significance Testing](#significance-testing)
+    -   [T-test (Frequentist version)](#t-test-frequentist-version)
+    -   [Bayesian T-test](#bayesian-t-test)
 
 References: \* <http://appliedpredictivemodeling.com/data> \*
 <http://faculty.marshall.usc.edu/gareth-james/ISL/data.html>
@@ -135,9 +139,9 @@ compare_norms_long %>%
   kable()
 ```
 
-| statistic |    t\_df |  p\_value | alternative |   lower\_ci | upper\_ci |
-| --------: | -------: | --------: | :---------- | ----------: | --------: |
-|  1.417581 | 197.3181 | 0.1578903 | two.sided   | \-0.7904857 |  4.832401 |
+| statistic |    t\_df |  p\_value | alternative |  lower\_ci | upper\_ci |
+|----------:|---------:|----------:|:------------|-----------:|----------:|
+|  1.417581 | 197.3181 | 0.1578903 | two.sided   | -0.7904857 |  4.832401 |
 
 ### Bayesian T-test
 
@@ -161,6 +165,6 @@ bayes_result
 describe_posterior(bayes_result) %>% kable()
 ```
 
-| Parameter  |   Median | CI |     CI\_low | CI\_high |      pd | ROPE\_CI | ROPE\_low | ROPE\_high | ROPE\_Percentage |        BF | Prior\_Distribution | Prior\_Location | Prior\_Scale |
-| :--------- | -------: | -: | ----------: | -------: | ------: | -------: | --------: | ---------: | ---------------: | --------: | :------------------ | --------------: | -----------: |
-| Difference | 1.885353 | 89 | \-0.2588156 | 4.222233 | 0.91725 |       89 |     \-0.1 |        0.1 |        0.0263971 | 0.3932028 | cauchy              |               0 |    0.7071068 |
+| Parameter  |    Median |  CI |   CI\_low |  CI\_high |      pd | ROPE\_CI | ROPE\_low | ROPE\_high | ROPE\_Percentage |        BF | Prior\_Distribution | Prior\_Location | Prior\_Scale |
+|:-----------|----------:|----:|----------:|----------:|--------:|---------:|----------:|-----------:|-----------------:|----------:|:--------------------|----------------:|-------------:|
+| Difference | -1.885353 |  89 | -4.149145 | 0.2915764 | 0.91525 |       89 | -1.010632 |   1.010632 |         0.232519 | 0.3932028 | cauchy              |               0 |    0.7071068 |
