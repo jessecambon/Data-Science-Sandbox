@@ -30,6 +30,7 @@ Info on 'trials' function: https://cran.r-project.org/web/packages/brms/vignette
 library(rethinking)
 library(brms)
 library(tidyverse)
+library(bayesplot)
 data("reedfrogs")
 ```
 
@@ -37,7 +38,8 @@ data("reedfrogs")
 
 ```{r}
 d <- reedfrogs %>%
-  mutate(tank = 1:nrow(.))
+  mutate(tank = as.factor(1:nrow(.)),
+         across(tank, as.factor))
 ```
 
 ```{r}
@@ -45,7 +47,7 @@ d <- reedfrogs %>%
 # No pooling
 b12.1 <- 
   brm(data = d, family = binomial,
-      surv | trials(density) ~ 0 + factor(tank),
+      surv | trials(density)  ~  tank,
       prior(normal(0, 5), class = b),
       iter = 2000, warmup = 500, chains = 4, cores = 4,
       seed = 12)
@@ -53,7 +55,7 @@ b12.1 <-
 # Partial pooling (multilevel model)
 b12.2 <- 
   brm(data = d, family = binomial,
-      surv | trials(density) ~ 1 + (1 | tank),
+      surv | trials(density) ~  (1 | tank),
       prior = c(prior(normal(0, 1), class = Intercept),
                 prior(cauchy(0, 1), class = sd)),
       iter = 4000, warmup = 1000, chains = 4, cores = 4,
@@ -64,6 +66,15 @@ b12.2 <-
 
 ```{r}
 pp_check(b12.1)
-pp_check(b12.1)
+pp_check(b12.2)
+```
+
+```{r}
+mcmc_areas(b12.2, pars = c('r_*', 'b_*'))
+```
+```{r}
+summary(b12.2)
+
+post <- posterior_samples(b12.2)
 ```
 
