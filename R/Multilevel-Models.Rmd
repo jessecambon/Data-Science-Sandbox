@@ -20,9 +20,11 @@ References:
 
 ```{r setup, message = F, warning = F}
 library(lme4)
+library(broom.mixed)
 library(rstanarm)
 library(bayesplot)
 library(tidyverse)
+library(bayestestR)
 ```
 
 
@@ -49,7 +51,8 @@ sleepstudy %>%
 
 
 ```{r}
-summary(fm1)
+tidy(fm1)
+glance(fm1)
 ```
 
 ## Bayesian approach
@@ -82,10 +85,13 @@ ppc_ribbon_grouped(
 ) 
 ```
 
+```{r}
+plot(p_direction(bm1, effects = "fixed", component = "all"))
+plot(p_direction(bm1, effects = "random", component = "all"))
 
-```{r, fig.height = 6, fig.width = 10}
-#posterior_vs_prior(bm1, pars = "beta", group_by_parameter = TRUE )
+p_direction(bm1, effects = 'all')
 ```
+
 
 ```{r}
 summary(bm1)

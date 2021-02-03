@@ -43,9 +43,9 @@ A collection of code and resources to serve as a starting point for data science
 * [Hierarchical Clustering](Python/Clustering.ipynb) (Python) - Agglomerative clustering with sklearn and scipy
 
 ## Stats Analysis
-* [Power Analysis](Power_Analysis.md) (R) - Statistical power analysis
-* [Distribution Sampling and Hypothesis Testing](Distribution_Sampling.md) (R)
-* [Hypothesis Testing](hypothesis_testing.md) (R)
+* [Power Analysis](R/Power_Analysis.md) (R) - Statistical power analysis
+* [Distribution Sampling and Hypothesis Testing](R/Distribution_Sampling.md) (R)
+* [Hypothesis Testing](R/hypothesis_testing.md) (R)
 
 ## NLP 
 * [Document Embeddings](Python/state_of_union_embeddings.ipynb) (Python) - Using word embeddings to compare the similarity of State of the Union addresses.
