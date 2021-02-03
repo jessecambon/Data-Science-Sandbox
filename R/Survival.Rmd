@@ -12,6 +12,7 @@ Survival Analysis
 * Kaplan-Meier Plots
 * Log-rank test
 * Cox Proportional Hazard Model
+* Parametric survival models
 * Bayesian Approaches
 
 ```{r knit-settings, include=FALSE}
@@ -151,6 +152,43 @@ aft_fit <- survreg(Surv(time, status) ~ sex + age + ph.ecog,
 
 # Exponentiate coefficients to get hazard ratios
 aft_hr <- tidy(aft_fit, exponentiate = TRUE, conf.int = TRUE)
+
+aft_hr
 ```
 
+
+
+
+
+## Bayesian Survival Models
+
+```{r}
+library(brms)
+library(bayesplot)
+```
+
+- http://paul-buerkner.github.io/brms/reference/kidney.html
+- https://mc-stan.org/rstanarm/reference/adapt_delta.html 
+
+```{r, message = FALSE,  warning = F, error = F, results = 'hide'}
+# fit weibull model
+fit2 <- brm(time | cens(censored) ~ sex + disease + (1 | patient), 
+            data = kidney, family = weibull(), cores = 4, 
+            control = list(adapt_delta = 0.97))
+```
+
+```{r}
+summary(fit2)
+```
+
+
+
+```{r}
+pp_check(fit2)
+
+pp_check(fit2, type = 'intervals')
+```
+```{r, fig.height =  8, fig.width = 4}
+mcmc_areas(fit2,  regex_pars = c('b_*', 'r_*'))
+```
 
