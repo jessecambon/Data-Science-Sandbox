@@ -25,13 +25,13 @@ A collection of code and resources to serve as a starting point for data science
 * [Modeling Fundamentals](R/Titanic.md) (R) - A primer on logistic and linear regression modeling with the classic Titanic dataset.
 * [Survival Analysis](R/Survival.md) (R) - Survival analysis methods such as cox proportion hazard models and Kaplan-Meier curves.
 * [Modeling Workflows](R/Modeling_Workflow.md) (R) - Streamlined Tidyverse modeling workflows with the gapminder dataset.
-* [Multilevel Models](R/Multilevel-Models.md) (R) - Mulitlevel aka. mixed effects models
+* [Multilevel Models](R/Multilevel-Models.md) (R) - Multi-level aka. mixed effects models
 * [Time Series Modeling](R/Time_Series_Modeling.md) (R) - Experimenting with time series modeling (tsibble, forecast libraries, prophet, etc.)
 * [Ordinal Regression](R/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
 * [Presenting Regression Models](R/Regression-Model-Tidying.md) (R) - Code for cleaning the outputs of regression models for presentations.
 * [Sklearn Modeling Workflows](Python/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves).
 * [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library for machine learning.
-* [Parsnip](R/Parsnip.md) (R) 
+* [Parsnip](R/Parsnip.md) (R) - fitting models with the parsnip package (from tidymodels)
 
 ## Bayesian Models
 * [Bayesian Basics](R/Bayesian_Basics.md) (R) - exploring a simple Bayesian multilevel model

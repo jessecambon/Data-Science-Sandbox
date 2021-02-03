@@ -1,0 +1,69 @@
+---
+title: "Multilevel Tadpoles"
+author: "Jesse Cambon"
+date: "`r format(Sys.time(), '%B, %Y')`"
+output:
+  github_document:
+    toc: true
+---
+
+```{r knit-settings, include=FALSE}
+library(here)
+source(here("rmd_config.R"))
+```
+
+Reproduce the multilevel model made for the tadpole data in Chapter 13 of [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/).
+
+Use this code as a starting point:
+
+https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/multilevel-models.html
+
+Also see:
+
+- https://cran.r-project.org/web/packages/brms/vignettes/brms_multilevel.pdf
+- https://www.rensvandeschoot.com/tutorials/brms-started/
+- https://www.rensvandeschoot.com/tutorials/brms/
+
+Info on 'trials' function: https://cran.r-project.org/web/packages/brms/vignettes/brms_customfamilies.html
+
+```{r setup, message = F, warning = F}
+library(rethinking)
+library(brms)
+library(tidyverse)
+data("reedfrogs")
+```
+
+
+
+```{r}
+d <- reedfrogs %>%
+  mutate(tank = 1:nrow(.))
+```
+
+```{r}
+
+# No pooling
+b12.1 <- 
+  brm(data = d, family = binomial,
+      surv | trials(density) ~ 0 + factor(tank),
+      prior(normal(0, 5), class = b),
+      iter = 2000, warmup = 500, chains = 4, cores = 4,
+      seed = 12)
+
+# Partial pooling (multilevel model)
+b12.2 <- 
+  brm(data = d, family = binomial,
+      surv | trials(density) ~ 1 + (1 | tank),
+      prior = c(prior(normal(0, 1), class = Intercept),
+                prior(cauchy(0, 1), class = sd)),
+      iter = 4000, warmup = 1000, chains = 4, cores = 4,
+      seed = 12)
+
+```
+
+
+```{r}
+pp_check(b12.1)
+pp_check(b12.1)
+```
+
