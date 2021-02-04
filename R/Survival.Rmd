@@ -165,6 +165,7 @@ aft_hr
 ```{r}
 library(brms)
 library(bayesplot)
+options(mc.cores = parallel::detectCores())
 ```
 
 - http://paul-buerkner.github.io/brms/reference/kidney.html
@@ -177,8 +178,11 @@ fit2 <- brm(time | cens(censored) ~ sex + disease + (1 | patient),
             control = list(adapt_delta = 0.97))
 ```
 
+
 ```{r}
 summary(fit2)
+
+prior_summary(fit2)
 ```
 
 
@@ -190,5 +194,16 @@ pp_check(fit2, type = 'intervals')
 ```
 ```{r, fig.height =  8, fig.width = 4}
 mcmc_areas(fit2,  regex_pars = c('b_*', 'r_*'))
+```
+
+https://mc-stan.org/bayesplot/reference/PPC-censoring.html
+
+```{r}
+yrep <- posterior_predict(fit2)
+```
+
+
+```{r}
+ppc_km_overlay(kidney$time, yrep, status_y = kidney$censored)
 ```
 

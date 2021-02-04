@@ -1,7 +1,7 @@
 Survival Models
 ================
 Jesse Cambon
-03 February, 2021
+04 February, 2021
 
 -   [Kaplan-Meier](#kaplan-meier)
 -   [Log-Rank Test](#log-rank-test)
@@ -233,7 +233,7 @@ library(brms)
 library(bayesplot)
 ```
 
-    ## This is bayesplot version 1.7.2
+    ## This is bayesplot version 1.8.0
 
     ## - Online documentation and vignettes at mc-stan.org/bayesplot
 
@@ -242,6 +242,10 @@ library(bayesplot)
     ##    * Does _not_ affect other ggplot2 plots
 
     ##    * See ?bayesplot_theme_set for details on theme setting
+
+``` r
+options(mc.cores = parallel::detectCores())
+```
 
 -   <http://paul-buerkner.github.io/brms/reference/kidney.html>
 -   <https://mc-stan.org/rstanarm/reference/adapt_delta.html>
@@ -267,23 +271,50 @@ summary(fit2)
     ## Group-Level Effects: 
     ## ~patient (Number of levels: 38) 
     ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## sd(Intercept)     0.53      0.24     0.05     0.97 1.00      722      675
+    ## sd(Intercept)     0.53      0.23     0.08     0.98 1.00      837     1549
     ## 
     ## Population-Level Effects: 
     ##            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## Intercept      3.66      0.41     2.88     4.50 1.00     2833     2788
-    ## sexfemale      1.61      0.38     0.87     2.35 1.00     2956     2919
-    ## diseaseGN     -0.15      0.44    -1.00     0.73 1.00     2587     2425
-    ## diseaseAN     -0.58      0.39    -1.36     0.20 1.00     2593     2207
-    ## diseasePKD     0.94      0.68    -0.39     2.27 1.00     2388     3112
+    ## Intercept      3.65      0.40     2.87     4.50 1.00     2298     3062
+    ## sexfemale      1.61      0.38     0.85     2.34 1.00     2891     3163
+    ## diseaseGN     -0.14      0.44    -1.00     0.72 1.00     2436     2704
+    ## diseaseAN     -0.57      0.39    -1.36     0.21 1.00     2524     2627
+    ## diseasePKD     0.95      0.66    -0.38     2.24 1.00     2192     2601
     ## 
     ## Family Specific Parameters: 
     ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## shape     1.12      0.16     0.85     1.48 1.00     1338     2461
+    ## shape     1.13      0.15     0.86     1.45 1.00     1305     2427
     ## 
     ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
     ## and Tail_ESS are effective sample size measures, and Rhat is the potential
     ## scale reduction factor on split chains (at convergence, Rhat = 1).
+
+``` r
+prior_summary(fit2)
+```
+
+    ##                   prior     class       coef   group resp dpar nlpar bound
+    ##                  (flat)         b                                         
+    ##                  (flat)         b  diseaseAN                              
+    ##                  (flat)         b  diseaseGN                              
+    ##                  (flat)         b diseasePKD                              
+    ##                  (flat)         b  sexfemale                              
+    ##  student_t(3, 3.7, 2.5) Intercept                                         
+    ##    student_t(3, 0, 2.5)        sd                                         
+    ##    student_t(3, 0, 2.5)        sd            patient                      
+    ##    student_t(3, 0, 2.5)        sd  Intercept patient                      
+    ##       gamma(0.01, 0.01)     shape                                         
+    ##        source
+    ##       default
+    ##  (vectorized)
+    ##  (vectorized)
+    ##  (vectorized)
+    ##  (vectorized)
+    ##       default
+    ##       default
+    ##  (vectorized)
+    ##  (vectorized)
+    ##       default
 
 ``` r
 pp_check(fit2)
@@ -310,3 +341,15 @@ mcmc_areas(fit2,  regex_pars = c('b_*', 'r_*'))
 ```
 
 ![](../rmd_images/Survival/unnamed-chunk-17-1.png)<!-- -->
+
+<https://mc-stan.org/bayesplot/reference/PPC-censoring.html>
+
+``` r
+yrep <- posterior_predict(fit2)
+```
+
+``` r
+ppc_km_overlay(kidney$time, yrep, status_y = kidney$censored)
+```
+
+![](../rmd_images/Survival/unnamed-chunk-19-1.png)<!-- -->
