@@ -23,6 +23,7 @@ library(tidyverse)
 library(bayestestR)
 library(bayesplot)
 library(wesanderson)
+library(broom.mixed)
 
 options(mc.cores = parallel::detectCores()) 
 
@@ -30,6 +31,8 @@ model <- stan_glmer(extra ~ group + (1 | ID), data = sleep,
                   prior = normal(0, 3, autoscale = FALSE))
 
 summary(model)
+
+tidy(model)
 ```
 
 https://github.com/easystats/see/issues/48
@@ -41,12 +44,9 @@ density <- estimate_density(model)
 sim_prior <- simulate_prior(model)
 density_prior <- estimate_density(sim_prior)
 
-#sim_likelihood <-  sleep %>% select(group) 
-#density_likelihood <- estimate_density(sim_likelihood)
-
 # Combine density for prior and posterior distributions
 post_prior <- density %>% mutate(type = 'posterior') %>%
-  bind_rows(density_prior %>% mutate(type='prior'))
+  bind_rows(density_prior %>% mutate(type = 'prior'))
 
 ```
 
@@ -55,7 +55,7 @@ Plot the prior and posterior distributions for the fixed effects
 ```{r}
 ggplot(data = post_prior, aes(x = x ,y = y, fill = type)) + 
   theme_bw() +
-  facet_wrap(~Parameter, ncol=1, scales='free') +
+  facet_wrap(~Parameter, ncol = 1, scales='free') +
   geom_ribbon( mapping = aes(
     ymin = 0,
     ymax = y  ),
@@ -66,19 +66,21 @@ ggplot(data = post_prior, aes(x = x ,y = y, fill = type)) +
 #  scale_x_continuous(expand=expand_scale(mult = c(-.4, -.4)))
 ```
 
+```{r}
+mcmc_trace(model)
+mcmc_areas(model)
+```
+
+
 https://easystats.github.io/see/articles/bayestestR.html
 
 ```{r}
-plot(density, priors = TRUE)
-```
+plot(model)
 
-
-
-```{r}
 p_direction(model)
 ```
 
-```{r}
+```{r, fig.height = 10, fig.width = 8}
 plot(p_direction(model, effects = "all", component = "all"))
 ```
 
@@ -87,15 +89,13 @@ Check posterior distribution
 
 ```{r}
 pp_check(model)
-```
-```{r}
+
 pp_check(model, plotfun = "hist")
-```
 
-
-```{r}
 pp_check(model, plotfun = "intervals")
 ```
+
+
 ```{r}
 ppc_intervals_grouped(
   y = sleep$extra,

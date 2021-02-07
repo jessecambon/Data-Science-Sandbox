@@ -30,6 +30,10 @@ library(survival)
 library(survminer)
 library(tidyverse)
 library(broom)
+library(broom.mixed)
+library(brms)
+library(bayesplot)
+options(mc.cores = parallel::detectCores())
 ```
 
 
@@ -162,29 +166,46 @@ aft_hr
 
 ## Bayesian Survival Models
 
-```{r}
-library(brms)
-library(bayesplot)
-options(mc.cores = parallel::detectCores())
-```
-
 - http://paul-buerkner.github.io/brms/reference/kidney.html
 - https://mc-stan.org/rstanarm/reference/adapt_delta.html 
 
+
+```{r}
+print('Default priors:')
+get_prior(time | cens(censored) ~ sex + disease + age + (1 | patient),
+            data = kidney, family = weibull()
+          )
+
+print('Horseshoe priors:')
+
+get_prior(time | cens(censored) ~ sex + disease + age + (1 | patient),
+            data = kidney, family = weibull(), 
+          prior = set_prior("horseshoe(3)", class = 'b') + 
+              set_prior("horseshoe(3)", class = 'Intercept') +
+              set_prior("horseshoe(3)", class = 'sd')
+          )
+```
+
+
 ```{r, message = FALSE,  warning = F, error = F, results = 'hide'}
 # fit weibull model
-fit2 <- brm(time | cens(censored) ~ sex + disease + (1 | patient), 
-            data = kidney, family = weibull(), cores = 4, 
-            control = list(adapt_delta = 0.97))
+fit2 <- brm(time | cens(censored) ~ sex + disease + (1 | patient),
+            data = kidney, family = weibull(), 
+            prior = set_prior("horseshoe(3)"),
+            iter = 3000,
+            control = list(adapt_delta = 0.98))
 ```
 
 
 ```{r}
 summary(fit2)
-
+tidy(fit2)
 prior_summary(fit2)
 ```
 
+```{r, fig.height = 12, fig.width = 10}
+mcmc_trace(fit2)
+```
 
 
 ```{r}
@@ -200,10 +221,18 @@ https://mc-stan.org/bayesplot/reference/PPC-censoring.html
 
 ```{r}
 yrep <- posterior_predict(fit2)
+
+loo(fit2)
 ```
 
 
 ```{r}
-ppc_km_overlay(kidney$time, yrep, status_y = kidney$censored)
+hist(kidney$time)
+```
+
+
+```{r}
+ppc_km_overlay(kidney$time, yrep, status_y = kidney$censored) + 
+  xlim(0, 200)
 ```
 

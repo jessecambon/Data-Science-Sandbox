@@ -1,23 +1,23 @@
 Survival Models
 ================
 Jesse Cambon
-04 February, 2021
+06 February, 2021
 
--   [Kaplan-Meier](#kaplan-meier)
--   [Log-Rank Test](#log-rank-test)
--   [Cox Proportional Hazard Model](#cox-proportional-hazard-model)
-    -   [Predictions](#predictions)
-    -   [Validation](#validation)
-    -   [Parametric Survival Model](#parametric-survival-model)
-    -   [Bayesian Survival Models](#bayesian-survival-models)
+  - [Kaplan-Meier](#kaplan-meier)
+  - [Log-Rank Test](#log-rank-test)
+  - [Cox Proportional Hazard Model](#cox-proportional-hazard-model)
+      - [Predictions](#predictions)
+      - [Validation](#validation)
+      - [Parametric Survival Model](#parametric-survival-model)
+      - [Bayesian Survival Models](#bayesian-survival-models)
 
 Survival Analysis
 
--   Kaplan-Meier Plots
--   Log-rank test
--   Cox Proportional Hazard Model
--   Parametric survival models
--   Bayesian Approaches
+  - Kaplan-Meier Plots
+  - Log-rank test
+  - Cox Proportional Hazard Model
+  - Parametric survival models
+  - Bayesian Approaches
 
 Reference:
 
@@ -28,6 +28,10 @@ library(survival)
 library(survminer)
 library(tidyverse)
 library(broom)
+library(broom.mixed)
+library(brms)
+library(bayesplot)
+options(mc.cores = parallel::detectCores())
 ```
 
 # Kaplan-Meier
@@ -75,10 +79,12 @@ survdiff(Surv(time, status) ~ sex,
 
 # Cox Proportional Hazard Model
 
--   Multivariate “semi-parametric” regression approach
--   Assumes hazard can change over time, but is proportional between
+  - Multivariate “semi-parametric” regression approach
+  - Assumes hazard can change over time, but is proportional between
     groups at all points in time (ie. hazard ratio is constant over
     time).
+
+<!-- end list -->
 
 ``` r
 cox_fit <- coxph(Surv(time, status) ~ sex + age + ph.ecog,
@@ -201,100 +207,26 @@ aft_hr
 
 ## Bayesian Survival Models
 
+  - <http://paul-buerkner.github.io/brms/reference/kidney.html>
+  - <https://mc-stan.org/rstanarm/reference/adapt_delta.html>
+
+<!-- end list -->
+
 ``` r
-library(brms)
+print('Default priors:')
 ```
 
-    ## Loading required package: Rcpp
-
-    ## Registered S3 methods overwritten by 'lme4':
-    ##   method                          from
-    ##   cooks.distance.influence.merMod car 
-    ##   influence.merMod                car 
-    ##   dfbeta.influence.merMod         car 
-    ##   dfbetas.influence.merMod        car
-
-    ## Loading 'brms' package (version 2.14.4). Useful instructions
-    ## can be found by typing help('brms'). A more detailed introduction
-    ## to the package is available through vignette('brms_overview').
-
-    ## 
-    ## Attaching package: 'brms'
-
-    ## The following object is masked from 'package:survival':
-    ## 
-    ##     kidney
-
-    ## The following object is masked from 'package:stats':
-    ## 
-    ##     ar
+    ## [1] "Default priors:"
 
 ``` r
-library(bayesplot)
-```
-
-    ## This is bayesplot version 1.8.0
-
-    ## - Online documentation and vignettes at mc-stan.org/bayesplot
-
-    ## - bayesplot theme set to bayesplot::theme_default()
-
-    ##    * Does _not_ affect other ggplot2 plots
-
-    ##    * See ?bayesplot_theme_set for details on theme setting
-
-``` r
-options(mc.cores = parallel::detectCores())
-```
-
--   <http://paul-buerkner.github.io/brms/reference/kidney.html>
--   <https://mc-stan.org/rstanarm/reference/adapt_delta.html>
-
-``` r
-# fit weibull model
-fit2 <- brm(time | cens(censored) ~ sex + disease + (1 | patient), 
-            data = kidney, family = weibull(), cores = 4, 
-            control = list(adapt_delta = 0.97))
-```
-
-``` r
-summary(fit2)
-```
-
-    ##  Family: weibull 
-    ##   Links: mu = log; shape = identity 
-    ## Formula: time | cens(censored) ~ sex + disease + (1 | patient) 
-    ##    Data: kidney (Number of observations: 76) 
-    ## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
-    ##          total post-warmup samples = 4000
-    ## 
-    ## Group-Level Effects: 
-    ## ~patient (Number of levels: 38) 
-    ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## sd(Intercept)     0.53      0.23     0.08     0.98 1.00      837     1549
-    ## 
-    ## Population-Level Effects: 
-    ##            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## Intercept      3.65      0.40     2.87     4.50 1.00     2298     3062
-    ## sexfemale      1.61      0.38     0.85     2.34 1.00     2891     3163
-    ## diseaseGN     -0.14      0.44    -1.00     0.72 1.00     2436     2704
-    ## diseaseAN     -0.57      0.39    -1.36     0.21 1.00     2524     2627
-    ## diseasePKD     0.95      0.66    -0.38     2.24 1.00     2192     2601
-    ## 
-    ## Family Specific Parameters: 
-    ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## shape     1.13      0.15     0.86     1.45 1.00     1305     2427
-    ## 
-    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
-    ## and Tail_ESS are effective sample size measures, and Rhat is the potential
-    ## scale reduction factor on split chains (at convergence, Rhat = 1).
-
-``` r
-prior_summary(fit2)
+get_prior(time | cens(censored) ~ sex + disease + age + (1 | patient),
+            data = kidney, family = weibull()
+          )
 ```
 
     ##                   prior     class       coef   group resp dpar nlpar bound
     ##                  (flat)         b                                         
+    ##                  (flat)         b        age                              
     ##                  (flat)         b  diseaseAN                              
     ##                  (flat)         b  diseaseGN                              
     ##                  (flat)         b diseasePKD                              
@@ -310,11 +242,140 @@ prior_summary(fit2)
     ##  (vectorized)
     ##  (vectorized)
     ##  (vectorized)
+    ##  (vectorized)
     ##       default
     ##       default
     ##  (vectorized)
     ##  (vectorized)
     ##       default
+
+``` r
+print('Horseshoe priors:')
+```
+
+    ## [1] "Horseshoe priors:"
+
+``` r
+get_prior(time | cens(censored) ~ sex + disease + age + (1 | patient),
+            data = kidney, family = weibull(), 
+          prior = set_prior("horseshoe(3)", class = 'b') + 
+              set_prior("horseshoe(3)", class = 'Intercept') +
+              set_prior("horseshoe(3)", class = 'sd')
+          )
+```
+
+    ##                   prior     class       coef   group resp dpar nlpar bound
+    ##                  (flat)         b                                         
+    ##                  (flat)         b        age                              
+    ##                  (flat)         b  diseaseAN                              
+    ##                  (flat)         b  diseaseGN                              
+    ##                  (flat)         b diseasePKD                              
+    ##                  (flat)         b  sexfemale                              
+    ##  student_t(3, 3.7, 2.5) Intercept                                         
+    ##    student_t(3, 0, 2.5)        sd                                         
+    ##    student_t(3, 0, 2.5)        sd            patient                      
+    ##    student_t(3, 0, 2.5)        sd  Intercept patient                      
+    ##       gamma(0.01, 0.01)     shape                                         
+    ##        source
+    ##       default
+    ##  (vectorized)
+    ##  (vectorized)
+    ##  (vectorized)
+    ##  (vectorized)
+    ##  (vectorized)
+    ##       default
+    ##       default
+    ##  (vectorized)
+    ##  (vectorized)
+    ##       default
+
+``` r
+# fit weibull model
+fit2 <- brm(time | cens(censored) ~ sex + disease + (1 | patient),
+            data = kidney, family = weibull(), 
+            prior = set_prior("horseshoe(3)"),
+            iter = 3000,
+            control = list(adapt_delta = 0.98))
+```
+
+``` r
+summary(fit2)
+```
+
+    ##  Family: weibull 
+    ##   Links: mu = log; shape = identity 
+    ## Formula: time | cens(censored) ~ sex + disease + (1 | patient) 
+    ##    Data: kidney (Number of observations: 76) 
+    ## Samples: 4 chains, each with iter = 3000; warmup = 1500; thin = 1;
+    ##          total post-warmup samples = 6000
+    ## 
+    ## Group-Level Effects: 
+    ## ~patient (Number of levels: 38) 
+    ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## sd(Intercept)     0.56      0.23     0.07     1.00 1.00     1220     1411
+    ## 
+    ## Population-Level Effects: 
+    ##            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## Intercept      3.84      0.40     3.10     4.66 1.00     3628     3643
+    ## sexfemale      1.29      0.43     0.36     2.08 1.00     3895     2965
+    ## diseaseGN     -0.09      0.31    -0.81     0.53 1.00     4734     5174
+    ## diseaseAN     -0.37      0.35    -1.12     0.19 1.00     3524     5001
+    ## diseasePKD     0.51      0.54    -0.32     1.68 1.00     3730     5473
+    ## 
+    ## Family Specific Parameters: 
+    ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+    ## shape     1.13      0.16     0.86     1.47 1.00     2068     3292
+    ## 
+    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+    ## and Tail_ESS are effective sample size measures, and Rhat is the potential
+    ## scale reduction factor on split chains (at convergence, Rhat = 1).
+
+``` r
+tidy(fit2)
+```
+
+    ## # A tibble: 6 x 8
+    ##   effect   component group   term          estimate std.error conf.low conf.high
+    ##   <chr>    <chr>     <chr>   <chr>            <dbl>     <dbl>    <dbl>     <dbl>
+    ## 1 fixed    cond      <NA>    (Intercept)     3.84       0.401   3.10       4.66 
+    ## 2 fixed    cond      <NA>    sexfemale       1.29       0.430   0.362      2.08 
+    ## 3 fixed    cond      <NA>    diseaseGN      -0.0908     0.313  -0.806      0.531
+    ## 4 fixed    cond      <NA>    diseaseAN      -0.374      0.355  -1.12       0.193
+    ## 5 fixed    cond      <NA>    diseasePKD      0.512      0.539  -0.317      1.68 
+    ## 6 ran_pars cond      patient sd__(Interce…   0.562      0.232   0.0700     0.996
+
+``` r
+prior_summary(fit2)
+```
+
+    ##                   prior     class       coef   group resp dpar nlpar bound
+    ##            horseshoe(3)         b                                         
+    ##            horseshoe(3)         b  diseaseAN                              
+    ##            horseshoe(3)         b  diseaseGN                              
+    ##            horseshoe(3)         b diseasePKD                              
+    ##            horseshoe(3)         b  sexfemale                              
+    ##  student_t(3, 3.7, 2.5) Intercept                                         
+    ##    student_t(3, 0, 2.5)        sd                                         
+    ##    student_t(3, 0, 2.5)        sd            patient                      
+    ##    student_t(3, 0, 2.5)        sd  Intercept patient                      
+    ##       gamma(0.01, 0.01)     shape                                         
+    ##        source
+    ##          user
+    ##  (vectorized)
+    ##  (vectorized)
+    ##  (vectorized)
+    ##  (vectorized)
+    ##       default
+    ##       default
+    ##  (vectorized)
+    ##  (vectorized)
+    ##       default
+
+``` r
+mcmc_trace(fit2)
+```
+
+![](../rmd_images/Survival/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
 pp_check(fit2)
@@ -324,7 +385,7 @@ pp_check(fit2)
 
     ## Warning: Censored responses are not shown in 'pp_check'.
 
-![](../rmd_images/Survival/unnamed-chunk-16-1.png)<!-- -->
+![](../rmd_images/Survival/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 pp_check(fit2, type = 'intervals')
@@ -334,22 +395,55 @@ pp_check(fit2, type = 'intervals')
 
     ## Warning: Censored responses are not shown in 'pp_check'.
 
-![](../rmd_images/Survival/unnamed-chunk-16-2.png)<!-- -->
+![](../rmd_images/Survival/unnamed-chunk-17-2.png)<!-- -->
 
 ``` r
 mcmc_areas(fit2,  regex_pars = c('b_*', 'r_*'))
 ```
 
-![](../rmd_images/Survival/unnamed-chunk-17-1.png)<!-- -->
+![](../rmd_images/Survival/unnamed-chunk-18-1.png)<!-- -->
 
 <https://mc-stan.org/bayesplot/reference/PPC-censoring.html>
 
 ``` r
 yrep <- posterior_predict(fit2)
+
+loo(fit2)
 ```
+
+    ## Warning: Found 8 observations with a pareto_k > 0.7 in model 'fit2'. It is
+    ## recommended to set 'moment_match = TRUE' in order to perform moment matching for
+    ## problematic observations.
+
+    ## 
+    ## Computed from 6000 by 76 log-likelihood matrix
+    ## 
+    ##          Estimate   SE
+    ## elpd_loo   -336.1 22.5
+    ## p_loo        16.6  2.7
+    ## looic       672.2 44.9
+    ## ------
+    ## Monte Carlo SE of elpd_loo is NA.
+    ## 
+    ## Pareto k diagnostic values:
+    ##                          Count Pct.    Min. n_eff
+    ## (-Inf, 0.5]   (good)     55    72.4%   1488      
+    ##  (0.5, 0.7]   (ok)       13    17.1%   609       
+    ##    (0.7, 1]   (bad)       8    10.5%   23        
+    ##    (1, Inf)   (very bad)  0     0.0%   <NA>      
+    ## See help('pareto-k-diagnostic') for details.
 
 ``` r
-ppc_km_overlay(kidney$time, yrep, status_y = kidney$censored)
+hist(kidney$time)
 ```
 
-![](../rmd_images/Survival/unnamed-chunk-19-1.png)<!-- -->
+![](../rmd_images/Survival/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
+ppc_km_overlay(kidney$time, yrep, status_y = kidney$censored) + 
+  xlim(0, 200)
+```
+
+    ## Warning: Removed 108922 row(s) containing missing values (geom_path).
+
+![](../rmd_images/Survival/unnamed-chunk-21-1.png)<!-- -->
