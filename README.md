@@ -39,7 +39,7 @@ A collection of code and resources to serve as a starting point for data science
 * [Comparing Bayesian Packages](R/Comparing_Bayesian_Packages.md) (R) - Comparing rstanarm, brms, and rstan.
 
 ##  Clustering 
-* [k-means clustering](R/Clustering.md) (R) - Using the k-means alogrithm to cluster data.
+* [k-means clustering](R/Clustering.md) (R) - Using the k-means algorithmn to cluster data.
 * [Clustering](Python/Clustering.ipynb) (Python) - Agglomerative (Hierarchical) clustering, k-means clustering, and Gaussian mixture models
 
 ## Stats Analysis
