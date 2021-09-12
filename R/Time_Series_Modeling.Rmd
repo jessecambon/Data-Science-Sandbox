@@ -8,8 +8,7 @@ output:
 ---
 
 ```{r knit-settings, include=FALSE}
-library(here)
-source(here("rmd_config.R"))
+source(here::here("rmd_config.R"))
 ```
 
 ## References
@@ -26,13 +25,13 @@ source(here("rmd_config.R"))
 ## Setup
 
 ```{r setup}
-library(nycflights13) 
+library(nycflights13)
 library(tsibbledata)
 library(wesanderson) # color palettes
 library(tidyverse)
 library(tsibble)
-#library(skimr)
-#library(feasts) # Removed for now since it breaks the forecast package
+# library(skimr)
+# library(feasts) # Removed for now since it breaks the forecast package
 library(lubridate)
 library(forecast)
 library(tsbox)
@@ -41,33 +40,38 @@ library(prophet)
 
 # Set default ggplot theme
 theme_set(theme_bw() +
-  theme(legend.position = "top",
-            plot.subtitle= element_text(face="bold",hjust=0.5),
-            plot.title = element_text(lineheight=1, face="bold",hjust = 0.5)))
-
+  theme(
+    legend.position = "top",
+    plot.subtitle = element_text(face = "bold", hjust = 0.5),
+    plot.title = element_text(lineheight = 1, face = "bold", hjust = 0.5)
+  ))
 ```
 
-#Importing Data
+## Importing Data
+
 Import Data and Convert to Tsibble format
 
 ```{r}
-weather <- nycflights13::weather %>% 
+weather <- nycflights13::weather %>%
   select(origin, time_hour, temp, humid, precip)
 
 weather_tsbl <- as_tsibble(weather, key = origin, index = time_hour)
 ```
 
 
-# Forecasting with Prophet
+## Forecasting with Prophet
+
 https://facebook.github.io/prophet
 
 ```{r}
 # convert to format needed by prophet (needs specific column names)
-weather_ts <- weather_tsbl %>% filter(origin == 'EWR') %>% select(time_hour,temp) %>% 
-  rename(ds=time_hour,y=temp)
+weather_ts <- weather_tsbl %>%
+  filter(origin == "EWR") %>%
+  select(time_hour, temp) %>%
+  rename(ds = time_hour, y = temp)
 
 # create prophet model
-m <- prophet(weather_ts,yearly.seasonality=TRUE)
+m <- prophet(weather_ts, yearly.seasonality = TRUE)
 
 future <- make_future_dataframe(m, periods = 400)
 
@@ -89,47 +93,54 @@ nrow(ansett)
 
 # Fill gaps and filter
 ansett_fill <- ansett %>%
-  filter(Airports == 'MEL-SYD') %>%
+  filter(Airports == "MEL-SYD") %>%
   fill_gaps(Passengers = 0)
 
 nrow(ansett_fill)
 
 # Aggregate all classes together , limit to 1990 onward
-ansett_summ <- ansett_fill %>% group_by %>%
-  summarize(Passengers=sum(Passengers,na.rm=TRUE)) %>%
-  filter_index("1990-01" ~ .) %>% as_tsibble(index = Week)
+ansett_summ <- ansett_fill %>%
+  group_by() %>%
+  summarize(Passengers = sum(Passengers, na.rm = TRUE)) %>%
+  filter_index("1990-01" ~ .) %>%
+  as_tsibble(index = Week)
 ```
 
 ```{r}
-ggplot(ansett_fill,
-          aes(x=Week,y=Passengers)) +
+ggplot(
+  ansett_fill,
+  aes(x = Week, y = Passengers)
+) +
   geom_area(aes(fill = Class), alpha = 1.0) +
-scale_fill_manual(values=wes_palette('Moonrise2')) +
-scale_y_continuous(labels=scales::comma) +
-labs(title='',
-     caption='') +
-theme(legend.title = element_blank(),
-      legend.position='right') 
+  scale_fill_manual(values = wes_palette("Moonrise2")) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "",
+    caption = ""
+  ) +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "right"
+  )
 ```
 
 Test forecast package
 
 ```{r}
-USAccDeaths %>% 
-  stl(s.window='periodic') %>%
+USAccDeaths %>%
+  stl(s.window = "periodic") %>%
   forecast() %>%
   autoplot()
 
 AirPassengers %>%
-  stlf(lambda=0) %>%
+  stlf(lambda = 0) %>%
   autoplot()
 
 # Have to convert this dataset to time series format with tsbox::ts_ts()
-ansett_summ %>% ts_ts(.) %>%
-  stlf(lambda=0) %>%
+ansett_summ %>%
+  ts_ts() %>%
+  stlf(lambda = 0) %>%
   autoplot()
-
 ```
 
 Feasts package unfortunately breaks the forecast package
-

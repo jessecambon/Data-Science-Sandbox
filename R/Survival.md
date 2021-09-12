@@ -1,23 +1,23 @@
 Survival Models
 ================
 Jesse Cambon
-06 February, 2021
+12 September, 2021
 
-  - [Kaplan-Meier](#kaplan-meier)
-  - [Log-Rank Test](#log-rank-test)
-  - [Cox Proportional Hazard Model](#cox-proportional-hazard-model)
-      - [Predictions](#predictions)
-      - [Validation](#validation)
-      - [Parametric Survival Model](#parametric-survival-model)
-      - [Bayesian Survival Models](#bayesian-survival-models)
+-   [Kaplan-Meier](#kaplan-meier)
+-   [Log-Rank Test](#log-rank-test)
+-   [Cox Proportional Hazard Model](#cox-proportional-hazard-model)
+    -   [Predictions](#predictions)
+    -   [Validation](#validation)
+    -   [Parametric Survival Model](#parametric-survival-model)
+    -   [Bayesian Survival Models](#bayesian-survival-models)
 
 Survival Analysis
 
-  - Kaplan-Meier Plots
-  - Log-rank test
-  - Cox Proportional Hazard Model
-  - Parametric survival models
-  - Bayesian Approaches
+-   Kaplan-Meier Plots
+-   Log-rank test
+-   Cox Proportional Hazard Model
+-   Parametric survival models
+-   Bayesian Approaches
 
 Reference:
 
@@ -79,12 +79,10 @@ survdiff(Surv(time, status) ~ sex,
 
 # Cox Proportional Hazard Model
 
-  - Multivariate “semi-parametric” regression approach
-  - Assumes hazard can change over time, but is proportional between
+-   Multivariate “semi-parametric” regression approach
+-   Assumes hazard can change over time, but is proportional between
     groups at all points in time (ie. hazard ratio is constant over
     time).
-
-<!-- end list -->
 
 ``` r
 cox_fit <- coxph(Surv(time, status) ~ sex + age + ph.ecog,
@@ -196,7 +194,7 @@ aft_hr <- tidy(aft_fit, exponentiate = TRUE, conf.int = TRUE)
 aft_hr
 ```
 
-    ## # A tibble: 5 x 7
+    ## # A tibble: 5 × 7
     ##   term        estimate std.error statistic  p.value conf.low conf.high
     ##   <chr>          <dbl>     <dbl>     <dbl>    <dbl>    <dbl>     <dbl>
     ## 1 (Intercept)  6.27      0.454       13.8  1.66e-43   5.38     7.16   
@@ -207,10 +205,8 @@ aft_hr
 
 ## Bayesian Survival Models
 
-  - <http://paul-buerkner.github.io/brms/reference/kidney.html>
-  - <https://mc-stan.org/rstanarm/reference/adapt_delta.html>
-
-<!-- end list -->
+-   <http://paul-buerkner.github.io/brms/reference/kidney.html>
+-   <https://mc-stan.org/rstanarm/reference/adapt_delta.html>
 
 ``` r
 print('Default priors:')
@@ -306,27 +302,27 @@ summary(fit2)
     ##   Links: mu = log; shape = identity 
     ## Formula: time | cens(censored) ~ sex + disease + (1 | patient) 
     ##    Data: kidney (Number of observations: 76) 
-    ## Samples: 4 chains, each with iter = 3000; warmup = 1500; thin = 1;
-    ##          total post-warmup samples = 6000
+    ##   Draws: 4 chains, each with iter = 3000; warmup = 1500; thin = 1;
+    ##          total post-warmup draws = 6000
     ## 
     ## Group-Level Effects: 
     ## ~patient (Number of levels: 38) 
     ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## sd(Intercept)     0.56      0.23     0.07     1.00 1.00     1220     1411
+    ## sd(Intercept)     0.57      0.24     0.07     1.01 1.00     1041     1334
     ## 
     ## Population-Level Effects: 
     ##            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## Intercept      3.84      0.40     3.10     4.66 1.00     3628     3643
-    ## sexfemale      1.29      0.43     0.36     2.08 1.00     3895     2965
-    ## diseaseGN     -0.09      0.31    -0.81     0.53 1.00     4734     5174
-    ## diseaseAN     -0.37      0.35    -1.12     0.19 1.00     3524     5001
-    ## diseasePKD     0.51      0.54    -0.32     1.68 1.00     3730     5473
+    ## Intercept      3.84      0.41     3.06     4.68 1.00     3314     3410
+    ## sexfemale      1.29      0.44     0.34     2.09 1.00     3596     2850
+    ## diseaseGN     -0.09      0.31    -0.77     0.53 1.00     4872     5044
+    ## diseaseAN     -0.38      0.35    -1.13     0.20 1.00     3301     4594
+    ## diseasePKD     0.51      0.54    -0.33     1.72 1.00     2936     4874
     ## 
     ## Family Specific Parameters: 
     ##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-    ## shape     1.13      0.16     0.86     1.47 1.00     2068     3292
+    ## shape     1.14      0.16     0.86     1.49 1.00     1698     3375
     ## 
-    ## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+    ## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
     ## and Tail_ESS are effective sample size measures, and Rhat is the potential
     ## scale reduction factor on split chains (at convergence, Rhat = 1).
 
@@ -334,15 +330,18 @@ summary(fit2)
 tidy(fit2)
 ```
 
-    ## # A tibble: 6 x 8
-    ##   effect   component group   term          estimate std.error conf.low conf.high
-    ##   <chr>    <chr>     <chr>   <chr>            <dbl>     <dbl>    <dbl>     <dbl>
-    ## 1 fixed    cond      <NA>    (Intercept)     3.84       0.401   3.10       4.66 
-    ## 2 fixed    cond      <NA>    sexfemale       1.29       0.430   0.362      2.08 
-    ## 3 fixed    cond      <NA>    diseaseGN      -0.0908     0.313  -0.806      0.531
-    ## 4 fixed    cond      <NA>    diseaseAN      -0.374      0.355  -1.12       0.193
-    ## 5 fixed    cond      <NA>    diseasePKD      0.512      0.539  -0.317      1.68 
-    ## 6 ran_pars cond      patient sd__(Interce…   0.562      0.232   0.0700     0.996
+    ## Warning: Method 'posterior_samples' is deprecated. Please see ?as_draws for
+    ## recommended alternatives.
+
+    ## # A tibble: 6 × 8
+    ##   effect   component group   term            estimate std.error conf.low conf.high
+    ##   <chr>    <chr>     <chr>   <chr>              <dbl>     <dbl>    <dbl>     <dbl>
+    ## 1 fixed    cond      <NA>    (Intercept)       3.84       0.407   3.06       4.68 
+    ## 2 fixed    cond      <NA>    sexfemale         1.29       0.440   0.337      2.09 
+    ## 3 fixed    cond      <NA>    diseaseGN        -0.0903     0.309  -0.766      0.531
+    ## 4 fixed    cond      <NA>    diseaseAN        -0.378      0.354  -1.13       0.199
+    ## 5 fixed    cond      <NA>    diseasePKD        0.509      0.544  -0.331      1.72 
+    ## 6 ran_pars cond      patient sd__(Intercept)   0.573      0.236   0.0740     1.01
 
 ``` r
 prior_summary(fit2)
@@ -381,7 +380,7 @@ mcmc_trace(fit2)
 pp_check(fit2)
 ```
 
-    ## Using 10 posterior samples for ppc type 'dens_overlay' by default.
+    ## Using 10 posterior draws for ppc type 'dens_overlay' by default.
 
     ## Warning: Censored responses are not shown in 'pp_check'.
 
@@ -391,7 +390,7 @@ pp_check(fit2)
 pp_check(fit2, type = 'intervals')
 ```
 
-    ## Using all posterior samples for ppc type 'intervals' by default.
+    ## Using all posterior draws for ppc type 'intervals' by default.
 
     ## Warning: Censored responses are not shown in 'pp_check'.
 
@@ -419,17 +418,17 @@ loo(fit2)
     ## Computed from 6000 by 76 log-likelihood matrix
     ## 
     ##          Estimate   SE
-    ## elpd_loo   -336.1 22.5
-    ## p_loo        16.6  2.7
-    ## looic       672.2 44.9
+    ## elpd_loo   -335.5 22.4
+    ## p_loo        16.3  2.5
+    ## looic       671.0 44.8
     ## ------
     ## Monte Carlo SE of elpd_loo is NA.
     ## 
     ## Pareto k diagnostic values:
     ##                          Count Pct.    Min. n_eff
-    ## (-Inf, 0.5]   (good)     55    72.4%   1488      
-    ##  (0.5, 0.7]   (ok)       13    17.1%   609       
-    ##    (0.7, 1]   (bad)       8    10.5%   23        
+    ## (-Inf, 0.5]   (good)     58    76.3%   1236      
+    ##  (0.5, 0.7]   (ok)       10    13.2%   315       
+    ##    (0.7, 1]   (bad)       8    10.5%   40        
     ##    (1, Inf)   (very bad)  0     0.0%   <NA>      
     ## See help('pareto-k-diagnostic') for details.
 
@@ -444,6 +443,6 @@ ppc_km_overlay(kidney$time, yrep, status_y = kidney$censored) +
   xlim(0, 200)
 ```
 
-    ## Warning: Removed 108922 row(s) containing missing values (geom_path).
+    ## Warning: Removed 109087 row(s) containing missing values (geom_path).
 
 ![](../rmd_images/Survival/unnamed-chunk-21-1.png)<!-- -->

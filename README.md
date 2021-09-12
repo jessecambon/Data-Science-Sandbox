@@ -39,7 +39,7 @@ A collection of code and resources to serve as a starting point for data science
 * [Comparing Bayesian Packages](R/Comparing_Bayesian_Packages.md) (R) - Comparing rstanarm, brms, and rstan.
 
 ##  Clustering 
-* [k-means clustering](R/Clustering.md) (R) - Using the k-means algorithmn to cluster data.
+* [k-means clustering](R/Clustering.md) (R) - Using the k-means algorithm to cluster data.
 * [Clustering](Python/Clustering.ipynb) (Python) - Agglomerative (Hierarchical) clustering, k-means clustering, and Gaussian mixture models
 
 ## Stats Analysis
@@ -54,9 +54,8 @@ A collection of code and resources to serve as a starting point for data science
 * [LSTM Demo](Python/LSTM-Demo.ipynb) (Python) - An LSTM network for predicting if a company review from glassdoor is positive
 
 ## Miscellaneous
-* [R-Quickstart](R/R-Quickstart.md) (R) - Minimal data analysis and visualization workflows. See [my blog post "Data Science Essentials"](https://jessecambon.github.io/2020/01/12/data-science-essentials.html) for more details and explanation.
+* [R-Quickstart](R/R-Quickstart.md) (R) - Minimal data analysis and visualization workflows. See [the blog post "Data Science Essentials"](https://jessecambon.github.io/2020/01/12/data-science-essentials.html) for more details and explanation.
 * [Creating Formatted Spreadsheets](R/Create_Formatted_Spreadsheet.md) (R) - How to create a custom formatted spreadsheet report with the openxlsx R package.
 * [Using Python and R Together](Python/R-Python-Hybrid.ipynb) - How to use python and R code together in the same Jupyter notebook with the rpy2 python package.
 * [R Quotation](R/R_Quotation.md) (R) - If you want to do certain things such as pass variable names as arguments to a function in R, you have to use quotation methods like `quo()` and `enquo()`. This notebook demonstrates how to do this. See [my blog post on Tidy Evaluation](https://jessecambon.github.io/2019/12/08/practical-tidy-evaluation.html) for more details and explanation.
-* [Tidy Pandas](Python/Tidy_Pandas.ipynb) (Python) - Functions to incorporate some of the functionality from dplyr (R/Tidyverse) into Pandas. Includes a function for counting values or combinations of values in a pandas dataframe that doesn't exclude missing values.
 * [SQL Databases](Python/SQL_Databases.ipynb) (Python) - Code for creating and manipulating a SQL database.

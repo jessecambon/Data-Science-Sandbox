@@ -16,8 +16,7 @@ Survival Analysis
 * Bayesian Approaches
 
 ```{r knit-settings, include=FALSE}
-library(here)
-source(here("rmd_config.R"))
+source(here::here("rmd_config.R"))
 ```
 
 Reference:
