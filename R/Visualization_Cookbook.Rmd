@@ -11,6 +11,9 @@ output:
 
 ```{r knit-settings, include=FALSE}
 source(here::here("rmd_config.R"))
+knitr::opts_chunk$set(
+  dpi = 192
+)
 ```
 
 The purpose of this document is to provide code that can be easily copied and adapted for use in data science projects to generate a wide variety of data visualizations. Because of this, I have opted to use inbuilt datasets in R so that you should not have to download any datasets external to R packages.
@@ -287,7 +290,7 @@ ggplot(eu_stock, aes(x = Index, y = Price, fill = Index)) +
 ### Dotplot
 
 ```{r dotplot}
-ggplot(starwars_jac %>% filter(gender %in% c("Male", "Female")), aes(x = factor(gender), y = height, fill = gender)) +
+ggplot(starwars_jac %>% filter(sex %in% c("male", "female")), aes(x = factor(gender), y = height, fill = gender)) +
   geom_dotplot(binaxis = "y", stackdir = "center") +
   xlab("Gender") +
   ylab("Height (cm)") +
@@ -298,7 +301,7 @@ ggplot(starwars_jac %>% filter(gender %in% c("Male", "Female")), aes(x = factor(
 ### Violin
 
 ```{r violin}
-ggplot(starwars_jac %>% filter(gender %in% c("Male", "Female")), aes(x = factor(gender), y = mass, fill = gender)) +
+ggplot(starwars_jac %>% filter(sex %in% c("male", "female")), aes(x = factor(gender), y = mass, fill = gender)) +
   geom_violin() +
   xlab("Gender") +
   ylab("Weight (kg)") +

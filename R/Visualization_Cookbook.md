@@ -304,7 +304,7 @@ ggplot(eu_stock, aes(x = Index, y = Price, fill = Index)) +
 ### Dotplot
 
 ``` r
-ggplot(starwars_jac %>% filter(gender %in% c("Male", "Female")), aes(x = factor(gender), y = height, fill = gender)) +
+ggplot(starwars_jac %>% filter(sex %in% c("male", "female")), aes(x = factor(gender), y = height, fill = gender)) +
   geom_dotplot(binaxis = "y", stackdir = "center") +
   xlab("Gender") +
   ylab("Height (cm)") +
@@ -312,18 +312,24 @@ ggplot(starwars_jac %>% filter(gender %in% c("Male", "Female")), aes(x = factor(
   labs(title = "Height Distribution of Starwars Characters")
 ```
 
+    ## Bin width defaults to 1/30 of the range of the data. Pick better value with `binwidth`.
+
+    ## Warning: Removed 4 rows containing non-finite values (stat_bindot).
+
 ![](../rmd_images/Visualization_Cookbook/dotplot-1.png)
 
 ### Violin
 
 ``` r
-ggplot(starwars_jac %>% filter(gender %in% c("Male", "Female")), aes(x = factor(gender), y = mass, fill = gender)) +
+ggplot(starwars_jac %>% filter(sex %in% c("male", "female")), aes(x = factor(gender), y = mass, fill = gender)) +
   geom_violin() +
   xlab("Gender") +
   ylab("Weight (kg)") +
   theme(legend.position = "none") +
   labs(title = "Weight Distribution of Starwars Characters")
 ```
+
+    ## Warning: Removed 23 rows containing non-finite values (stat_ydensity).
 
 ![](../rmd_images/Visualization_Cookbook/violin-1.png)
 
