@@ -30,6 +30,7 @@ A collection of code and resources to serve as a starting point for data science
 * [Ordinal Regression](R/Ordinal_Regression.md) (R) - Experimenting with ordinal (ranked categorical outcome) regression
 * [Presenting Regression Models](R/Regression-Model-Tidying.md) (R) - Code for cleaning the outputs of regression models for presentations.
 * [Sklearn Modeling Workflows](Python/Sklearn-Workflow.ipynb) (Python) - Modeling workflows with sklearn (cross-validation, randomized search for optimizing hyperparameters, lift curves).
+* [Sklearn - Skopt Workflow](Python/sklearn_skopt_pipeline.ipynb) (Python) - Modeling workflow with sklearn and scikit-optimize (bayesian hyperparameter optimization.
 * [Machine Learning with Caret](R/Caret.md) (R) - Using the Caret library for machine learning.
 * [Parsnip](R/Parsnip.md) (R) - fitting models with the parsnip package (from tidymodels)
 
